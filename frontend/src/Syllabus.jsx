@@ -7,7 +7,6 @@ import {
   Layers, 
   Activity, 
   Search, 
-  SortAsc, 
   TreePine, 
   GitBranch, 
   Zap 
