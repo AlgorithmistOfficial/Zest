@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  BookOpen, 
-  Code, 
-  Layers, 
-  Activity, 
-  Search, 
-  TreePine, 
-  GitBranch, 
-  Zap 
+import {
+  ArrowLeft,
+  BookOpen,
+  Code,
+  Layers,
+  Activity,
+  Search,
+  TreePine,
+  GitBranch,
+  Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -95,11 +95,10 @@ const Syllabus = () => {
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
       {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${
-        isScrolled 
-          ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1' 
-          : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
-      }`}>
+      <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
+        ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'
+        : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
@@ -117,7 +116,7 @@ const Syllabus = () => {
       <main className="pt-32 pb-20 px-4">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
@@ -132,16 +131,16 @@ const Syllabus = () => {
           {/* Syllabus Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {syllabusData.map((section, index) => (
-              <SyllabusCard 
-                key={index} 
-                {...section} 
+              <SyllabusCard
+                key={index}
+                {...section}
                 delay={index * 0.1}
               />
             ))}
           </div>
 
           {/* Footer Call to Action */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             className="mt-24 p-12 bg-navy rounded-[3rem] text-center text-white"
@@ -150,7 +149,7 @@ const Syllabus = () => {
             <p className="text-slate-300 mb-8 max-w-xl mx-auto">
               Our online platform provides real-time evaluations and progress tracking for every topic listed above.
             </p>
-            <Link 
+            <Link
               to="/"
               className="px-8 py-4 bg-lime text-navy font-bold rounded-2xl hover:scale-105 transition-transform inline-block"
             >
@@ -162,7 +161,7 @@ const Syllabus = () => {
 
       <footer className="py-12 border-t border-slate-100 text-center mt-20">
         <p className="text-slate-500 font-medium">
-          &copy; {new Date().getFullYear()} <span className="text-navy font-bold">Shreyansh Srivastava</span>. Powered by Zest Learning Engine.
+          &copy; {new Date().getFullYear()} <span className="text-navy font-bold">Shreyansh Srivastava</span>. An EvolveNet Initiative.
         </p>
       </footer>
     </div>
