@@ -217,9 +217,9 @@ export default function LandingPage() {
                   </span>
                 </motion.button>
 
-                <button className="px-8 py-4 bg-white border-2 border-navy text-navy font-bold rounded-xl hover:bg-navy hover:text-white transition-all duration-300 shadow-sm">
+                <Link to="/syllabus" className="px-8 py-4 bg-white border-2 border-navy text-navy font-bold rounded-xl hover:bg-navy hover:text-white transition-all duration-300 shadow-sm inline-block text-center">
                   View Syllabus
-                </button>
+                </Link>
               </div>
 
               <div className="pt-8 flex items-center gap-6 text-sm text-slate-500">

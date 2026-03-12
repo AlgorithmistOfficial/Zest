@@ -1,0 +1,173 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+  ArrowLeft, 
+  BookOpen, 
+  Code, 
+  Layers, 
+  Activity, 
+  Search, 
+  SortAsc, 
+  TreePine, 
+  GitBranch, 
+  Zap 
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const SyllabusCard = ({ title, icon: Icon, topics, delay }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay }}
+    className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group"
+  >
+    <div className="flex items-center gap-4 mb-4">
+      <div className="w-12 h-12 rounded-xl bg-lime/10 flex items-center justify-center text-navy group-hover:bg-lime group-hover:text-white transition-colors duration-300">
+        <Icon size={24} />
+      </div>
+      <h3 className="text-xl font-bold text-navy">{title}</h3>
+    </div>
+    <ul className="space-y-2">
+      {topics.map((topic, index) => (
+        <li key={index} className="flex items-center gap-2 text-slate-600">
+          <div className="w-1.5 h-1.5 rounded-full bg-lime"></div>
+          {topic}
+        </li>
+      ))}
+    </ul>
+  </motion.div>
+);
+
+const Syllabus = () => {
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const syllabusData = [
+    {
+      title: "Complexity Analysis",
+      icon: Activity,
+      topics: ["Asymptotic Notations", "Big O, Omega, Theta", "Time Complexity", "Space Complexity"]
+    },
+    {
+      title: "Arrays & Strings",
+      icon: Code,
+      topics: ["Memory Layout", "Two Pointers", "Sliding Window", "String Algorithms"]
+    },
+    {
+      title: "Linked Lists",
+      icon: Layers,
+      topics: ["Singly Linked List", "Doubly Linked List", "Circular List", "Fast & Slow Pointers"]
+    },
+    {
+      title: "Stacks & Queues",
+      icon: Zap,
+      topics: ["LIFO/FIFO", "Monotonic Stack", "Priority Queue", "Deque Operations"]
+    },
+    {
+      title: "Searching & Sorting",
+      icon: Search,
+      topics: ["Binary Search", "Quick Sort", "Merge Sort", "Counting Sort"]
+    },
+    {
+      title: "Trees",
+      icon: TreePine,
+      topics: ["Binary Trees", "BST Operations", "Heaps", "Traversals (DFS/BFS)"]
+    },
+    {
+      title: "Graphs",
+      icon: GitBranch,
+      topics: ["Representations", "Dijkstra's", "MST (Prim/Kruskal)", "Topological Sort"]
+    },
+    {
+      title: "Advanced Topics",
+      icon: BookOpen,
+      topics: ["Dynamic Programming", "Greedy Algorithms", "Recursion", "Backtracking"]
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
+      {/* Navigation */}
+      <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${
+        isScrolled 
+          ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1' 
+          : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
+              <ArrowLeft size={20} />
+              <span className="font-bold">Home</span>
+            </Link>
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="Zest Logo" className="w-8 h-8 object-contain" />
+              <span className="text-white font-bold text-xl tracking-tight">Zest Syllabus</span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="pt-32 pb-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
+          >
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-navy">Master the DSA Roadmap</h1>
+            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+              Follow our comprehensive curriculum designed to take you from a beginner to an algorithmic expert.
+            </p>
+            <div className="w-24 h-1.5 bg-lime mx-auto rounded-full mt-8"></div>
+          </motion.div>
+
+          {/* Syllabus Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {syllabusData.map((section, index) => (
+              <SyllabusCard 
+                key={index} 
+                {...section} 
+                delay={index * 0.1}
+              />
+            ))}
+          </div>
+
+          {/* Footer Call to Action */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="mt-24 p-12 bg-navy rounded-[3rem] text-center text-white"
+          >
+            <h2 className="text-3xl font-bold mb-4">Ready to Start Practicing?</h2>
+            <p className="text-slate-300 mb-8 max-w-xl mx-auto">
+              Our online platform provides real-time evaluations and progress tracking for every topic listed above.
+            </p>
+            <Link 
+              to="/"
+              className="px-8 py-4 bg-lime text-navy font-bold rounded-2xl hover:scale-105 transition-transform inline-block"
+            >
+              Get Started Now
+            </Link>
+          </motion.div>
+        </div>
+      </main>
+
+      <footer className="py-12 border-t border-slate-100 text-center mt-20">
+        <p className="text-slate-500 font-medium">
+          &copy; {new Date().getFullYear()} <span className="text-navy font-bold">Shreyansh Srivastava</span>. Powered by Zest Learning Engine.
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+export default Syllabus;

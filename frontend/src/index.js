@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import LandingPage from './LandingPage';
 import About from './About';
+import Syllabus from './Syllabus';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -12,6 +13,7 @@ root.render(
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/syllabus" element={<Syllabus />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
