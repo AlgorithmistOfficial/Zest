@@ -12,10 +12,15 @@ app.use(express.text());
 
 const TEMP_DIR = path.join(__dirname, 'temp');
 
-// Ensure temp directory exists
 if (!fs.existsSync(TEMP_DIR)) {
     fs.mkdirSync(TEMP_DIR);
 }
+
+// --- ADD THIS ROOT HANDLER ---
+app.get('/', (req, res) => {
+    res.status(200).send('Java Compiler API is online and waiting for requests.');
+});
+// -----------------------------
 
 app.post('/compile', (req, res) => {
     const code = req.body;
@@ -28,23 +33,16 @@ app.post('/compile', (req, res) => {
     fs.mkdirSync(sessionDir);
 
     const javaFile = path.join(sessionDir, 'Main.java');
-
-    // Write code to Main.java
     fs.writeFileSync(javaFile, code);
 
-    // Compile command
     exec(`javac Main.java`, { cwd: sessionDir }, (error, stdout, stderr) => {
         if (error || stderr) {
-            // Cleanup and return compilation error
             fs.rmSync(sessionDir, { recursive: true, force: true });
             return res.send(stderr || error.message);
         }
 
-        // Run command with timeout
         exec(`java Main`, { cwd: sessionDir, timeout: 5000 }, (runError, runStdout, runStderr) => {
             const output = runStdout + runStderr;
-
-            // Cleanup
             fs.rmSync(sessionDir, { recursive: true, force: true });
 
             if (runError && runError.killed) {
@@ -57,6 +55,6 @@ app.post('/compile', (req, res) => {
 });
 
 const PORT = process.env.PORT || 7860;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Backend compilation server running on port ${PORT}`);
 });
