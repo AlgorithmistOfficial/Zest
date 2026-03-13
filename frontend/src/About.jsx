@@ -108,7 +108,7 @@ const About = () => {
               <div className="absolute inset-0 bg-lime rounded-full blur-2xl opacity-20 animate-pulse"></div>
               <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full border-8 border-white shadow-2xl overflow-hidden mx-auto mb-8 bg-slate-100">
                 <img
-                  src={process.env.REACT_APP_FOUNDER_PHOTO}
+                  src="/head.png"
                   alt="Founder of Algorithmist"
                   className="w-full h-full object-cover"
                   onContextMenu={(e) => e.preventDefault()}
