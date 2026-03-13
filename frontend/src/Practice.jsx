@@ -27,7 +27,7 @@ const Practice = () => {
     setOutput('Compiling and running...');
 
     try {
-      const response = await fetch('https://shreyansh6726-zest.hf.space/compile', {
+      const response = await fetch('https://shreyansh6726-zest.hf.space/', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain'
