@@ -11,6 +11,7 @@ const Practice = () => {
     }
 }`);
   const [output, setOutput] = useState('');
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -30,9 +31,9 @@ const Practice = () => {
       const response = await fetch('https://Shreyansh6726-zest.hf.space/compile', {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain'
+          'Content-Type': 'application/json'
         },
-        body: code
+        body: JSON.stringify({ code, input })
       });
 
       const data = await response.text();
@@ -119,6 +120,20 @@ const Practice = () => {
 
           {/* Action Bar & Output Section */}
           <div className="lg:w-1/3 flex flex-col gap-4">
+            {/* Input Area */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-1/3 min-h-[150px]">
+              <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Standard Input</span>
+              </div>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Enter input for your program here..."
+                className="flex-1 p-4 font-mono text-sm resize-none focus:outline-none bg-slate-50/10 text-slate-800 leading-relaxed"
+                spellCheck="false"
+              />
+            </div>
+
             {/* Run Button Container */}
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
               <motion.button
