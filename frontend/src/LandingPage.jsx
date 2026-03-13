@@ -41,7 +41,7 @@ const Navbar = () => {
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
               <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Dashboard</a>
-              <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Tests</a>
+              <Link to="/practice" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Practice</Link>
               <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Progress</a>
               <Link to="/about" className="text-white md:hover:text-[#052340] md:hover:bg-white/20 px-3 py-2 rounded-md text-sm font-medium transition-all font-semibold border border-white/20">Algorithmist Classes</Link>
             </div>
@@ -66,7 +66,7 @@ const Navbar = () => {
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <a href="#!" className="text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
-              <a href="#!" className="text-white block px-3 py-2 rounded-md text-base font-medium">Tests</a>
+              <Link to="/practice" className="text-white block px-3 py-2 rounded-md text-base font-medium">Practice</Link>
               <Link to="/about" className="text-white block px-3 py-2 rounded-md text-base font-medium font-semibold">Algorithmist Classes</Link>
             </div>
           </motion.div>
@@ -260,8 +260,8 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
               icon={Code2}
-              title="Online Evaluations"
-              desc="Participate in timed coding tests directly from the platform. Supports multiple languages and auto-grading."
+              title="Practice Java"
+              desc="Practice Java coding directly on the platform with our online compiler. Instant feedback and output."
               delay={0.1}
             />
             <FeatureCard
