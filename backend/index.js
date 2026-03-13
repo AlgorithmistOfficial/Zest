@@ -56,7 +56,7 @@ app.post('/compile', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 7860;
 app.listen(PORT, () => {
     console.log(`Backend compilation server running on port ${PORT}`);
 });
