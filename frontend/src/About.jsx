@@ -25,11 +25,10 @@ const About = () => {
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
       {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${
-        isScrolled 
-          ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1' 
-          : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
-      }`}>
+      <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
+        ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'
+        : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
@@ -109,9 +108,11 @@ const About = () => {
               <div className="absolute inset-0 bg-lime rounded-full blur-2xl opacity-20 animate-pulse"></div>
               <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full border-8 border-white shadow-2xl overflow-hidden mx-auto mb-8 bg-slate-100">
                 <img
-                  src="/head.png"
+                  src={process.env.REACT_APP_FOUNDER_PHOTO}
                   alt="Founder of Algorithmist"
                   className="w-full h-full object-cover"
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
                   onError={(e) => {
                     e.target.src = "https://ui-avatars.com/api/?name=Algorithmist+Founder&background=92c211&color=fff&size=256";
                   }}
@@ -126,7 +127,7 @@ const About = () => {
           <section className="mt-32 pt-20 border-t border-slate-200">
             <div className="grid md:grid-cols-2 gap-12">
               <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-navy">Get In Touch</h2>
+                <h2 className="text-3xl font-bold text-navy">Contact Us</h2>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-slate-600">
                     <div className="w-10 h-10 rounded-full bg-lime/10 flex items-center justify-center text-navy font-bold">

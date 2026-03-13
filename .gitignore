@@ -40,3 +40,4 @@ coverage/
 # --- Local Development ---
 .eslintcache
 .prettiercache
+public/head.png
