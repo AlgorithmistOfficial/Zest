@@ -107,7 +107,7 @@ const Syllabus = () => {
             </Link>
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="Zest Logo" className="w-8 h-8 object-contain" />
-              <span className="text-white font-bold text-xl tracking-tight">Zest Syllabus</span>
+              <span className="text-white font-bold text-xl tracking-tight">Zest</span>
             </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ const Navbar = () => {
             <div className="ml-10 flex items-baseline space-x-8">
               <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Dashboard</a>
               <Link to="/practice" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Practice</Link>
-              <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Progress</a>
+              <Link to="/leaderboard" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Leaderboard</Link>
               <Link to="/about" className="text-white md:hover:text-[#052340] md:hover:bg-white/20 px-3 py-2 rounded-md text-sm font-medium transition-all font-semibold border border-white/20">Algorithmist Classes</Link>
             </div>
           </div>
@@ -67,6 +67,7 @@ const Navbar = () => {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <a href="#!" className="text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
               <Link to="/practice" className="text-white block px-3 py-2 rounded-md text-base font-medium">Practice</Link>
+              <Link to="/leaderboard" className="text-white block px-3 py-2 rounded-md text-base font-medium">Leaderboard</Link>
               <Link to="/about" className="text-white block px-3 py-2 rounded-md text-base font-medium font-semibold">Algorithmist Classes</Link>
             </div>
           </motion.div>

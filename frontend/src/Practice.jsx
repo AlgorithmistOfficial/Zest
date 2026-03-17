@@ -88,7 +88,7 @@ const Practice = () => {
                     <div className="flex items-center justify-between h-16">
                         <Link to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
                             <ArrowLeft size={20} />
-                            <span className="font-bold">Back to Zest</span>
+                            <span className="font-bold">Home</span>
                         </Link>
                         <div className="flex items-center gap-3">
                             <img src="/logo.png" alt="Zest Logo" className="w-8 h-8 object-contain" />
