@@ -6,8 +6,7 @@ import {
   BookOpen, 
   Code, 
   Trophy,
-  Calendar,
-  Layout
+  Calendar
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
