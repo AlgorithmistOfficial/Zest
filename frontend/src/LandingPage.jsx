@@ -40,7 +40,7 @@ const Navbar = () => {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Dashboard</a>
+              <a href="#!" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Schedule</a>
               <Link to="/practice" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Practice</Link>
               <Link to="/leaderboard" className="text-white nav-hover-draw px-3 py-2 rounded-md text-sm font-medium transition-all">Leaderboard</Link>
               <Link to="/about" className="text-white md:hover:text-[#052340] md:hover:bg-white/20 px-3 py-2 rounded-md text-sm font-medium transition-all font-semibold border border-white/20">Algorithmist Classes</Link>
@@ -65,7 +65,7 @@ const Navbar = () => {
             className="md:hidden bg-[#92c211] border-b border-white/20"
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <a href="#!" className="text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+               <a href="#!" className="text-white block px-3 py-2 rounded-md text-base font-medium">Schedule</a>
               <Link to="/practice" className="text-white block px-3 py-2 rounded-md text-base font-medium">Practice</Link>
               <Link to="/leaderboard" className="text-white block px-3 py-2 rounded-md text-base font-medium">Leaderboard</Link>
               <Link to="/about" className="text-white block px-3 py-2 rounded-md text-base font-medium font-semibold">Algorithmist Classes</Link>

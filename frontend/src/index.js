@@ -6,6 +6,7 @@ import LandingPage from './LandingPage';
 import About from './About';
 import Syllabus from './Syllabus';
 import Practice from './Practice';
+import Leaderboard from './Leaderboard';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,6 +17,7 @@ root.render(
         <Route path="/about" element={<About />} />
         <Route path="/syllabus" element={<Syllabus />} />
         <Route path="/practice" element={<Practice />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
