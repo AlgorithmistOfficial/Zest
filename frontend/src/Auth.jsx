@@ -20,6 +20,12 @@ const Auth = () => {
   const API_URL = 'https://Shreyansh6726-zest.hf.space'; // Base URL for backend
 
   React.useEffect(() => {
+    // Redirect if already logged in
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+      window.location.href = '/home';
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -65,6 +71,12 @@ const Auth = () => {
       }
 
       if (isLogin) {
+        // Clear both first to avoid conflicts
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+
         const storage = persistent ? localStorage : sessionStorage;
         storage.setItem('token', data.token);
         storage.setItem('user', JSON.stringify(data.user));
