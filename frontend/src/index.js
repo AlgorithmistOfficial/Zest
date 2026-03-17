@@ -9,6 +9,7 @@ import Practice from './Practice';
 import Leaderboard from './Leaderboard';
 import Schedule from './Schedule';
 import Auth from './Auth';
+import Home from './Home';
 
 
 
@@ -24,6 +25,7 @@ root.render(
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

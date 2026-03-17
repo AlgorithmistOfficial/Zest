@@ -14,6 +14,7 @@ const Auth = () => {
   });
   const [step, setStep] = useState('info'); // 'info' or 'otp'
   const [loading, setLoading] = useState(false);
+  const [persistent, setPersistent] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const API_URL = 'https://Shreyansh6726-zest.hf.space'; // Base URL for backend
@@ -64,10 +65,11 @@ const Auth = () => {
       }
 
       if (isLogin) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        const storage = persistent ? localStorage : sessionStorage;
+        storage.setItem('token', data.token);
+        storage.setItem('user', JSON.stringify(data.user));
         setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
-        setTimeout(() => window.location.href = '/', 2000);
+        setTimeout(() => window.location.href = '/home', 2000);
       } else {
         setMessage({ type: 'success', text: 'Registration successful! You can now log in.' });
         setIsLogin(true);
@@ -257,6 +259,21 @@ const Auth = () => {
                       </div>
                     </div>
                   )}
+
+                {isLogin && (
+                  <div className="flex items-center gap-2 ml-1">
+                    <input
+                      type="checkbox"
+                      id="persistent"
+                      checked={persistent}
+                      onChange={(e) => setPersistent(e.target.checked)}
+                      className="w-4 h-4 accent-lime rounded cursor-pointer"
+                    />
+                    <label htmlFor="persistent" className="text-xs font-bold text-slate-500 cursor-pointer select-none">
+                      Remember Me (Persistent Login)
+                    </label>
+                  </div>
+                )}
 
                 <motion.button
                   whileHover={!loading ? { scale: 1.02 } : {}}
