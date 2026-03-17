@@ -8,6 +8,8 @@ import Syllabus from './Syllabus';
 import Practice from './Practice';
 import Leaderboard from './Leaderboard';
 import Schedule from './Schedule';
+import Auth from './Auth';
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -21,6 +23,7 @@ root.render(
         <Route path="/practice" element={<Practice />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/schedule" element={<Schedule />} />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

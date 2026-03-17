@@ -207,16 +207,18 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="group relative px-8 py-4 bg-navy text-white font-bold rounded-xl overflow-hidden shadow-lg shadow-navy/20"
-                >
-                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-navy via-navy to-lime opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <span className="relative flex items-center justify-center gap-2">
-                    Get Started <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </motion.button>
+                <Link to="/auth">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="group relative px-8 py-4 bg-navy text-white font-bold rounded-xl overflow-hidden shadow-lg shadow-navy/20 w-full sm:w-auto"
+                  >
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-navy via-navy to-lime opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <span className="relative flex items-center justify-center gap-2">
+                      Get Started <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </motion.button>
+                </Link>
 
                 <Link to="/syllabus" className="px-8 py-4 bg-white border-2 border-navy text-navy font-bold rounded-xl hover:bg-navy hover:text-white transition-all duration-300 shadow-sm inline-block text-center">
                   View Syllabus
