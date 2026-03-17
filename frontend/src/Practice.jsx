@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, RotateCcw, Copy, CheckCircle2, Terminal } from 'lucide-react';
+import { ArrowLeft, Play, RotateCcw, Copy, CheckCircle2, Terminal, Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import Editor from '@monaco-editor/react';
 
 const Practice = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -15,6 +16,7 @@ const Practice = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [inputBuffer, setInputBuffer] = useState('');
+    const [editorTheme, setEditorTheme] = useState('vs'); // 'vs' or 'vs-dark'
     const socketRef = useRef(null);
     const outputRef = useRef(null);
 
@@ -112,6 +114,13 @@ const Practice = () => {
                             </div>
                             <div className="flex items-center gap-3">
                                 <button
+                                    onClick={() => setEditorTheme(prev => prev === 'vs' ? 'vs-dark' : 'vs')}
+                                    className="p-2 text-slate-400 hover:text-navy transition-colors rounded-lg hover:bg-slate-100 flex items-center gap-2 text-xs font-bold"
+                                    title="Toggle Editor Theme"
+                                >
+                                    {editorTheme === 'vs' ? <Moon size={18} /> : <Sun size={18} />}
+                                </button>
+                                <button
                                     onClick={handleCopy}
                                     className="p-2 text-slate-400 hover:text-navy transition-colors rounded-lg hover:bg-slate-100"
                                     title="Copy Code"
@@ -127,12 +136,23 @@ const Practice = () => {
                                 </button>
                             </div>
                         </div>
-                        <textarea
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            className="flex-1 p-6 font-mono text-sm resize-none focus:outline-none bg-slate-50/10 text-slate-800 leading-relaxed"
-                            spellCheck="false"
-                        />
+                        <div className="flex-1 min-h-[400px]">
+                            <Editor
+                                height="100%"
+                                language="java"
+                                value={code}
+                                theme={editorTheme}
+                                onChange={(value) => setCode(value)}
+                                options={{
+                                    fontSize: 14,
+                                    minimap: { enabled: false },
+                                    scrollBeyondLastLine: false,
+                                    automaticLayout: true,
+                                    padding: { top: 20 },
+                                    fontFamily: "'Fira Code', 'Monaco', 'Consolas', monospace",
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Terminal Section */}
