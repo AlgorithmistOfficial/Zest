@@ -172,7 +172,7 @@ const Auth = () => {
                       type="email"
                       name="email"
                       required
-                      pattern=".+@gmail\.com"
+                      pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
                       value={formData.email}
                       onChange={handleInputChange}
                       className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium"
