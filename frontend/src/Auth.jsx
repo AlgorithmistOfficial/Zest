@@ -9,8 +9,10 @@ const Auth = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: ''
+    password: '',
+    otp: ''
   });
+  const [step, setStep] = useState('info'); // 'info' or 'otp'
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -33,9 +35,22 @@ const Auth = () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
+    const endpoint = isLogin ? '/api/auth/login' : (step === 'info' ? '/api/auth/send-otp' : '/api/auth/signup');
     
     try {
+      if (!isLogin && step === 'info') {
+        const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        setMessage({ type: 'success', text: 'OTP sent to your email!' });
+        setStep('otp');
+        return;
+      }
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -139,7 +154,45 @@ const Auth = () => {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <AnimatePresence mode="wait">
-                  {!isLogin && (
+                  {!isLogin && step === 'otp' && (
+                    <motion.div
+                      key="signup-otp"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="space-y-4"
+                    >
+                      <div className="bg-lime/5 p-4 rounded-2xl border border-lime/10 mb-2">
+                        <p className="text-xs text-navy font-medium text-center italic">
+                          We've sent a 6-digit verification code to <span className="font-bold">{formData.email}</span>
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Verification OTP</label>
+                        <div className="relative">
+                          <CheckCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                          <input
+                            type="text"
+                            name="otp"
+                            required
+                            maxLength="6"
+                            value={formData.otp}
+                            onChange={handleInputChange}
+                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold tracking-[0.5em] text-center text-xl"
+                            placeholder="000000"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setStep('info')}
+                        className="text-xs text-navy font-bold hover:text-lime transition-colors ml-1"
+                      >
+                       ← Edit Email
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {!isLogin && step === 'info' && (
                     <motion.div
                       key="signup-name"
                       initial={{ opacity: 0, height: 0 }}
@@ -187,21 +240,23 @@ const Auth = () => {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input
-                      type="password"
-                      name="password"
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                </div>
+                  {step === 'info' && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                      <div className="relative">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                          type="password"
+                          name="password"
+                          required
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium"
+                          placeholder="••••••••"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                 <motion.button
                   whileHover={!loading ? { scale: 1.02 } : {}}
@@ -216,7 +271,7 @@ const Auth = () => {
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      {isLogin ? 'Login' : 'Create Account'}
+                      {isLogin ? 'Login' : (step === 'info' ? 'Next: Verify Email' : 'Complete Registration')}
                       <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
