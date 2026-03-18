@@ -34,8 +34,9 @@ root.render(
         <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
         <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
         
+        <Route path="/about" element={<About />} />
+
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
         <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
         <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
