@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  LogOut, 
-  ArrowRight, 
-  BookOpen, 
-  Code, 
+import {
+  LogOut,
+  ArrowRight,
+  BookOpen,
+  Code,
   Trophy,
   Calendar,
   Clock
@@ -46,6 +46,7 @@ const Home = () => {
   ];
 
   const [upcomingTest, setUpcomingTest] = React.useState(null);
+  const [isSoon, setIsSoon] = React.useState(false);
 
   React.useEffect(() => {
     const fetchNearestTest = async () => {
@@ -53,9 +54,9 @@ const Home = () => {
         const res = await fetch('https://Shreyansh6726-zest.hf.space/api/exams');
         if (!res.ok) return;
         const exams = await res.json();
-        
+
         const now = new Date();
-        
+
         const parseDateTime = (d, t) => {
           const ds = d.toString().padStart(8, '0');
           const ts = t.toString().padStart(6, '0');
@@ -85,9 +86,24 @@ const Home = () => {
     fetchNearestTest();
   }, []);
 
+  // Check if test is soon (within 10 mins)
+  React.useEffect(() => {
+    if (!upcomingTest) return;
+
+    const checkSoon = () => {
+      const now = new Date();
+      const diff = upcomingTest.startAt - now;
+      setIsSoon(diff > 0 && diff < 10 * 60 * 1000);
+    };
+
+    checkSoon();
+    const interval = setInterval(checkSoon, 30000); // Check every 30s
+    return () => clearInterval(interval);
+  }, [upcomingTest]);
+
   const fmtDate = (n) => {
     const s = n.toString().padStart(8, '0');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${parseInt(s.slice(0, 2))} ${months[parseInt(s.slice(2, 4)) - 1]} ${s.slice(4)}`;
   };
 
@@ -100,8 +116,10 @@ const Home = () => {
     return `${hh}:${mm} ${ampm}`;
   };
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   return (
-    <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col">
+    <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col overflow-x-hidden">
       {/* Navigation */}
       <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
         ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'
@@ -113,12 +131,47 @@ const Home = () => {
               <img src="/logo.png" alt="Zest Logo" className="w-8 h-8 object-contain" />
               <span className="text-white font-bold text-xl tracking-tight">Zest</span>
             </div>
-            <button 
+
+            <div className="flex items-center gap-3">
+              {/* Desktop Nav Links shifted to right */}
+              <div className="hidden md:flex items-center gap-8 mr-4">
+                <Link to="/home" className="text-white nav-hover-draw px-1 py-2 text-lg tracking-tight transition-all">Profile</Link>
+                <Link to="/leaderboard" className="text-white nav-hover-draw px-1 py-2 text-lg tracking-tight transition-all">Analytics</Link>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-bold"
+              >
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 text-white"
+              >
+                <div className="w-6 h-5 flex flex-col justify-between">
+                  <span className={`h-1 w-full bg-white rounded-full transition-all ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+                  <span className={`h-1 w-full bg-white rounded-full transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+                  <span className={`h-1 w-full bg-white rounded-full transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        <div className={`md:hidden bg-lime transition-all duration-300 overflow-hidden ${isMobileMenuOpen ? 'max-h-64 border-b border-white/20' : 'max-h-0'}`}>
+          <div className="px-4 py-6 space-y-4">
+            <Link to="/home" className="block text-white font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
+            <Link to="/leaderboard" className="block text-white font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>Analytics</Link>
+            <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-bold"
+              className="flex items-center gap-2 text-white font-bold text-lg pt-4 border-t border-white/20 w-full"
             >
-              <LogOut size={18} />
-              <span>Logout</span>
+              <LogOut size={20} /> Logout
             </button>
           </div>
         </div>
@@ -155,7 +208,7 @@ const Home = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Link 
+                <Link
                   to={item.path}
                   className="block p-8 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group"
                 >
@@ -171,53 +224,71 @@ const Home = () => {
             ))}
           </div>
 
-          {/* Upcoming Test Section */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="mt-12 p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8"
-          >
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Upcoming Test</h2>
-              {upcomingTest ? (
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-lime">{upcomingTest.examName}</h3>
-                  <div className="flex flex-wrap gap-4 text-slate-300 text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-lime" />
-                      {fmtDate(upcomingTest.examDate)}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} className="text-lime" />
-                      {fmtTime(upcomingTest.examTime)}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {upcomingTest.topics.slice(0, 3).map((topic, i) => (
-                      <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10">
-                        {topic}
-                      </span>
-                    ))}
-                    {upcomingTest.topics.length > 3 && <span className="text-xs text-slate-400">+{upcomingTest.topics.length - 3} more</span>}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-slate-400 font-medium italic">No upcoming exams recently scheduled.</p>
-              )}
-            </div>
-            
-            {upcomingTest && (
-              <Link to="/practice" className="w-full md:w-auto">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full px-10 py-4 bg-lime text-white font-extrabold rounded-2xl shadow-lg shadow-lime/20 hover:bg-lime/90 transition-all flex items-center justify-center gap-2"
-                >
-                  Start Test <ArrowRight size={20} />
-                </motion.button>
-              </Link>
+          {/* Upcoming Test Section Container */}
+          <div className="relative mt-12 w-full">
+            {isSoon && (
+              <>
+                <motion.div
+                  animate={{ scale: [1, 1.2], opacity: [0.8, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute inset-0 border-[6px] border-lime/40 rounded-[3rem] z-0"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+                  className="absolute inset-0 border-[4px] border-lime/20 rounded-[3rem] z-0"
+                />
+              </>
             )}
-          </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              className="p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 border-2 border-transparent transition-colors shadow-2xl shadow-navy/20 relative z-10"
+              style={isSoon ? { borderColor: 'rgba(146, 194, 17, 0.7)' } : {}}
+            >
+              <div>
+                <h2 className="text-3xl font-bold mb-4">Upcoming Test</h2>
+                {upcomingTest ? (
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-lime">{upcomingTest.examName}</h3>
+                    <div className="flex flex-wrap gap-4 text-slate-300 text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-lime" />
+                        {fmtDate(upcomingTest.examDate)}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} className="text-lime" />
+                        {fmtTime(upcomingTest.examTime)}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {upcomingTest.topics.slice(0, 3).map((topic, i) => (
+                        <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10">
+                          {topic}
+                        </span>
+                      ))}
+                      {upcomingTest.topics.length > 3 && <span className="text-xs text-slate-400">+{upcomingTest.topics.length - 3} more</span>}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-slate-400 font-medium italic">No upcoming exams recently scheduled.</p>
+                )}
+              </div>
+
+              {upcomingTest && (
+                <Link to="/practice" className="w-full md:w-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full px-10 py-4 bg-lime text-white font-extrabold rounded-2xl hover:bg-lime/90 transition-all flex items-center justify-center gap-2"
+                  >
+                    Start Test <ArrowRight size={20} />
+                  </motion.button>
+                </Link>
+              )}
+            </motion.div>
+          </div>
         </div>
       </main>
 
