@@ -43,7 +43,7 @@ const Auth = () => {
     setMessage({ type: '', text: '' });
 
     const endpoint = isLogin ? '/api/auth/login' : (step === 'info' ? '/api/auth/send-otp' : '/api/auth/signup');
-    
+
     try {
       if (!isLogin && step === 'info') {
         const response = await fetch(`${API_URL}/api/auth/send-otp`, {
@@ -125,17 +125,15 @@ const Auth = () => {
             <div className="flex border-b border-slate-100 bg-slate-50/50 p-2">
               <button
                 onClick={() => setIsLogin(true)}
-                className={`flex-1 py-3 rounded-2xl font-bold transition-all ${
-                  isLogin ? 'bg-navy text-white shadow-lg' : 'text-slate-400 hover:text-navy'
-                }`}
+                className={`flex-1 py-3 rounded-2xl font-bold transition-all ${isLogin ? 'bg-navy text-white shadow-lg' : 'text-slate-400 hover:text-navy'
+                  }`}
               >
                 Login
               </button>
               <button
                 onClick={() => setIsLogin(false)}
-                className={`flex-1 py-3 rounded-2xl font-bold transition-all ${
-                  !isLogin ? 'bg-navy text-white shadow-lg' : 'text-slate-400 hover:text-navy'
-                }`}
+                className={`flex-1 py-3 rounded-2xl font-bold transition-all ${!isLogin ? 'bg-navy text-white shadow-lg' : 'text-slate-400 hover:text-navy'
+                  }`}
               >
                 Sign Up
               </button>
@@ -155,11 +153,10 @@ const Auth = () => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`mb-6 p-4 rounded-2xl text-sm font-bold flex items-center gap-3 ${
-                    message.type === 'success' 
-                      ? 'bg-green-50 text-green-600 border border-green-100' 
+                  className={`mb-6 p-4 rounded-2xl text-sm font-bold flex items-center gap-3 ${message.type === 'success'
+                      ? 'bg-green-50 text-green-600 border border-green-100'
                       : 'bg-red-50 text-red-600 border border-red-100'
-                  }`}
+                    }`}
                 >
                   {message.type === 'success' ? <CheckCircle2 size={18} /> : <div className="w-4 h-4 rounded-full bg-red-600 flex items-center justify-center text-[10px] text-white">!</div>}
                   {message.text}
@@ -201,7 +198,7 @@ const Auth = () => {
                         onClick={() => setStep('info')}
                         className="text-xs text-navy font-bold hover:text-lime transition-colors ml-1"
                       >
-                       ← Edit Email
+                        ← Edit Email
                       </button>
                     </motion.div>
                   )}
@@ -254,23 +251,23 @@ const Auth = () => {
                   )}
                 </div>
 
-                  {step === 'info' && (
-                    <div className="space-y-2">
-                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
-                      <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input
-                          type="password"
-                          name="password"
-                          required
-                          value={formData.password}
-                          onChange={handleInputChange}
-                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium"
-                          placeholder="••••••••"
-                        />
-                      </div>
+                {step === 'info' && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input
+                        type="password"
+                        name="password"
+                        required
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium"
+                        placeholder="••••••••"
+                      />
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {isLogin && (
                   <div className="flex items-center gap-2 ml-1">
@@ -282,7 +279,7 @@ const Auth = () => {
                       className="w-4 h-4 accent-lime rounded cursor-pointer"
                     />
                     <label htmlFor="persistent" className="text-xs font-bold text-slate-500 cursor-pointer select-none">
-                      Remember Me (Persistent Login)
+                      Remember Me
                     </label>
                   </div>
                 )}
@@ -292,9 +289,8 @@ const Auth = () => {
                   whileTap={!loading ? { scale: 0.98 } : {}}
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-4 font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2 group mt-4 transition-all ${
-                    loading ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-navy text-white shadow-navy/20'
-                  }`}
+                  className={`w-full py-4 font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2 group mt-4 transition-all ${loading ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-navy text-white shadow-navy/20'
+                    }`}
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
