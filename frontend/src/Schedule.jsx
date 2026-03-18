@@ -1,18 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Award, Timer, BarChart3, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Schedule = () => {
-  const [isScrolled, setIsScrolled] = React.useState(false);
+const API_URL = 'https://Shreyansh6726-zest.hf.space';
 
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+const Schedule = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/exams`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setExams(data);
+      } catch (err) {
+        setError('Unable to load exam schedule. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExams();
+  }, []);
+
+  const fmtDate = (n) => {
+    const s = n.toString().padStart(8, '0');
+    const dd = s.slice(0, 2), mm = s.slice(2, 4), yyyy = s.slice(4);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${parseInt(dd)} ${months[parseInt(mm) - 1]} ${yyyy}`;
+  };
+
+  const fmtTime = (n) => {
+    const s = n.toString().padStart(6, '0');
+    let hh = parseInt(s.slice(0, 2));
+    const mm = s.slice(2, 4);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    hh = hh % 12 || 12;
+    return `${hh}:${mm} ${ampm}`;
+  };
+
+  const diffStyle = {
+    easy:   'bg-green-100 text-green-700',
+    medium: 'bg-amber-100 text-amber-700',
+    hard:   'bg-red-100 text-red-700',
+  };
+
+  const statusStyle = {
+    scheduled: 'bg-blue-100 text-blue-700',
+    ongoing:   'bg-amber-100 text-amber-700',
+    completed: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+  };
 
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col">
@@ -35,26 +83,103 @@ const Schedule = () => {
         </div>
       </nav>
 
-      <main className="pt-32 pb-20 px-4 flex-1 flex flex-col items-center justify-center min-h-[70vh]">
-        <div className="max-w-4xl mx-auto text-center">
+      <main className="pt-32 pb-20 px-4 flex-1">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="flex flex-col items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
           >
-            <div className="w-20 h-20 rounded-3xl bg-lime/10 flex items-center justify-center text-navy mb-8">
-              <Calendar size={40} />
-            </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight text-navy">Class Schedule</h1>
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                <p className="text-slate-600 font-bold uppercase tracking-widest text-sm">Under Development</p>
-            </div>
-            <p className="mt-8 text-slate-500 max-w-lg mx-auto">
-              Our class planning system is on the way. Soon you'll be able to view session timings and upcoming lectures for the Algorithmist DSA classes.
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-navy">Upcoming Exams</h1>
+            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+              View all scheduled evaluations for the Algorithmist DSA classes. Prepare well and ace your tests!
             </p>
+            <div className="w-24 h-1.5 bg-lime mx-auto rounded-full mt-8"></div>
           </motion.div>
+
+          {/* Content */}
+          {loading && (
+            <div className="text-center py-20">
+              <div className="w-12 h-12 border-4 border-lime/30 border-t-lime rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-slate-500 font-semibold">Loading exam schedule…</p>
+            </div>
+          )}
+
+          {error && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="max-w-lg mx-auto bg-red-50 text-red-600 p-5 rounded-2xl font-bold flex items-center gap-3 border border-red-100">
+              <AlertCircle size={20} /> {error}
+            </motion.div>
+          )}
+
+          {!loading && !error && exams.length === 0 && (
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20">
+              <div className="w-20 h-20 rounded-3xl bg-lime/10 flex items-center justify-center text-navy mx-auto mb-6">
+                <Calendar size={40} />
+              </div>
+              <h2 className="text-2xl font-bold text-navy mb-2">No Exams Scheduled</h2>
+              <p className="text-slate-500 max-w-md mx-auto">There are no upcoming tests at the moment. Check back soon!</p>
+            </motion.div>
+          )}
+
+          {!loading && !error && exams.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {exams.map((exam, idx) => (
+                <motion.div
+                  key={exam._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.08 }}
+                  className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group"
+                >
+                  {/* Top row: name + badges */}
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <h3 className="text-xl font-bold text-navy">{exam.examName}</h3>
+                    <div className="flex gap-2 shrink-0">
+                      <span className={`${diffStyle[exam.difficultyLevel]} text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full`}>
+                        {exam.difficultyLevel}
+                      </span>
+                      <span className={`${statusStyle[exam.status]} text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full`}>
+                        {exam.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Info grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Calendar size={14} className="text-lime shrink-0" />
+                      <span className="font-semibold">{fmtDate(exam.examDate)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Clock size={14} className="text-lime shrink-0" />
+                      <span className="font-semibold">{fmtTime(exam.examTime)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Timer size={14} className="text-lime shrink-0" />
+                      <span className="font-semibold">{exam.duration} Minutes</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <Award size={14} className="text-lime shrink-0" />
+                      <span className="font-semibold">{exam.totalMarks} Marks (Pass: {exam.passingMarks})</span>
+                    </div>
+                  </div>
+
+                  {/* Topics */}
+                  <div className="flex flex-wrap gap-2">
+                    {exam.topics.map((topic, i) => (
+                      <span key={i} className="bg-lime/10 text-navy text-xs font-bold px-2.5 py-1 rounded-lg">
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
