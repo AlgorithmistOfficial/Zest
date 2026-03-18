@@ -1,0 +1,231 @@
+:root {
+    --navy: #052340;
+    --lime: #92c211;
+    --white: #ffffff;
+    --off-white: #fffef2;
+    --slate-100: #f1f5f9;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--off-white);
+    color: var(--navy);
+    line-height: 1.6;
+}
+
+.admin-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.z-badge {
+    background-color: var(--lime);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.5rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+header p {
+    color: var(--slate-500);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.card {
+    background: var(--white);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    border: 1px solid var(--slate-100);
+}
+
+.shadow-premium {
+    box-shadow: 0 32px 64px -16px rgba(5, 35, 64, 0.1);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.card-header i {
+    color: var(--lime);
+}
+
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.grid-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.span-2 {
+    grid-column: span 2;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--slate-400);
+    margin-left: 0.25rem;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--slate-400);
+    pointer-events: none;
+}
+
+input, select {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3.25rem;
+    border: 2px solid var(--slate-100);
+    border-radius: 1rem;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: var(--slate-100);
+}
+
+input:focus, select:focus {
+    border-color: var(--lime);
+    background-color: var(--white);
+    box-shadow: 0 0 0 4px rgba(146, 194, 17, 0.1);
+}
+
+.button-container {
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    width: 100%;
+    background-color: var(--navy);
+    color: var(--white);
+    padding: 1.25rem;
+    border: none;
+    border-radius: 1rem;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(5, 35, 64, 0.4);
+    background-color: #08335d;
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+#statusMessage {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+#statusMessage.success {
+    background-color: rgba(146, 194, 17, 0.1);
+    color: #4a6309;
+    border: 1px solid rgba(146, 194, 17, 0.2);
+}
+
+#statusMessage.error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+}
+
+.hidden {
+    display: none;
+}
+
+footer {
+    margin-top: 4rem;
+    text-align: center;
+    color: var(--slate-500);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .grid-form {
+        grid-template-columns: 1fr;
+    }
+    .span-2 {
+        grid-column: span 1;
+    }
+}

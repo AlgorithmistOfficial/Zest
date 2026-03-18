@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Scheduler | Zest Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <header>
+            <div class="logo">
+                <span class="z-badge">Z</span>
+                <h1>Admin Portal</h1>
+            </div>
+            <p>Algorithmist DSA Classes | Exam Scheduler</p>
+        </header>
+
+        <main>
+            <div class="card shadow-premium">
+                <div class="card-header">
+                    <i data-lucide="calendar"></i>
+                    <h2>Schedule New Exam</h2>
+                </div>
+                
+                <form id="examForm" class="grid-form">
+                    <div class="form-group span-2">
+                        <label for="examName">Exam Name</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="edit-3"></i>
+                            <input type="text" id="examName" placeholder="e.g., Binary Search & Arrays" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="examDate">Exam Date (DD-MM-YYYY)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="calendar-days"></i>
+                            <input type="date" id="examDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="examTime">Start Time (HH:MM)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="clock"></i>
+                            <input type="time" id="examTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">Duration (Minutes)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="timer"></i>
+                            <input type="number" id="duration" placeholder="e.g., 60" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficultyLevel">Difficulty Level</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="bar-chart"></i>
+                            <select id="difficultyLevel">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="totalMarks">Total Marks</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="award"></i>
+                            <input type="number" id="totalMarks" placeholder="e.g., 100" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passingMarks">Passing Marks</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="target"></i>
+                            <input type="number" id="passingMarks" placeholder="e.g., 40" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="topics">Topics (Comma separated)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="list-checks"></i>
+                            <input type="text" id="topics" placeholder="e.g., Arrays, Pointers, Search" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="status">Initial Status</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="activity"></i>
+                            <select id="status">
+                                <option value="scheduled">Scheduled</option>
+                                <option value="ongoing">Ongoing</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="button-container span-2">
+                        <button type="submit" class="btn-primary" id="scheduleBtn">
+                            <span>Schedule Exam</span>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="statusMessage" class="hidden"></div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2026 Shreyansh Srivastava | Zest Evaluation Platform</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
