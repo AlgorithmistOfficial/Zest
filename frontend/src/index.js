@@ -10,6 +10,8 @@ import Leaderboard from './Leaderboard';
 import Schedule from './Schedule';
 import Auth from './Auth';
 import Home from './Home';
+import Profile from './Profile';
+import Analytics from './Analytics';
 
 // Helper to check for token
 const isAuthenticated = () => {
@@ -41,6 +43,8 @@ root.render(
         <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
         <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

@@ -135,8 +135,8 @@ const Home = () => {
             <div className="flex items-center gap-3">
               {/* Desktop Nav Links shifted to right */}
               <div className="hidden md:flex items-center gap-8 mr-4">
-                <Link to="/home" className="text-white nav-hover-draw px-1 py-2 text-lg tracking-tight transition-all">Profile</Link>
-                <Link to="/leaderboard" className="text-white nav-hover-draw px-1 py-2 text-lg tracking-tight transition-all">Analytics</Link>
+                <Link to="/profile" className="text-white nav-hover-draw px-1 py-2 text-lg tracking-tight transition-all">Profile</Link>
+                <Link to="/analytics" className="text-white nav-hover-draw px-1 py-2 text-lg tracking-tight transition-all">Analytics</Link>
               </div>
 
               <button
@@ -165,8 +165,8 @@ const Home = () => {
         {/* Mobile Menu Dropdown */}
         <div className={`md:hidden bg-lime transition-all duration-300 overflow-hidden ${isMobileMenuOpen ? 'max-h-64 border-b border-white/20' : 'max-h-0'}`}>
           <div className="px-4 py-6 space-y-4">
-            <Link to="/home" className="block text-white font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
-            <Link to="/leaderboard" className="block text-white font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>Analytics</Link>
+            <Link to="/profile" className="block text-white font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>Profile</Link>
+            <Link to="/analytics" className="block text-white font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>Analytics</Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-white font-bold text-lg pt-4 border-t border-white/20 w-full"
