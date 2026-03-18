@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Clock, Award, Timer, BarChart3, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Award, Timer, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const API_URL = 'https://Shreyansh6726-zest.hf.space';
