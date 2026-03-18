@@ -18,12 +18,6 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   React.useEffect(() => {
-    // Redirect if already logged in
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (token) {
-      window.location.href = '/home';
-    }
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };

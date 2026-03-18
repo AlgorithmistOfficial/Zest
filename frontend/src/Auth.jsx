@@ -20,12 +20,6 @@ const Auth = () => {
   const API_URL = 'https://Shreyansh6726-zest.hf.space'; // Base URL for backend
 
   React.useEffect(() => {
-    // Redirect if already logged in
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (token) {
-      window.location.href = '/home';
-    }
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
