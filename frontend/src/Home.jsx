@@ -6,7 +6,8 @@ import {
   BookOpen, 
   Code, 
   Trophy,
-  Calendar
+  Calendar,
+  Clock
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -44,8 +45,63 @@ const Home = () => {
     { title: "Schedule", icon: Calendar, path: "/schedule", color: "bg-purple-500" },
   ];
 
+  const [upcomingTest, setUpcomingTest] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchNearestTest = async () => {
+      try {
+        const res = await fetch('https://Shreyansh6726-zest.hf.space/api/exams');
+        if (!res.ok) return;
+        const exams = await res.json();
+        
+        const now = new Date();
+        
+        const parseDateTime = (d, t) => {
+          const ds = d.toString().padStart(8, '0');
+          const ts = t.toString().padStart(6, '0');
+          return new Date(
+            parseInt(ds.slice(4)), // yyyy
+            parseInt(ds.slice(2, 4)) - 1, // mm
+            parseInt(ds.slice(0, 2)), // dd
+            parseInt(ts.slice(0, 2)), // hh
+            parseInt(ts.slice(2, 4)), // mm
+            parseInt(ts.slice(4)) // ss
+          );
+        };
+
+        const scheduled = exams
+          .filter(e => e.status === 'scheduled' || e.status === 'ongoing')
+          .map(e => ({ ...e, startAt: parseDateTime(e.examDate, e.examTime) }))
+          .filter(e => e.startAt > now)
+          .sort((a, b) => a.startAt - b.startAt);
+
+        if (scheduled.length > 0) {
+          setUpcomingTest(scheduled[0]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch nearest test:', err);
+      }
+    };
+    fetchNearestTest();
+  }, []);
+
+  const fmtDate = (n) => {
+    const s = n.toString().padStart(8, '0');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${parseInt(s.slice(0, 2))} ${months[parseInt(s.slice(2, 4)) - 1]} ${s.slice(4)}`;
+  };
+
+  const fmtTime = (n) => {
+    const s = n.toString().padStart(6, '0');
+    let hh = parseInt(s.slice(0, 2));
+    const mm = s.slice(2, 4);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    hh = hh % 12 || 12;
+    return `${hh}:${mm} ${ampm}`;
+  };
+
   return (
-    <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
+    <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col">
       {/* Navigation */}
       <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
         ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'
@@ -115,26 +171,52 @@ const Home = () => {
             ))}
           </div>
 
-          {/* Activity Section Placeholder */}
+          {/* Upcoming Test Section */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             className="mt-12 p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8"
           >
             <div>
-              <h2 className="text-3xl font-bold mb-4">Your Progress</h2>
-              <p className="text-slate-300 max-w-md">
-                Keep practicing to reach the top of the leaderboard! Your personalized stats and recent problems will appear here soon.
-              </p>
+              <h2 className="text-3xl font-bold mb-4">Upcoming Test</h2>
+              {upcomingTest ? (
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-lime">{upcomingTest.examName}</h3>
+                  <div className="flex flex-wrap gap-4 text-slate-300 text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-lime" />
+                      {fmtDate(upcomingTest.examDate)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock size={16} className="text-lime" />
+                      {fmtTime(upcomingTest.examTime)}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {upcomingTest.topics.slice(0, 3).map((topic, i) => (
+                      <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10">
+                        {topic}
+                      </span>
+                    ))}
+                    {upcomingTest.topics.length > 3 && <span className="text-xs text-slate-400">+{upcomingTest.topics.length - 3} more</span>}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-slate-400 font-medium italic">No upcoming exams recently scheduled.</p>
+              )}
             </div>
-            <div className="w-full md:w-64 h-3 bg-white/10 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: '45%' }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="h-full bg-lime"
-              />
-            </div>
+            
+            {upcomingTest && (
+              <Link to="/practice" className="w-full md:w-auto">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full px-10 py-4 bg-lime text-white font-extrabold rounded-2xl shadow-lg shadow-lime/20 hover:bg-lime/90 transition-all flex items-center justify-center gap-2"
+                >
+                  Start Test <ArrowRight size={20} />
+                </motion.button>
+              </Link>
+            )}
           </motion.div>
         </div>
       </main>
