@@ -77,7 +77,13 @@ const Home = () => {
             className="mb-12"
           >
             <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-navy">
-              Welcome back, <span className="text-lime">{user.name || 'Student'}</span>! 👋
+              {(() => {
+                const hour = new Date().getHours();
+                if (hour >= 4 && hour < 12) return 'Good Morning';
+                if (hour >= 12 && hour < 16) return 'Good Afternoon';
+                if (hour >= 16 && hour < 20) return 'Good Evening';
+                return 'Hello';
+              })()}, <span className="text-lime">{user.name || 'Student'}</span>! 👋
             </h1>
             <p className="text-slate-600 text-lg">
               Pick up right where you left off in your DSA journey.
