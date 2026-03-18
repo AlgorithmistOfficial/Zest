@@ -10,6 +10,7 @@ const Auth = () => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     otp: ''
   });
   const [step, setStep] = useState('info'); // 'info' or 'otp'
@@ -18,6 +19,18 @@ const Auth = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const API_URL = 'https://Shreyansh6726-zest.hf.space'; // Base URL for backend
+
+  const passwordRules = {
+    length: formData.password.length >= 8 && formData.password.length <= 25,
+    hasLetter: /[a-zA-Z]/.test(formData.password),
+    hasNumber: /[0-9]/.test(formData.password),
+    match: formData.password === formData.confirmPassword && formData.password !== ''
+  };
+
+  const isPasswordValid = passwordRules.length && passwordRules.hasLetter && passwordRules.hasNumber;
+  const canSubmit = isLogin ? (formData.email && formData.password) : (
+    step === 'info' ? (formData.name && formData.email && isPasswordValid && passwordRules.match) : formData.otp
+  );
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -33,6 +46,7 @@ const Auth = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!canSubmit) return;
     setLoading(true);
     setMessage({ type: '', text: '' });
 
@@ -245,23 +259,75 @@ const Auth = () => {
                   )}
                 </div>
 
-                {step === 'info' && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input
-                        type="password"
-                        name="password"
-                        required
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium"
-                        placeholder="••••••••"
-                      />
+                  {step === 'info' && (
+                    <div className="space-y-4">
+                      {/* Password Field */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                        <div className="relative">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                          <input
+                            type="password"
+                            name="password"
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-medium ${
+                              formData.password && !isLogin
+                                ? isPasswordValid ? 'border-green-100 focus:border-green-400' : 'border-red-50 focus:border-red-200'
+                                : 'border-transparent focus:border-lime focus:bg-white'
+                            }`}
+                            placeholder="••••••••"
+                          />
+                        </div>
+
+                        {/* Password Rules Indicators (only for signup) */}
+                        {!isLogin && (
+                          <div className="grid grid-cols-2 gap-2 mt-2 px-1">
+                            <div className={`flex items-center gap-1.5 text-[10px] font-bold ${passwordRules.length ? 'text-green-600' : 'text-slate-400'}`}>
+                              <CheckCircle2 size={10} className={passwordRules.length ? 'text-green-600' : 'text-slate-300'} />
+                              8-25 characters
+                            </div>
+                            <div className={`flex items-center gap-1.5 text-[10px] font-bold ${passwordRules.hasLetter ? 'text-green-600' : 'text-slate-400'}`}>
+                              <CheckCircle2 size={10} className={passwordRules.hasLetter ? 'text-green-600' : 'text-slate-300'} />
+                              One letter
+                            </div>
+                            <div className={`flex items-center gap-1.5 text-[10px] font-bold ${passwordRules.hasNumber ? 'text-green-600' : 'text-slate-400'}`}>
+                              <CheckCircle2 size={10} className={passwordRules.hasNumber ? 'text-green-600' : 'text-slate-300'} />
+                              One number
+                            </div>
+                            <div className={`flex items-center gap-1.5 text-[10px] font-bold ${passwordRules.match ? 'text-green-600' : 'text-slate-400'}`}>
+                              <CheckCircle2 size={10} className={passwordRules.match ? 'text-green-600' : 'text-slate-300'} />
+                              Passwords match
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Confirm Password Field (only for signup) */}
+                      {!isLogin && (
+                        <div className="space-y-2">
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
+                          <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input
+                              type="password"
+                              name="confirmPassword"
+                              required
+                              value={formData.confirmPassword}
+                              onChange={handleInputChange}
+                              className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-medium ${
+                                formData.confirmPassword 
+                                  ? passwordRules.match ? 'border-green-100 focus:border-green-400' : 'border-red-50 focus:border-red-200'
+                                  : 'border-transparent focus:border-lime focus:bg-white'
+                              }`}
+                              placeholder="••••••••"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {isLogin && (
                   <div className="flex items-center gap-2 ml-1">
@@ -279,12 +345,13 @@ const Auth = () => {
                 )}
 
                 <motion.button
-                  whileHover={!loading ? { scale: 1.02 } : {}}
-                  whileTap={!loading ? { scale: 0.98 } : {}}
+                  whileHover={canSubmit && !loading ? { scale: 1.02 } : {}}
+                  whileTap={canSubmit && !loading ? { scale: 0.98 } : {}}
                   type="submit"
-                  disabled={loading}
-                  className={`w-full py-4 font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2 group mt-4 transition-all ${loading ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-navy text-white shadow-navy/20'
-                    }`}
+                  disabled={!canSubmit || loading}
+                  className={`w-full py-4 font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2 group mt-4 transition-all ${
+                    !canSubmit || loading ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-navy text-white shadow-navy/20'
+                  }`}
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
