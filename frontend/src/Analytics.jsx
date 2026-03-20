@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowLeft, BarChart3, Construction, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
