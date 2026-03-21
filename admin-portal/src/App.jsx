@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import ManageExams from './pages/ManageExams';
 import ScheduleExam from './pages/ScheduleExam';
 import EditExam from './pages/EditExam';
+import ActiveStudents from './pages/ActiveStudents';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<ManageExams />} />
             <Route path="/create" element={<ScheduleExam />} />
             <Route path="/edit/:id" element={<EditExam />} />
+            <Route path="/active-students" element={<ActiveStudents />} />
           </Routes>
         </main>
         <Footer />

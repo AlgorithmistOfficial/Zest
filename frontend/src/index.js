@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
+import { io } from 'socket.io-client';
 import LandingPage from './LandingPage';
 import About from './About';
 import Syllabus from './Syllabus';
@@ -23,9 +24,43 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated() ? <Navigate to="/home" replace /> : children;
 };
 
+// Component to handle user presence via WebSocket
+const UserPresence = ({ children }) => {
+  React.useEffect(() => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+
+    if (token && user.email) {
+      // Connect to the backend socket server
+      const socket = io('https://Shreyansh6726-zest.hf.space', {
+        auth: { token }
+      });
+
+      socket.on('connect', () => {
+        // Emit user-online event to the server
+        socket.emit('user-online', {
+          name: user.name,
+          email: user.email,
+          id: user._id || user.id
+        });
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, []);
+
+  return children;
+};
+
 // Redirects to /auth if not logged in
 const ProtectedRoute = ({ children }) => {
-  return isAuthenticated() ? children : <Navigate to="/auth" replace />;
+  return isAuthenticated() ? (
+    <UserPresence>{children}</UserPresence>
+  ) : (
+    <Navigate to="/auth" replace />
+  );
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
