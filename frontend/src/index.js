@@ -45,6 +45,12 @@ const UserPresence = ({ children }) => {
         });
       });
 
+      // Listen for test reminders
+      socket.on('test-reminder', (data) => {
+        // Find if there's an existing notification area or just alert
+        alert(`🔔 ${data.message}\n\nTopics: ${data.topics.join(', ')}\nDuration: ${data.duration} mins`);
+      });
+
       return () => {
         socket.disconnect();
       };
