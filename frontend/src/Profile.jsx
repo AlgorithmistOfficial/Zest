@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Edit3, Save, X, Mail, Phone, Info, Globe, Camera } from 'lucide-react';
+import { ArrowLeft, User, LogOut, Edit3, Save, X, Mail, Info, Camera } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Profile = () => {
@@ -13,10 +13,7 @@ const Profile = () => {
     const [userData, setUserData] = useState({
         name: initialUser.name || 'Anonymous User',
         email: initialUser.email || 'guest@zest.com',
-        phone: initialUser.phone || '+91 98765 43210',
-        bio: initialUser.bio || 'DSA enthusiast and problem solver.',
         role: initialUser.role || 'Student',
-        location: initialUser.location || 'India',
         profilePic: initialUser.profilePic || null
     });
 
@@ -251,41 +248,7 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                {/* Phone Input */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                        <input 
-                                            type="text" 
-                                            name="phone"
-                                            value={isEditing ? tempData.phone : userData.phone}
-                                            onChange={handleChange}
-                                            disabled={!isEditing}
-                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold disabled:text-slate-500 disabled:bg-slate-50/50"
-                                            placeholder="+91 00000 00000"
-                                        />
-                                    </div>
-                                </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Location Input */}
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Location</label>
-                                        <div className="relative">
-                                            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                            <input 
-                                                type="text" 
-                                                name="location"
-                                                value={isEditing ? tempData.location : userData.location}
-                                                onChange={handleChange}
-                                                disabled={!isEditing}
-                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold disabled:text-slate-500 disabled:bg-slate-50/50"
-                                                placeholder="City, Country"
-                                            />
-                                        </div>
-                                    </div>
-
                                     {/* Password Field (READ ONLY Placeholder) */}
                                     <div className="space-y-2">
                                         <div className="flex justify-between px-1">
@@ -304,19 +267,7 @@ const Profile = () => {
                                     </div>
                                 </div>
 
-                                {/* Bio Input */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">About Me / Bio</label>
-                                    <textarea 
-                                        name="bio"
-                                        value={isEditing ? tempData.bio : userData.bio}
-                                        onChange={handleChange}
-                                        disabled={!isEditing}
-                                        rows="3"
-                                        className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-medium disabled:text-slate-500 disabled:bg-slate-50/50 resize-none"
-                                        placeholder="Tell us about yourself..."
-                                    />
-                                </div>
+
                             </form>
                         </motion.div>
                     </div>
