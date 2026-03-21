@@ -22,17 +22,14 @@ const ActiveStudents = () => {
             setLastUpdated(new Date());
         } catch (err) {
             console.error('Error fetching active students:', err);
-            setError('Could not connect to the backend server to fetch active students.');
+            setError('Could not connect to the backend server. Displaying demo data instead.');
             
-            // MOCK DATA for demonstration purposes (if backend is unavailable)
-            // This allows the user to see how the UI looks.
-            /* 
+            // MOCK DATA for demonstration purposes
             setStudents([
                 { id: 1, name: 'Alex Rivera', email: 'alex@gmail.com', lastActive: '2 minutes ago' },
                 { id: 2, name: 'Samantha Lee', email: 'sam@gmail.com', lastActive: 'Just now' },
                 { id: 3, name: 'Jordan Smith', email: 'jordan@gmail.com', lastActive: '5 minutes ago' }
             ]);
-            */
         } finally {
             setLoading(false);
         }
