@@ -60,6 +60,7 @@ const Home = () => {
         const res = await fetch('https://Shreyansh6726-zest.hf.space/api/exams');
         if (!res.ok) return;
         const exams = await res.json();
+        console.log('[Home] Fetched exams:', exams);
 
         const now = new Date();
 
@@ -76,14 +77,24 @@ const Home = () => {
           );
         };
 
-        const scheduled = exams
+        const activeExams = exams
           .filter(e => e.status === 'scheduled' || e.status === 'ongoing')
           .map(e => ({ ...e, startAt: parseDateTime(e.examDate, e.examTime) }))
-          .filter(e => e.startAt > now)
           .sort((a, b) => a.startAt - b.startAt);
 
-        if (scheduled.length > 0) {
-          setUpcomingTest(scheduled[0]);
+        console.log('[Home] All active exams sorted:', activeExams);
+
+        // Logic to find the "best" test to show:
+        // 1. First upcoming test (startAt > now)
+        // 2. Or the most recent ongoing/scheduled test that started today
+        const upcoming = activeExams.find(e => e.startAt > now);
+        const mostRecentStarted = [...activeExams].reverse().find(e => e.startAt <= now);
+
+        const bestTest = upcoming || mostRecentStarted;
+        
+        if (bestTest) {
+          console.log('[Home] Best test selected:', bestTest.examName);
+          setUpcomingTest(bestTest);
         }
       } catch (err) {
         console.error('Failed to fetch nearest test:', err);
