@@ -27,6 +27,12 @@ const Home = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
+
+    // Request notification permission on mount
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, [navigate]);
 
@@ -47,6 +53,7 @@ const Home = () => {
 
   const [upcomingTest, setUpcomingTest] = React.useState(null);
   const [isSoon, setIsSoon] = React.useState(false);
+  const notifiedTestId = React.useRef(null);
 
   React.useEffect(() => {
     const fetchNearestTest = async () => {
@@ -86,18 +93,45 @@ const Home = () => {
     fetchNearestTest();
   }, []);
 
-  // Check if test is soon (within 10 mins)
+  // Check if test is soon (within 10 mins) and send browser notification
   React.useEffect(() => {
     if (!upcomingTest) return;
 
-    const checkSoon = () => {
+    const checkAndNotify = () => {
       const now = new Date();
       const diff = upcomingTest.startAt - now;
-      setIsSoon(diff > 0 && diff < 10 * 60 * 1000);
+      const tenMinutesInMs = 10 * 60 * 1000;
+      
+      const soon = diff > 0 && diff < tenMinutesInMs;
+      setIsSoon(soon);
+
+      // Trigger browser notification if within 10 mins and not already notified for this test
+      if (soon && notifiedTestId.current !== upcomingTest._id) {
+        if (Notification.permission === 'granted') {
+          new Notification("Test Starting Soon! 📝", {
+            body: `Your test "${upcomingTest.examName}" starts in 10 minutes. Get ready!`,
+            icon: "/logo.png"
+          });
+          notifiedTestId.current = upcomingTest._id;
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+              new Notification("Test Starting Soon! 📝", {
+                body: `Your test "${upcomingTest.examName}" starts in 10 minutes. Get ready!`,
+                icon: "/logo.png"
+              });
+              notifiedTestId.current = upcomingTest._id;
+            }
+          });
+        }
+      }
     };
 
-    checkSoon();
-    const interval = setInterval(checkSoon, 30000); // Check every 30s
+    // Initial check
+    checkAndNotify();
+    
+    // Check every 30s to catch the 10-minute window
+    const interval = setInterval(checkAndNotify, 30000);
     return () => clearInterval(interval);
   }, [upcomingTest]);
 
