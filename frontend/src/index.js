@@ -45,15 +45,18 @@ const UserPresence = ({ children }) => {
         });
       });
 
-      // Listen for test reminders
-      socket.on('test-reminder', (data) => {
-        // Find if there's an existing notification area or just alert
-        alert(`🔔 ${data.message}\n\nTopics: ${data.topics.join(', ')}\nDuration: ${data.duration} mins`);
-      });
-
       return () => {
         socket.disconnect();
       };
+    }
+  }, []);
+
+  // Register Service Worker for Push Notifications
+  React.useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('[SW] Service Worker Registered', reg.scope))
+        .catch(err => console.error('[SW] Service Worker Registration Failed', err));
     }
   }, []);
 

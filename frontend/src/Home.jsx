@@ -53,7 +53,6 @@ const Home = () => {
 
   const [upcomingTest, setUpcomingTest] = React.useState(null);
   const [isSoon, setIsSoon] = React.useState(false);
-  const notifiedTestId = React.useRef(null);
 
   React.useEffect(() => {
     const fetchNearestTest = async () => {
@@ -93,45 +92,63 @@ const Home = () => {
     fetchNearestTest();
   }, []);
 
-  // Check if test is soon (within 10 mins) and send browser notification
+  // Handle Web Push Notifications
   React.useEffect(() => {
-    if (!upcomingTest) return;
+    const subscribeToPush = async () => {
+      // Only subscribe if "Remember Me" (persistent) is enabled
+      const isPersistent = localStorage.getItem('rememberMe') === 'true';
+      if (!isPersistent) return;
 
-    const checkAndNotify = () => {
-      const now = new Date();
-      const diff = upcomingTest.startAt - now;
-      const tenMinutesInMs = 10 * 60 * 1000;
-      
-      const soon = diff > 0 && diff < tenMinutesInMs;
-      setIsSoon(soon);
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-      // Trigger browser notification if within 10 mins and not already notified for this test
-      if (soon && notifiedTestId.current !== upcomingTest._id) {
-        if (Notification.permission === 'granted') {
-          new Notification("Test Starting Soon! 📝", {
-            body: `Your test "${upcomingTest.examName}" starts in 10 minutes. Get ready!`,
-            icon: "/logo.png"
-          });
-          notifiedTestId.current = upcomingTest._id;
-        } else if (Notification.permission !== 'denied') {
-          Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-              new Notification("Test Starting Soon! 📝", {
-                body: `Your test "${upcomingTest.examName}" starts in 10 minutes. Get ready!`,
-                icon: "/logo.png"
-              });
-              notifiedTestId.current = upcomingTest._id;
-            }
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        
+        // Check for existing subscription
+        let subscription = await registration.pushManager.getSubscription();
+        
+        if (!subscription) {
+          const publicVapidKey = 'BOTRe2gEPZ0JryyOujmFxMhl7PvT4n0aYZmVpqpQoJkMYKPExQUEzzcziRL53r6I2nuQ5FStp7JdETMec6TXIu0';
+          
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: publicVapidKey
           });
         }
+
+        // Send subscription to backend
+        await fetch('https://Shreyansh6726-zest.hf.space/api/notifications/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription,
+            studentEmail: user.email
+          })
+        });
+        
+        console.log('[Push] Subscribed to notifications');
+      } catch (err) {
+        console.error('[Push] Failed to subscribe:', err);
       }
     };
 
-    // Initial check
-    checkAndNotify();
-    
-    // Check every 30s to catch the 10-minute window
-    const interval = setInterval(checkAndNotify, 30000);
+    if (user.email) {
+      subscribeToPush();
+    }
+  }, [user.email]);
+
+  // Check if test is soon (within 10 mins) for UI pulsing effect
+  React.useEffect(() => {
+    if (!upcomingTest) return;
+
+    const checkSoon = () => {
+      const now = new Date();
+      const diff = upcomingTest.startAt - now;
+      setIsSoon(diff > 0 && diff < 10 * 60 * 1000);
+    };
+
+    checkSoon();
+    const interval = setInterval(checkSoon, 30000);
     return () => clearInterval(interval);
   }, [upcomingTest]);
 

@@ -86,6 +86,9 @@ const Auth = () => {
         sessionStorage.removeItem('user');
 
         const storage = persistent ? localStorage : sessionStorage;
+        if (persistent) localStorage.setItem('rememberMe', 'true');
+        else localStorage.removeItem('rememberMe');
+        
         storage.setItem('token', data.token);
         storage.setItem('user', JSON.stringify(data.user));
         setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
