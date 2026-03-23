@@ -9,7 +9,16 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { 
+  SiNodedotjs, SiReact, SiExpress, SiAngular, SiTypescript, SiJavascript, 
+  SiHtml5, SiNextdotjs, SiPython, SiOpenjdk, SiGithub, 
+  SiGitlab, SiTensorflow, SiGoogle, 
+  SiOpenai, SiGithubcopilot, SiRedis, SiVercel, SiDocker, SiKotlin,
+  SiMongodb, SiGooglegemini
+} from 'react-icons/si';
+import { FaLinkedin, FaMicrosoft as FaMs } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import LogoLoop from './LogoLoop';
 
 // --- Components ---
 
@@ -275,6 +284,49 @@ export default function LandingPage() {
             />
           </div>
         </div>
+      </section>
+
+      {/* Tech Stack Loop Section */}
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 mb-12 text-center">
+          <h2 className="text-2xl font-bold text-navy/40 uppercase tracking-[0.2em] mb-4">Powering the Future</h2>
+          <div className="w-12 h-1 bg-lime/30 mx-auto rounded-full"></div>
+        </div>
+        <LogoLoop
+          logos={[
+            { node: <SiNodedotjs />, title: "Node.js" },
+            { node: <SiReact />, title: "React" },
+            { node: <SiExpress />, title: "Express.js" },
+            { node: <SiAngular />, title: "Angular" },
+            { node: <SiTypescript />, title: "TypeScript" },
+            { node: <SiJavascript />, title: "JavaScript" },
+            { node: <SiHtml5 />, title: "HTML5" },
+            { node: <SiNextdotjs />, title: "Next.js" },
+            { node: <SiPython />, title: "Python" },
+            { node: <SiOpenjdk />, title: "Java" },
+            { node: <SiGithub />, title: "GitHub" },
+            { node: <SiGitlab />, title: "GitLab" },
+            { node: <SiTensorflow />, title: "TensorFlow" },
+            { node: <FaLinkedin />, title: "LinkedIn" },
+            { node: <FaMs />, title: "Microsoft" },
+            { node: <SiGoogle />, title: "Google" },
+            { node: <SiGooglegemini />, title: "Gemini" },
+            { node: <SiOpenai />, title: "OpenAI" },
+            { node: <SiGithubcopilot />, title: "GitHub Copilot" },
+            { node: <SiRedis />, title: "Redis" },
+            { node: <SiMongodb />, title: "MongoDB" },
+            { node: <SiVercel />, title: "Vercel" },
+            { node: <SiDocker />, title: "Docker" },
+            { node: <SiKotlin />, title: "Kotlin" },
+          ]}
+          speed={30}
+          direction="left"
+          logoHeight={45}
+          gap={80}
+          hoverSpeed={0}
+          scaleOnHover
+          fadeOut
+        />
       </section>
 
       <footer className="py-12 bg-navy text-white text-center px-4 mt-20">
