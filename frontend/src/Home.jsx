@@ -104,7 +104,7 @@ const Home = () => {
   }, []);
 
   // Handle Web Push Notifications
-  const subscribeToPush = async (manual = false) => {
+  const subscribeToPush = React.useCallback(async (manual = false) => {
     // Only subscribe if "Remember Me" (persistent) is enabled (or if manual test)
     const isPersistent = localStorage.getItem('rememberMe') === 'true';
     if (!isPersistent && !manual) {
@@ -131,8 +131,6 @@ const Home = () => {
       
       if (!subscription) {
         console.log('[Push] Creating new subscription...');
-        const publicVapidKey = 'BOTRe2gEPZ0JryyOujmFxMhl7PvT4n0aYZmVpqp (Wait, use full key here)';
-        // NOTE: I'll use the full key in the actual replacement
         
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -160,13 +158,13 @@ const Home = () => {
       console.error('[Push] Subscription flow failed:', err);
       if (manual) alert('Failed to enable notifications. Please check console (F12) for details.');
     }
-  };
+  }, [user.email]);
 
   React.useEffect(() => {
     if (user.email) {
       subscribeToPush();
     }
-  }, [user.email]);
+  }, [user.email, subscribeToPush]);
 
   // Check if test is soon (within 10 mins) for UI pulsing effect
   React.useEffect(() => {
