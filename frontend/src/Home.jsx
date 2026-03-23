@@ -28,11 +28,6 @@ const Home = () => {
     };
     window.addEventListener('scroll', handleScroll);
 
-    // Request notification permission on mount
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, [navigate]);
 
@@ -52,7 +47,6 @@ const Home = () => {
   ];
 
   const [upcomingTest, setUpcomingTest] = React.useState(null);
-  const [isSoon, setIsSoon] = React.useState(false);
 
   React.useEffect(() => {
     const fetchNearestTest = async () => {
@@ -103,83 +97,6 @@ const Home = () => {
     fetchNearestTest();
   }, []);
 
-  // Handle Web Push Notifications
-  const subscribeToPush = React.useCallback(async (manual = false) => {
-    // Only subscribe if "Remember Me" (persistent) is enabled (or if manual test)
-    const isPersistent = localStorage.getItem('rememberMe') === 'true';
-    if (!isPersistent && !manual) {
-      console.log('[Push] Skipping subscription: Not persistent login');
-      return;
-    }
-
-    if (!('serviceWorker' in navigator)) {
-      console.error('[Push] Service Workers not supported');
-      return;
-    }
-    if (!('PushManager' in window)) {
-      console.error('[Push] Push Manager not supported');
-      return;
-    }
-
-    try {
-      console.log('[Push] Checking subscription...');
-      const registration = await navigator.serviceWorker.ready;
-      
-      // Check for existing subscription
-      let subscription = await registration.pushManager.getSubscription();
-      console.log('[Push] Existing subscription:', subscription);
-      
-      if (!subscription) {
-        console.log('[Push] Creating new subscription...');
-        
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: 'BOTRe2gEPZ0JryyOujmFxMhl7PvT4n0aYZmVpqpQoJkMYKPExQUEzzcziRL53r6I2nuQ5FStp7JdETMec6TXIu0'
-        });
-        console.log('[Push] New subscription created:', subscription);
-      }
-
-      // Send subscription to backend
-      console.log('[Push] Sending subscription to backend for:', user.email);
-      const res = await fetch('https://Shreyansh6726-zest.hf.space/api/notifications/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subscription,
-          studentEmail: user.email
-        })
-      });
-      
-      const resData = await res.json();
-      console.log('[Push] Backend response:', resData);
-      
-      if (manual) alert('Push subscription active! You will receive a system notification 10 minutes before your next test.');
-    } catch (err) {
-      console.error('[Push] Subscription flow failed:', err);
-      if (manual) alert('Failed to enable notifications. Please check console (F12) for details.');
-    }
-  }, [user.email]);
-
-  React.useEffect(() => {
-    if (user.email) {
-      subscribeToPush();
-    }
-  }, [user.email, subscribeToPush]);
-
-  // Check if test is soon (within 10 mins) for UI pulsing effect
-  React.useEffect(() => {
-    if (!upcomingTest) return;
-
-    const checkSoon = () => {
-      const now = new Date();
-      const diff = upcomingTest.startAt - now;
-      setIsSoon(diff > 0 && diff < 10 * 60 * 1000);
-    };
-
-    checkSoon();
-    const interval = setInterval(checkSoon, 30000);
-    return () => clearInterval(interval);
-  }, [upcomingTest]);
 
   const fmtDate = (n) => {
     const s = n.toString().padStart(8, '0');
@@ -304,38 +221,15 @@ const Home = () => {
             ))}
           </div>
 
-          {/* Upcoming Test Section Container */}
-          <div className="relative mt-12 w-full">
-            {isSoon && (
-              <>
-                <motion.div
-                  animate={{ scale: [1, 1.2], opacity: [0.8, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                  className="absolute inset-0 border-[6px] border-lime/40 rounded-[3rem] z-0"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
-                  className="absolute inset-0 border-[4px] border-lime/20 rounded-[3rem] z-0"
-                />
-              </>
-            )}
 
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              className="p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 border-2 border-transparent transition-colors shadow-2xl shadow-navy/20 relative z-10"
-              style={isSoon ? { borderColor: 'rgba(146, 194, 17, 0.7)' } : {}}
+              className="mt-12 p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 border-2 border-transparent transition-colors shadow-2xl shadow-navy/20 relative z-10"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-3xl font-bold">Upcoming Test</h2>
-                  <button 
-                    onClick={() => subscribeToPush(true)}
-                    className="text-[10px] bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full text-slate-400 font-bold border border-white/5 transition-all"
-                  >
-                    Enable System Notifications
-                  </button>
                 </div>
                 {upcomingTest ? (
                   <div className="space-y-2">
@@ -376,7 +270,6 @@ const Home = () => {
                 </Link>
               )}
             </motion.div>
-          </div>
         </div>
       </main>
 
