@@ -9,10 +9,10 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { 
-  SiNodedotjs, SiReact, SiExpress, SiAngular, SiTypescript, SiJavascript, 
-  SiHtml5, SiNextdotjs, SiPython, SiOpenjdk, SiGithub, 
-  SiGitlab, SiTensorflow, SiGoogle, 
+import {
+  SiNodedotjs, SiReact, SiExpress, SiAngular, SiTypescript, SiJavascript,
+  SiHtml5, SiNextdotjs, SiPython, SiOpenjdk, SiGithub,
+  SiGitlab, SiTensorflow, SiGoogle,
   SiOpenai, SiGithubcopilot, SiRedis, SiVercel, SiDocker, SiKotlin,
   SiMongodb, SiGooglegemini
 } from 'react-icons/si';
@@ -36,11 +36,10 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${
-      isScrolled 
-        ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1' 
-        : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
-    }`}>
+    <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
+      ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'
+      : 'bg-[#92c211] md:bg-[#92c211]/90 py-0'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
@@ -249,7 +248,7 @@ export default function LandingPage() {
               <p className="text-slate-600 max-w-lg font-medium leading-relaxed text-lg">
                 Designed specifically for the Algorithmist curriculum to ensure you stay on track with your DSA goals.
               </p>
-              
+
               <div className="mt-12 space-y-4">
                 <div className="flex items-center gap-3 text-navy/70 font-semibold">
                   <div className="w-2 h-2 rounded-full bg-lime"></div>
@@ -272,35 +271,35 @@ export default function LandingPage() {
                 height={350}
                 cardDistance={40}
                 verticalDistance={50}
-                delay={2600}
+                delay={4000}
                 pauseOnHover={true}
                 skewAmount={2}
               >
-              <Card style={{ backgroundColor: '#eff6ff' }}>
-                <div className="card-icon-wrapper">
-                  <Code2 size={32} />
-                </div>
-                <h3>Practice Java</h3>
-                <p>Sharpen your coding skills with our integrated online Java compiler. Get instant results and detailed error highlights directly in your browser.</p>
-                <div className="card-number">01</div>
-              </Card>
-              <Card style={{ backgroundColor: '#f0fdf4' }}>
-                <div className="card-icon-wrapper">
-                  <BarChart3 size={32} />
-                </div>
-                <h3>Progress Tracking</h3>
-                <p>Visualize your growth with comprehensive performance analytics. Track your test history, accuracy rates, and topic-wise mastery over time.</p>
-                <div className="card-number">02</div>
-              </Card>
-              <Card style={{ backgroundColor: '#fffbeb' }}>
-                <div className="card-icon-wrapper">
-                  <Trophy size={32} />
-                </div>
-                <h3>Leaderboards</h3>
-                <p>Fuel your motivation by competing with your peers. See where you stand in the Algorithmist class and challenge yourself to climb the ranks.</p>
-                <div className="card-number">03</div>
-              </Card>
-            </CardSwap>
+                <Card style={{ backgroundColor: '#eff6ff' }}>
+                  <div className="card-icon-wrapper">
+                    <Code2 size={32} />
+                  </div>
+                  <h3>Practice Java</h3>
+                  <p>Sharpen your coding skills with our integrated online Java compiler. Get instant results and detailed error highlights directly in your browser.</p>
+                  <div className="card-number">01</div>
+                </Card>
+                <Card style={{ backgroundColor: '#f0fdf4' }}>
+                  <div className="card-icon-wrapper">
+                    <BarChart3 size={32} />
+                  </div>
+                  <h3>Progress Tracking</h3>
+                  <p>Visualize your growth with comprehensive performance analytics. Track your test history, accuracy rates, and topic-wise mastery over time.</p>
+                  <div className="card-number">02</div>
+                </Card>
+                <Card style={{ backgroundColor: '#fffbeb' }}>
+                  <div className="card-icon-wrapper">
+                    <Trophy size={32} />
+                  </div>
+                  <h3>Leaderboards</h3>
+                  <p>Fuel your motivation by competing with your peers. See where you stand in the Algorithmist class and challenge yourself to climb the ranks.</p>
+                  <div className="card-number">03</div>
+                </Card>
+              </CardSwap>
             </div>
           </div>
         </div>
