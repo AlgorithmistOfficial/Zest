@@ -287,7 +287,7 @@ export default function LandingPage() {
       </section>
 
       {/* Tech Stack Loop Section */}
-      <section className="py-20 bg-white overflow-hidden">
+      <section className="py-20 bg-[#fffef2] overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 mb-12 text-center">
           <h2 className="text-2xl font-bold text-navy/40 uppercase tracking-[0.2em] mb-4">Powering the Future</h2>
           <div className="w-12 h-1 bg-lime/30 mx-auto rounded-full"></div>
