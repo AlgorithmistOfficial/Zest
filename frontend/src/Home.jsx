@@ -7,7 +7,9 @@ import {
   Code,
   Trophy,
   Calendar,
-  Clock
+  Clock,
+  Timer,
+  Award
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -85,7 +87,7 @@ const Home = () => {
         const mostRecentStarted = [...activeExams].reverse().find(e => e.startAt <= now);
 
         const bestTest = upcoming || mostRecentStarted;
-        
+
         if (bestTest) {
           console.log('[Home] Best test selected:', bestTest.examName);
           setUpcomingTest(bestTest);
@@ -221,55 +223,63 @@ const Home = () => {
             ))}
           </div>
 
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              className="mt-12 p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 border-2 border-transparent transition-colors shadow-2xl shadow-navy/20 relative z-10"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-3xl font-bold">Upcoming Test</h2>
-                </div>
-                {upcomingTest ? (
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-lime">{upcomingTest.examName}</h3>
-                    <div className="flex flex-wrap gap-4 text-slate-300 text-sm font-medium">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={16} className="text-lime" />
-                        {fmtDate(upcomingTest.examDate)}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock size={16} className="text-lime" />
-                        {fmtTime(upcomingTest.examTime)}
-                      </div>
+          {/* Upcoming Test Section */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="mt-12 p-12 bg-navy rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 border-2 border-transparent transition-colors shadow-2xl shadow-navy/20 relative z-10"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-3xl font-bold">Upcoming Test</h2>
+              </div>
+              {upcomingTest ? (
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-lime">{upcomingTest.examName}</h3>
+                  <div className="flex flex-wrap gap-4 text-slate-300 text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-lime" />
+                      {fmtDate(upcomingTest.examDate)}
                     </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {upcomingTest.topics.slice(0, 3).map((topic, i) => (
-                        <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10">
-                          {topic}
-                        </span>
-                      ))}
-                      {upcomingTest.topics.length > 3 && <span className="text-xs text-slate-400">+{upcomingTest.topics.length - 3} more</span>}
+                    <div className="flex items-center gap-2">
+                      <Clock size={16} className="text-lime" />
+                      {fmtTime(upcomingTest.examTime)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Timer size={16} className="text-lime shrink-0" />
+                      {upcomingTest.duration} Min
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Award size={16} className="text-lime shrink-0" />
+                      {upcomingTest.totalMarks} Marks
                     </div>
                   </div>
-                ) : (
-                  <p className="text-slate-400 font-medium italic">No upcoming exams recently scheduled.</p>
-                )}
-              </div>
-
-              {upcomingTest && (
-                <Link to="/practice" className="w-full md:w-auto">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-full px-10 py-4 bg-lime text-white font-extrabold rounded-2xl hover:bg-lime/90 transition-all flex items-center justify-center gap-2"
-                  >
-                    Start Test <ArrowRight size={20} />
-                  </motion.button>
-                </Link>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {upcomingTest.topics.slice(0, 10).map((topic, i) => (
+                      <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10">
+                        {topic}
+                      </span>
+                    ))}
+                    {upcomingTest.topics.length > 10 && <span className="text-xs text-slate-400">+{upcomingTest.topics.length - 10} more</span>}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-slate-400 font-medium italic">No upcoming exams recently scheduled.</p>
               )}
-            </motion.div>
+            </div>
+
+            {upcomingTest && (
+              <Link to="/practice" className="w-full md:w-auto">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full px-10 py-4 bg-lime text-white font-extrabold rounded-2xl hover:bg-lime/90 transition-all flex items-center justify-center gap-2"
+                >
+                  Start Test <ArrowRight size={20} />
+                </motion.button>
+              </Link>
+            )}
+          </motion.div>
         </div>
       </main>
 
