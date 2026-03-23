@@ -19,6 +19,7 @@ import {
 import { FaLinkedin, FaMicrosoft as FaMs } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import LogoLoop from './LogoLoop';
+import CardSwap, { Card } from './CardSwap';
 
 // --- Components ---
 
@@ -80,21 +81,7 @@ const Navbar = () => {
   );
 };
 
-const FeatureCard = ({ icon: Icon, title, desc, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ delay, duration: 0.5 }}
-    className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-lime transition-all hover:shadow-xl hover:shadow-lime/10 group"
-  >
-    <div className="w-12 h-12 rounded-lg bg-navy/5 flex items-center justify-center mb-4 group-hover:bg-lime/10 transition-colors">
-      <Icon className="text-navy group-hover:text-lime transition-colors" size={24} />
-    </div>
-    <h3 className="text-lg font-bold text-navy mb-2">{title}</h3>
-    <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
-  </motion.div>
-);
+
 
 const HeroVisual = () => {
   return (
@@ -254,34 +241,67 @@ export default function LandingPage() {
       </main>
 
       {/* Features Section */}
-      <section className="py-24 bg-slate-50/50 relative border-y border-slate-100">
+      <section className="py-16 bg-slate-50/50 relative border-y border-slate-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-navy mb-4">Why use Zest?</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto font-medium">
-              Designed specifically for the Algorithmist curriculum to ensure you stay on track with your DSA goals.
-            </p>
-          </div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="text-left lg:pr-8">
+              <h2 className="text-4xl lg:text-5xl font-extrabold text-navy mb-6">Why use Zest?</h2>
+              <p className="text-slate-600 max-w-lg font-medium leading-relaxed text-lg">
+                Designed specifically for the Algorithmist curriculum to ensure you stay on track with your DSA goals.
+              </p>
+              
+              <div className="mt-12 space-y-4">
+                <div className="flex items-center gap-3 text-navy/70 font-semibold">
+                  <div className="w-2 h-2 rounded-full bg-lime"></div>
+                  Real-time Java Evaluation
+                </div>
+                <div className="flex items-center gap-3 text-navy/70 font-semibold">
+                  <div className="w-2 h-2 rounded-full bg-lime"></div>
+                  Detailed Performance History
+                </div>
+                <div className="flex items-center gap-3 text-navy/70 font-semibold">
+                  <div className="w-2 h-2 rounded-full bg-lime"></div>
+                  Competitive Classroom Rankings
+                </div>
+              </div>
+            </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={Code2}
-              title="Practice Java"
-              desc="Practice Java coding directly on the platform with our online compiler. Instant feedback and output."
-              delay={0.1}
-            />
-            <FeatureCard
-              icon={BarChart3}
-              title="Progress Tracking"
-              desc="Visualize your improvement over time with detailed charts and performance metrics."
-              delay={0.2}
-            />
-            <FeatureCard
-              icon={Trophy}
-              title="Leaderboards"
-              desc="Compete with your peers in the Algorithmist class to boost motivation and learning speed."
-              delay={0.3}
-            />
+            <div className="flex justify-end items-center mr-[-40px] lg:mr-[-100px] min-h-[520px] pointer-events-none md:pointer-events-auto">
+              <CardSwap
+                width={500}
+                height={350}
+                cardDistance={40}
+                verticalDistance={50}
+                delay={2600}
+                pauseOnHover={true}
+                skewAmount={2}
+              >
+              <Card style={{ backgroundColor: '#eff6ff' }}>
+                <div className="card-icon-wrapper">
+                  <Code2 size={32} />
+                </div>
+                <h3>Practice Java</h3>
+                <p>Sharpen your coding skills with our integrated online Java compiler. Get instant results and detailed error highlights directly in your browser.</p>
+                <div className="card-number">01</div>
+              </Card>
+              <Card style={{ backgroundColor: '#f0fdf4' }}>
+                <div className="card-icon-wrapper">
+                  <BarChart3 size={32} />
+                </div>
+                <h3>Progress Tracking</h3>
+                <p>Visualize your growth with comprehensive performance analytics. Track your test history, accuracy rates, and topic-wise mastery over time.</p>
+                <div className="card-number">02</div>
+              </Card>
+              <Card style={{ backgroundColor: '#fffbeb' }}>
+                <div className="card-icon-wrapper">
+                  <Trophy size={32} />
+                </div>
+                <h3>Leaderboards</h3>
+                <p>Fuel your motivation by competing with your peers. See where you stand in the Algorithmist class and challenge yourself to climb the ranks.</p>
+                <div className="card-number">03</div>
+              </Card>
+            </CardSwap>
+            </div>
           </div>
         </div>
       </section>
