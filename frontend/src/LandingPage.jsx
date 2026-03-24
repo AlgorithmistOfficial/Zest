@@ -240,7 +240,7 @@ export default function LandingPage() {
       </main>
 
       {/* Features Section */}
-      <section className="py-16 bg-slate-50/50 relative border-y border-slate-100 overflow-hidden">
+      <section className="pt-32 pb-20 bg-slate-50/50 relative border-y border-slate-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="text-left lg:pr-8">
@@ -265,7 +265,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex justify-end items-center mr-[-40px] lg:mr-[-100px] min-h-[520px] pointer-events-none md:pointer-events-auto">
+            <div className="flex justify-end items-center mr-[-40px] lg:mr-[-100px] min-h-[450px] pointer-events-none md:pointer-events-auto">
               <CardSwap
                 width={500}
                 height={350}
@@ -306,7 +306,7 @@ export default function LandingPage() {
       </section>
 
       {/* Tech Stack Loop Section */}
-      <section className="py-20 bg-[#fffef2] overflow-hidden">
+      <section className="pt-8 pb-20 bg-[#fffef2] overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 mb-12 text-center">
           <h2 className="text-2xl font-bold text-navy/40 uppercase tracking-[0.2em] mb-4">Powering the Future</h2>
           <div className="w-12 h-1 bg-lime/30 mx-auto rounded-full"></div>
