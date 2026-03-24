@@ -17,7 +17,8 @@ import {
   SiMongodb, SiGooglegemini
 } from 'react-icons/si';
 import { FaLinkedin, FaMicrosoft as FaMs } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
 import LogoLoop from './LogoLoop';
 import CardSwap, { Card } from './CardSwap';
 
@@ -158,8 +159,30 @@ const HeroVisual = () => {
 };
 
 export default function LandingPage() {
+  const [navigating, setNavigating] = React.useState(false);
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    setNavigating(true);
+    setTimeout(() => navigate('/auth'), 700);
+  };
+
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
+      {/* Page transition overlay */}
+      <AnimatePresence>
+        {navigating && (
+          <motion.div
+            key="page-transition"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: 0 }}
+            transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
+            className="fixed inset-0 bg-black z-[9999] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
       <Navbar />
 
       <main className="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -210,18 +233,17 @@ export default function LandingPage() {
 
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link to="/auth">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="group relative px-8 py-4 bg-navy text-white font-bold rounded-xl overflow-hidden shadow-lg shadow-navy/20 w-full sm:w-auto"
-                  >
-                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-navy via-navy to-lime opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <span className="relative flex items-center justify-center gap-2">
-                      Get Started <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </motion.button>
-                </Link>
+                <motion.button
+                  onClick={handleGetStarted}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="group relative px-8 py-4 bg-navy text-white font-bold rounded-xl overflow-hidden shadow-lg shadow-navy/20 w-full sm:w-auto"
+                >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-navy via-navy to-lime opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <span className="relative flex items-center justify-center gap-2">
+                    Get Started <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </motion.button>
 
 
               </div>
