@@ -84,7 +84,8 @@ const Navbar = () => {
 
 const HeroVisual = () => {
   return (
-    <div className="relative w-full max-w-md mx-auto lg:mx-0 perspective-1000">
+    <div className="relative w-[400px] perspective-1000">
+
       {/* Abstract Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-lime/20 rounded-full blur-3xl animate-pulse"></div>
 
@@ -162,14 +163,26 @@ export default function LandingPage() {
       <Navbar />
 
       <main className="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-lime/5 rounded-full blur-[100px]"></div>
-          <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-navy/5 rounded-full blur-[120px]"></div>
+        {/* Background Video Holder */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          <video
+            src="/landingpage.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-80"
+          />
+          {/* Simple semi-transparent overlay to ensure text contrast */}
+          <div className="absolute inset-0 bg-[#fffef2]/40"></div>
+
+          {/* Subtle accent glows on top of video */}
+          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-lime/20 rounded-full blur-[100px] opacity-50"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-navy/10 rounded-full blur-[120px] opacity-50"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 items-center">
 
             {/* Left Content */}
             <motion.div
@@ -178,22 +191,23 @@ export default function LandingPage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="space-y-8"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-navy/5 border border-navy/10 text-navy text-xs font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-navy/20 border border-navy/40 text-navy text-xs font-bold uppercase tracking-wider">
+
                 <span className="w-2 h-2 rounded-full bg-lime animate-pulse"></span>
                 For Algorithmist Students
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-extrabold text-navy tracking-tight leading-[1.1]">
                 Master DSA. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-navy to-lime">
-                  Track Progress.
-                </span>
+                Track Progress.
               </h1>
 
-              <p className="text-lg text-slate-600 max-w-lg leading-relaxed">
+
+              <p className="text-lg text-white max-w-lg leading-relaxed drop-shadow-md">
                 Zest is the dedicated evaluation platform for Algorithmist DSA classes.
                 Take online tests, analyze your performance, and accelerate your learning journey.
               </p>
+
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link to="/auth">
@@ -209,9 +223,7 @@ export default function LandingPage() {
                   </motion.button>
                 </Link>
 
-                <Link to="/syllabus" className="px-8 py-4 bg-white border-2 border-navy text-navy font-bold rounded-xl hover:bg-navy hover:text-white transition-all duration-300 shadow-sm inline-block text-center">
-                  View Syllabus
-                </Link>
+
               </div>
 
               <div className="pt-8 flex items-center gap-6 text-sm text-slate-500">
@@ -226,17 +238,18 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Right Visual */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-            >
-              <HeroVisual />
-            </motion.div>
           </div>
         </div>
+
+        {/* Floating Card — bottom-right of hero */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="absolute bottom-8 right-8 lg:bottom-12 lg:right-16 z-20 hidden md:block"
+        >
+          <HeroVisual />
+        </motion.div>
       </main>
 
       {/* Features Section */}
