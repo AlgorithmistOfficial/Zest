@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Mail, Lock, User, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, ArrowRight, CheckCircle2, X, AlertCircle, KeyRound, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Auth = () => {
@@ -17,6 +17,21 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [persistent, setPersistent] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  const [forgotModal, setForgotModal] = useState({
+    isOpen: false,
+    step: 0,
+    email: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: '',
+    loading: false,
+    error: ''
+  });
+
+  const resetForgotModal = () => {
+    setForgotModal({ isOpen: false, step: 0, email: '', otp: '', newPassword: '', confirmPassword: '', loading: false, error: '' });
+  };
 
   const API_URL = 'https://Shreyansh6726-zest.hf.space'; // Base URL for backend
 
@@ -103,6 +118,98 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const handleForgotSendOtp = async () => {
+    if (!forgotModal.email.match(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)) {
+      return setForgotModal(prev => ({ ...prev, error: 'Enter a valid Gmail address' }));
+    }
+    setForgotModal(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotModal.email })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setForgotModal(prev => ({ ...prev, step: 1, loading: false }));
+    } catch (err) {
+      setForgotModal(prev => ({ ...prev, error: err.message, loading: false }));
+    }
+  };
+
+  const handleForgotVerifyOtp = async () => {
+    setForgotModal(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotModal.email, otp: forgotModal.otp })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      setForgotModal(prev => ({ ...prev, step: 2, loading: false }));
+    } catch (err) {
+      setForgotModal(prev => ({ ...prev, error: err.message, loading: false }));
+    }
+  };
+
+  const handleForgotLoginWithOtp = async () => {
+    setForgotModal(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login-with-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotModal.email, otp: forgotModal.otp })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      
+      const storage = persistent ? localStorage : sessionStorage;
+      if (persistent) localStorage.setItem('rememberMe', 'true');
+      else localStorage.removeItem('rememberMe');
+      
+      storage.setItem('token', data.token);
+      storage.setItem('user', JSON.stringify(data.user));
+      
+      setForgotModal(prev => ({ ...prev, step: 4, loading: false }));
+      setTimeout(() => window.location.href = '/home', 1500);
+    } catch (err) {
+      setForgotModal(prev => ({ ...prev, error: err.message, loading: false }));
+    }
+  };
+
+  const handleForgotChangePassword = async () => {
+    if (forgotModal.newPassword !== forgotModal.confirmPassword) {
+      return setForgotModal(prev => ({ ...prev, error: 'Passwords do not match' }));
+    }
+    if (forgotModal.newPassword.length < 8) {
+      return setForgotModal(prev => ({ ...prev, error: 'Password must be at least 8 characters' }));
+    }
+    setForgotModal(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const response = await fetch(`${API_URL}/api/auth/change-password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotModal.email, otp: forgotModal.otp, newPassword: forgotModal.newPassword })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      
+      const storage = persistent ? localStorage : sessionStorage;
+      if (persistent) localStorage.setItem('rememberMe', 'true');
+      else localStorage.removeItem('rememberMe');
+      
+      storage.setItem('token', data.token);
+      storage.setItem('user', JSON.stringify(data.user));
+      
+      setForgotModal(prev => ({ ...prev, step: 4, loading: false }));
+      setTimeout(() => window.location.href = '/home', 1500);
+    } catch (err) {
+      setForgotModal(prev => ({ ...prev, error: err.message, loading: false }));
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col">
@@ -333,17 +440,22 @@ const Auth = () => {
                   )}
 
                 {isLogin && (
-                  <div className="flex items-center gap-2 ml-1">
-                    <input
-                      type="checkbox"
-                      id="persistent"
-                      checked={persistent}
-                      onChange={(e) => setPersistent(e.target.checked)}
-                      className="w-4 h-4 accent-lime rounded cursor-pointer"
-                    />
-                    <label htmlFor="persistent" className="text-xs font-bold text-slate-500 cursor-pointer select-none">
-                      Remember Me
-                    </label>
+                  <div className="flex items-center justify-between ml-1">
+                    <div className="flex items-center gap-2">
+                       <input
+                        type="checkbox"
+                        id="persistent"
+                        checked={persistent}
+                        onChange={(e) => setPersistent(e.target.checked)}
+                        className="w-4 h-4 accent-lime rounded cursor-pointer"
+                      />
+                      <label htmlFor="persistent" className="text-xs font-bold text-slate-500 cursor-pointer select-none">
+                        Remember Me
+                      </label>
+                    </div>
+                    <button type="button" onClick={() => setForgotModal({...forgotModal, isOpen: true})} className="text-xs font-bold text-navy hover:text-lime transition-colors underline decoration-lime/30 underline-offset-2">
+                        Forgot Password?
+                    </button>
                   </div>
                 )}
 
@@ -388,6 +500,170 @@ const Auth = () => {
           <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist DSA Classes</span>
         </p>
       </footer>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {forgotModal.isOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-navy/60 backdrop-blur-sm"
+              onClick={forgotModal.loading || forgotModal.step === 4 ? null : resetForgotModal}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl p-8 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-extrabold text-navy">
+                    {forgotModal.step === 0 && "Reset Password"}
+                    {forgotModal.step === 1 && "Security Verification"}
+                    {forgotModal.step === 2 && "Verification Successful"}
+                    {forgotModal.step === 3 && "Create New Password"}
+                    {forgotModal.step === 4 && "Success!"}
+                </h3>
+                {forgotModal.step !== 4 && (
+                    <button onClick={resetForgotModal} className="p-2 bg-slate-50 text-slate-400 hover:text-navy rounded-full transition-colors"><X size={16}/></button>
+                )}
+              </div>
+
+              {forgotModal.error && (
+                <p className="text-red-500 flex items-center gap-1 text-xs font-bold mb-4 bg-red-50 p-3 rounded-lg">
+                    <AlertCircle size={14}/> {forgotModal.error}
+                </p>
+              )}
+
+              {forgotModal.step === 0 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-500">Enter your registered email address and we'll send you a 6-digit OTP to verify your identity.</p>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="email"
+                      value={forgotModal.email}
+                      onChange={(e) => setForgotModal({...forgotModal, email: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                      placeholder="Your Gmail Address"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleForgotSendOtp}
+                    disabled={!forgotModal.email || forgotModal.loading}
+                    className="w-full py-4 bg-navy text-white font-bold rounded-xl shadow-lg shadow-navy/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex justify-center items-center h-14"
+                  >
+                    {forgotModal.loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Send Recovery Code"}
+                  </button>
+                </div>
+              )}
+
+              {forgotModal.step === 1 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-500 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    We've sent a 6-digit code to <strong className="text-navy">{forgotModal.email}</strong>
+                  </p>
+                  <input 
+                    type="text" 
+                    maxLength={6}
+                    value={forgotModal.otp}
+                    onChange={(e) => setForgotModal({...forgotModal, otp: e.target.value.replace(/\D/g, '')})}
+                    className="w-full text-center text-3xl tracking-[0.5em] font-black py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all text-navy placeholder:text-slate-300"
+                    placeholder="••••••"
+                  />
+                  <button 
+                    onClick={handleForgotVerifyOtp}
+                    disabled={forgotModal.otp.length !== 6 || forgotModal.loading}
+                    className="w-full py-4 bg-navy text-white font-bold rounded-xl shadow-lg shadow-navy/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex justify-center items-center h-14"
+                  >
+                    {forgotModal.loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Verify Code"}
+                  </button>
+                </div>
+              )}
+
+              {forgotModal.step === 2 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-500 mb-2">Your identity has been verified. How would you like to proceed?</p>
+                  
+                  <button 
+                    onClick={handleForgotLoginWithOtp}
+                    disabled={forgotModal.loading}
+                    className="w-full flex items-center justify-between p-4 bg-lime/10 hover:bg-lime/20 border border-lime/20 rounded-xl transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white text-lime rounded-lg shadow-sm"><LogIn size={18} /></div>
+                      <div className="text-left">
+                        <span className="block font-bold text-navy text-sm">Login for now</span>
+                        <span className="block text-xs text-slate-500">Go directly to your dashboard</span>
+                      </div>
+                    </div>
+                    {forgotModal.loading ? <div className="w-5 h-5 border-2 border-navy/30 border-t-navy rounded-full animate-spin"></div> : <ArrowRight size={16} className="text-lime group-hover:translate-x-1 transition-all" />}
+                  </button>
+
+                  <button 
+                    onClick={() => setForgotModal(prev => ({ ...prev, step: 3 }))}
+                    disabled={forgotModal.loading}
+                    className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white text-navy rounded-lg shadow-sm"><KeyRound size={18} /></div>
+                      <div className="text-left">
+                        <span className="block font-bold text-navy text-sm">Change password</span>
+                        <span className="block text-xs text-slate-500">Set a new password and proceed</span>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-all" />
+                  </button>
+                </div>
+              )}
+
+              {forgotModal.step === 3 && (
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="password"
+                      value={forgotModal.newPassword}
+                      onChange={(e) => setForgotModal({...forgotModal, newPassword: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                      placeholder="New Password"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50" size={18} />
+                    <input 
+                      type="password"
+                      value={forgotModal.confirmPassword}
+                      onChange={(e) => setForgotModal({...forgotModal, confirmPassword: e.target.value})}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                      placeholder="Confirm New Password"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleForgotChangePassword}
+                    disabled={!forgotModal.newPassword || !forgotModal.confirmPassword || forgotModal.loading}
+                    className="w-full py-4 bg-lime text-navy font-bold rounded-xl shadow-lg shadow-lime/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex justify-center items-center h-14"
+                  >
+                    {forgotModal.loading ? <div className="w-5 h-5 border-2 border-navy/30 border-t-navy rounded-full animate-spin"></div> : "Save & Continue"}
+                  </button>
+                </div>
+              )}
+
+              {forgotModal.step === 4 && (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <p className="text-slate-500 text-sm">Redirecting to Dashboard...</p>
+                </div>
+              )}
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
