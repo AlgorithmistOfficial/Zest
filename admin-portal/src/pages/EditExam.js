@@ -12,7 +12,7 @@ const EditExam = () => {
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        examName: '', examDate: '', examTime: '', duration: '',
+        testId: '', examName: '', examDate: '', examTime: '', duration: '',
         difficultyLevel: '', totalMarks: '', passingMarks: '',
         topics: '', status: ''
     });
@@ -30,6 +30,7 @@ const EditExam = () => {
             const st = exam.examTime.toString().padStart(6, '0');
 
             setFormData({
+                testId: exam.testId || '',
                 examName: exam.examName,
                 examDate: `${sd.slice(4)}-${sd.slice(2,4)}-${sd.slice(0,2)}`,
                 examTime: `${st.slice(0,2)}:${st.slice(2,4)}`,
@@ -88,7 +89,11 @@ const EditExam = () => {
                     </motion.div>
                 ) : (
                     <form onSubmit={handleSubmit} className="grid-2">
-                        <div className="span-2">
+                        <div className="span-2 md:col-span-1">
+                            <label className="label">Test ID</label>
+                            <input type="text" id="testId" className="input-field" required onChange={handleChange} value={formData.testId} />
+                        </div>
+                        <div className="span-2 md:col-span-1">
                             <label className="label">Exam Name</label>
                             <input type="text" id="examName" className="input-field" required onChange={handleChange} value={formData.examName} />
                         </div>

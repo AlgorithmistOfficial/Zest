@@ -10,7 +10,7 @@ const ScheduleExam = () => {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        examName: '', examDate: '', examTime: '', duration: '',
+        testId: '', examName: '', examDate: '', examTime: '', duration: '',
         difficultyLevel: 'medium', totalMarks: '', passingMarks: '',
         topics: '', status: 'scheduled'
     });
@@ -57,7 +57,11 @@ const ScheduleExam = () => {
                     </motion.div>
                 ) : (
                     <form onSubmit={handleSubmit} className="grid-2">
-                        <div className="span-2">
+                        <div className="span-2 md:col-span-1">
+                            <label className="label">Test ID</label>
+                            <input type="text" id="testId" className="input-field" placeholder="e.g., TEST-001" required onChange={handleChange} />
+                        </div>
+                        <div className="span-2 md:col-span-1">
                             <label className="label">Exam Name</label>
                             <input type="text" id="examName" className="input-field" placeholder="e.g., Arrays & Linked Lists" required onChange={handleChange} />
                         </div>
