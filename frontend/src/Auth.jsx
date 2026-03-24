@@ -42,7 +42,16 @@ const Auth = () => {
     match: formData.password === formData.confirmPassword && formData.password !== ''
   };
 
+  const forgotPasswordRules = {
+    length: forgotModal.newPassword.length >= 8 && forgotModal.newPassword.length <= 25,
+    hasLetter: /[a-zA-Z]/.test(forgotModal.newPassword),
+    hasNumber: /[0-9]/.test(forgotModal.newPassword),
+    match: forgotModal.newPassword === forgotModal.confirmPassword && forgotModal.newPassword !== ''
+  };
+
   const isPasswordValid = passwordRules.length && passwordRules.hasLetter && passwordRules.hasNumber;
+  const isForgotPassValid = forgotPasswordRules.length && forgotPasswordRules.hasLetter && forgotPasswordRules.hasNumber;
+
   const canSubmit = isLogin ? (formData.email && formData.password) : (
     step === 'info' ? (formData.name && formData.email && isPasswordValid && passwordRules.match) : formData.otp
   );
@@ -180,11 +189,11 @@ const Auth = () => {
   };
 
   const handleForgotChangePassword = async () => {
-    if (forgotModal.newPassword !== forgotModal.confirmPassword) {
+    if (!forgotPasswordRules.match) {
       return setForgotModal(prev => ({ ...prev, error: 'Passwords do not match' }));
     }
-    if (forgotModal.newPassword.length < 8) {
-      return setForgotModal(prev => ({ ...prev, error: 'Password must be at least 8 characters' }));
+    if (!isForgotPassValid) {
+      return setForgotModal(prev => ({ ...prev, error: 'Password does not meet the requirements' }));
     }
     setForgotModal(prev => ({ ...prev, loading: true, error: '' }));
     try {
@@ -627,24 +636,53 @@ const Auth = () => {
                       type="password"
                       value={forgotModal.newPassword}
                       onChange={(e) => setForgotModal({...forgotModal, newPassword: e.target.value})}
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                      className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-bold ${
+                        forgotModal.newPassword 
+                          ? isForgotPassValid ? 'border-green-100 focus:border-green-400' : 'border-red-50 focus:border-red-200'
+                          : 'border-transparent focus:border-lime focus:bg-white'
+                      }`}
                       placeholder="New Password"
                     />
                   </div>
-                  <div className="relative">
+                  
+                  {/* Password Rules Indicators */}
+                  <div className="grid grid-cols-2 gap-2 px-1">
+                    <div className={`flex items-center gap-1.5 text-[10px] font-bold ${forgotPasswordRules.length ? 'text-green-600' : 'text-slate-400'}`}>
+                      <CheckCircle2 size={10} className={forgotPasswordRules.length ? 'text-green-600' : 'text-slate-300'} />
+                      8-25 characters
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[10px] font-bold ${forgotPasswordRules.hasLetter ? 'text-green-600' : 'text-slate-400'}`}>
+                      <CheckCircle2 size={10} className={forgotPasswordRules.hasLetter ? 'text-green-600' : 'text-slate-300'} />
+                      One letter
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[10px] font-bold ${forgotPasswordRules.hasNumber ? 'text-green-600' : 'text-slate-400'}`}>
+                      <CheckCircle2 size={10} className={forgotPasswordRules.hasNumber ? 'text-green-600' : 'text-slate-300'} />
+                      One number
+                    </div>
+                    <div className={`flex items-center gap-1.5 text-[10px] font-bold ${forgotPasswordRules.match ? 'text-green-600' : 'text-slate-400'}`}>
+                      <CheckCircle2 size={10} className={forgotPasswordRules.match ? 'text-green-600' : 'text-slate-300'} />
+                      Passwords match
+                    </div>
+                  </div>
+
+                  <div className="relative mt-2">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50" size={18} />
                     <input 
                       type="password"
                       value={forgotModal.confirmPassword}
                       onChange={(e) => setForgotModal({...forgotModal, confirmPassword: e.target.value})}
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                      className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-bold ${
+                        forgotModal.confirmPassword 
+                          ? forgotPasswordRules.match ? 'border-green-100 focus:border-green-400' : 'border-red-50 focus:border-red-200'
+                          : 'border-transparent focus:border-lime focus:bg-white'
+                      }`}
                       placeholder="Confirm New Password"
                     />
                   </div>
                   <button 
                     onClick={handleForgotChangePassword}
-                    disabled={!forgotModal.newPassword || !forgotModal.confirmPassword || forgotModal.loading}
-                    className="w-full py-4 bg-lime text-navy font-bold rounded-xl shadow-lg shadow-lime/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex justify-center items-center h-14"
+                    disabled={!isForgotPassValid || !forgotPasswordRules.match || forgotModal.loading}
+                    className="w-full py-4 mt-2 bg-lime text-navy font-bold rounded-xl shadow-lg shadow-lime/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex justify-center items-center h-14"
                   >
                     {forgotModal.loading ? <div className="w-5 h-5 border-2 border-navy/30 border-t-navy rounded-full animate-spin"></div> : "Save & Continue"}
                   </button>
