@@ -276,22 +276,28 @@ const Profile = () => {
                                 className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm"
                             >
                                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-4">Security Settings</h3>
-                                <div className="space-y-3">
-                                    <button onClick={() => handleInitiateChange('email')} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl transition-all group">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-navy/5 text-navy rounded-lg group-hover:bg-navy group-hover:text-white transition-colors"><Mail size={16} /></div>
-                                            <span className="font-bold text-navy text-sm">Change Email ID</span>
-                                        </div>
-                                        <ArrowLeft size={16} className="rotate-180 text-slate-300 group-hover:text-navy transition-colors" />
-                                    </button>
-                                    <button onClick={() => handleInitiateChange('password')} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl transition-all group">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-navy/5 text-navy rounded-lg group-hover:bg-navy group-hover:text-white transition-colors"><KeyRound size={16} /></div>
-                                            <span className="font-bold text-navy text-sm">Change Password</span>
-                                        </div>
-                                        <ArrowLeft size={16} className="rotate-180 text-slate-300 group-hover:text-navy transition-colors" />
-                                    </button>
-                                </div>
+                                {isEditing ? (
+                                    <div className="space-y-3">
+                                        <button onClick={() => handleInitiateChange('email')} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl transition-all group">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-navy/5 text-navy rounded-lg group-hover:bg-navy group-hover:text-white transition-colors"><Mail size={16} /></div>
+                                                <span className="font-bold text-navy text-sm">Change Email ID</span>
+                                            </div>
+                                            <ArrowLeft size={16} className="rotate-180 text-slate-300 group-hover:text-navy transition-colors" />
+                                        </button>
+                                        <button onClick={() => handleInitiateChange('password')} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl transition-all group">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-navy/5 text-navy rounded-lg group-hover:bg-navy group-hover:text-white transition-colors"><KeyRound size={16} /></div>
+                                                <span className="font-bold text-navy text-sm">Change Password</span>
+                                            </div>
+                                            <ArrowLeft size={16} className="rotate-180 text-slate-300 group-hover:text-navy transition-colors" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="text-xs text-slate-500 font-medium leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                        Click on <span className="text-navy font-bold">Edit Profile</span> to update your Email ID or Password securely via OTP verification.
+                                    </div>
+                                )}
                             </motion.div>
                         </div>
 
