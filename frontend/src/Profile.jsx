@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Edit3, Save, X, Mail, Info, Camera } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, User, LogOut, Edit3, Save, X, Mail, Info, Camera, Lock, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+
+const API_URL = 'https://Shreyansh6726-zest.hf.space';
+
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -20,6 +23,23 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [tempData, setTempData] = useState({ ...userData });
     const [isSaving, setIsSaving] = useState(false);
+
+    // Modal State
+    const [modal, setModal] = useState({
+        isOpen: false,
+        type: null, // 'email' or 'password'
+        step: 0, // 0: sending/intro, 1: OTP, 2: set new value, 3: success
+        otp: '',
+        newValue: '',
+        confirmValue: '',
+        loading: false,
+        error: ''
+    });
+
+    const resetModal = () => setModal({
+        isOpen: false, type: null, step: 0, otp: '', newValue: '', confirmValue: '', loading: false, error: ''
+    });
+
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -61,6 +81,78 @@ const Profile = () => {
         setIsEditing(false);
         setIsSaving(false);
     };
+
+    // --- OTP Handlers ---
+
+    const handleInitiateChange = async (type) => {
+        setModal(prev => ({ ...prev, isOpen: true, type, step: 0, loading: true, error: '' }));
+        try {
+            const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userData.email })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            setModal(prev => ({ ...prev, step: 1, loading: false }));
+        } catch (err) {
+            setModal(prev => ({ ...prev, error: err.message, loading: false }));
+        }
+    };
+
+    const handleVerifyOtp = async () => {
+        setModal(prev => ({ ...prev, loading: true, error: '' }));
+        try {
+            const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userData.email, otp: modal.otp })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            setModal(prev => ({ ...prev, step: 2, loading: false }));
+        } catch (err) {
+            setModal(prev => ({ ...prev, error: err.message, loading: false }));
+        }
+    };
+
+    const handleSubmitChange = async () => {
+        if (modal.type === 'password' && modal.newValue !== modal.confirmValue) {
+            return setModal(prev => ({ ...prev, error: 'Passwords do not match' }));
+        }
+        if (modal.type === 'email' && !modal.newValue.match(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)) {
+            return setModal(prev => ({ ...prev, error: 'Must be a valid Gmail address' }));
+        }
+
+        setModal(prev => ({ ...prev, loading: true, error: '' }));
+        try {
+            const endpoint = modal.type === 'email' ? '/api/auth/change-email' : '/api/auth/change-password';
+            const payload = modal.type === 'email' 
+                ? { currentEmail: userData.email, newEmail: modal.newValue, otp: modal.otp }
+                : { email: userData.email, newPassword: modal.newValue, otp: modal.otp };
+
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            if (modal.type === 'email' && data.user) {
+                const updatedUser = { ...userData, email: data.user.email };
+                setUserData(updatedUser);
+                const storageType = localStorage.getItem('user') ? localStorage : sessionStorage;
+                storageType.setItem('user', JSON.stringify(updatedUser));
+            }
+
+            setModal(prev => ({ ...prev, step: 3, loading: false }));
+            setTimeout(resetModal, 2000); // Auto close after success
+        } catch (err) {
+            setModal(prev => ({ ...prev, error: err.message, loading: false }));
+        }
+    };
+
 
     return (
         <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col overflow-x-hidden">
@@ -183,9 +275,22 @@ const Profile = () => {
                                 transition={{ delay: 0.2 }}
                                 className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm"
                             >
-                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-4">Security Notice</h3>
-                                <div className="text-xs text-slate-500 font-medium leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    For security reasons, your <span className="text-navy font-bold">Email ID</span> and <span className="text-navy font-bold">Password</span> can only be updated via the support portal.
+                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-4">Security Settings</h3>
+                                <div className="space-y-3">
+                                    <button onClick={() => handleInitiateChange('email')} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl transition-all group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-navy/5 text-navy rounded-lg group-hover:bg-navy group-hover:text-white transition-colors"><Mail size={16} /></div>
+                                            <span className="font-bold text-navy text-sm">Change Email ID</span>
+                                        </div>
+                                        <ArrowLeft size={16} className="rotate-180 text-slate-300 group-hover:text-navy transition-colors" />
+                                    </button>
+                                    <button onClick={() => handleInitiateChange('password')} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl transition-all group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-navy/5 text-navy rounded-lg group-hover:bg-navy group-hover:text-white transition-colors"><KeyRound size={16} /></div>
+                                            <span className="font-bold text-navy text-sm">Change Password</span>
+                                        </div>
+                                        <ArrowLeft size={16} className="rotate-180 text-slate-300 group-hover:text-navy transition-colors" />
+                                    </button>
                                 </div>
                             </motion.div>
                         </div>
@@ -281,7 +386,120 @@ const Profile = () => {
                     <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist DSA Classes</span>
                 </p>
             </footer>
+
+            {/* OTP Modal */}
+            <AnimatePresence>
+                {modal.isOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }} 
+                            className="absolute inset-0 bg-navy/40 backdrop-blur-sm"
+                            onClick={modal.loading || modal.step === 3 ? null : resetModal}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl p-8 overflow-hidden"
+                        >
+                            {modal.step === 0 && (
+                                <div className="text-center py-6">
+                                    <div className="w-16 h-16 border-4 border-slate-100 border-t-lime rounded-full animate-spin mx-auto mb-4"></div>
+                                    <h3 className="text-xl font-bold text-navy mb-2">Sending Security Code</h3>
+                                    <p className="text-slate-500 text-sm">Sending a 6-digit OTP to {userData.email}</p>
+                                </div>
+                            )}
+
+                            {modal.step === 1 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-xl font-extrabold text-navy">Security Verification</h3>
+                                        <button onClick={resetModal} className="p-2 bg-slate-50 text-slate-400 hover:text-navy rounded-full transition-colors"><X size={16}/></button>
+                                    </div>
+                                    <p className="text-sm text-slate-500 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                        We sent a 6-digit code to <strong className="text-navy">{userData.email}</strong>. Enter it below to proceed.
+                                    </p>
+                                    
+                                    <input 
+                                        type="text" 
+                                        maxLength={6}
+                                        value={modal.otp}
+                                        onChange={(e) => setModal({...modal, otp: e.target.value.replace(/\D/g, '')})}
+                                        className="w-full text-center text-3xl tracking-[0.5em] font-black py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all mb-4 text-navy placeholder:text-slate-300"
+                                        placeholder="••••••"
+                                    />
+                                    
+                                    {modal.error && <p className="text-red-500 flex items-center gap-1 text-xs font-bold mb-4 bg-red-50 p-3 rounded-lg"><AlertCircle size={14}/> {modal.error}</p>}
+                                    
+                                    <button 
+                                        onClick={handleVerifyOtp}
+                                        disabled={modal.otp.length !== 6 || modal.loading}
+                                        className="w-full py-4 bg-navy text-white font-bold rounded-xl shadow-lg shadow-navy/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex justify-center items-center h-14"
+                                    >
+                                        {modal.loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : "Verify Code"}
+                                    </button>
+                                </div>
+                            )}
+
+                            {modal.step === 2 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-xl font-extrabold text-navy">Change {modal.type === 'email' ? 'Email ID' : 'Password'}</h3>
+                                        <button onClick={resetModal} className="p-2 bg-slate-50 text-slate-400 hover:text-navy rounded-full transition-colors"><X size={16}/></button>
+                                    </div>
+
+                                    <div className="space-y-4 mb-6">
+                                        <div className="relative">
+                                            {modal.type === 'email' ? <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} /> : <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />}
+                                            <input 
+                                                type={modal.type === 'email' ? 'email' : 'password'}
+                                                value={modal.newValue}
+                                                onChange={(e) => setModal({...modal, newValue: e.target.value})}
+                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                                                placeholder={modal.type === 'email' ? 'New Email Address' : 'New Password'}
+                                            />
+                                        </div>
+                                        <div className="relative">
+                                            {modal.type === 'email' ? <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50" size={18} /> : <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50" size={18} />}
+                                            <input 
+                                                type={modal.type === 'email' ? 'email' : 'password'}
+                                                value={modal.confirmValue}
+                                                onChange={(e) => setModal({...modal, confirmValue: e.target.value})}
+                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                                                placeholder={modal.type === 'email' ? 'Confirm New Email' : 'Confirm Password'}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {modal.error && <p className="text-red-500 flex items-center gap-1 text-xs font-bold mb-4 bg-red-50 p-3 rounded-lg"><AlertCircle size={14}/> {modal.error}</p>}
+                                    
+                                    <button 
+                                        onClick={handleSubmitChange}
+                                        disabled={!modal.newValue || !modal.confirmValue || modal.loading}
+                                        className="w-full py-4 bg-lime text-navy font-bold rounded-xl shadow-lg shadow-lime/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex justify-center items-center h-14"
+                                    >
+                                        {modal.loading ? <div className="w-5 h-5 border-2 border-navy/30 border-t-navy rounded-full animate-spin"></div> : "Save Changes"}
+                                    </button>
+                                </div>
+                            )}
+
+                            {modal.step === 3 && (
+                                <div className="text-center py-6">
+                                    <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <CheckCircle2 size={32} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-navy mb-2">Success!</h3>
+                                    <p className="text-slate-500 text-sm">Your {modal.type} has been updated successfully.</p>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
+
     );
 };
 
