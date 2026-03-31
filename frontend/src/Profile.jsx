@@ -40,6 +40,15 @@ const Profile = () => {
         isOpen: false, type: null, step: 0, otp: '', newValue: '', confirmValue: '', loading: false, error: ''
     });
 
+    const changePasswordRules = {
+        length: modal.newValue.length >= 8 && modal.newValue.length <= 25,
+        hasLetter: /[a-zA-Z]/.test(modal.newValue),
+        hasNumber: /[0-9]/.test(modal.newValue),
+        match: modal.newValue === modal.confirmValue && modal.newValue !== ''
+    };
+
+    const isPassValid = changePasswordRules.length && changePasswordRules.hasLetter && changePasswordRules.hasNumber;
+
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -117,8 +126,13 @@ const Profile = () => {
     };
 
     const handleSubmitChange = async () => {
-        if (modal.type === 'password' && modal.newValue !== modal.confirmValue) {
-            return setModal(prev => ({ ...prev, error: 'Passwords do not match' }));
+        if (modal.type === 'password') {
+            if (!changePasswordRules.match) {
+                return setModal(prev => ({ ...prev, error: 'Passwords do not match' }));
+            }
+            if (!isPassValid) {
+                return setModal(prev => ({ ...prev, error: 'Password does not meet the requirements' }));
+            }
         }
         if (modal.type === 'email' && !modal.newValue.match(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)) {
             return setModal(prev => ({ ...prev, error: 'Must be a valid Gmail address' }));
@@ -463,17 +477,47 @@ const Profile = () => {
                                                 type={modal.type === 'email' ? 'email' : 'password'}
                                                 value={modal.newValue}
                                                 onChange={(e) => setModal({...modal, newValue: e.target.value})}
-                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                                                className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-bold ${
+                                                    modal.type === 'password' && modal.newValue
+                                                        ? isPassValid ? 'border-green-100 focus:border-green-400' : 'border-red-50 focus:border-red-200'
+                                                        : 'border-transparent focus:border-lime focus:bg-white'
+                                                }`}
                                                 placeholder={modal.type === 'email' ? 'New Email Address' : 'New Password'}
                                             />
                                         </div>
+
+                                        {modal.type === 'password' && (
+                                            <div className="grid grid-cols-2 gap-2 px-1">
+                                                <div className={`flex items-center gap-1.5 text-[10px] font-bold ${changePasswordRules.length ? 'text-green-600' : 'text-slate-400'}`}>
+                                                    <CheckCircle2 size={10} className={changePasswordRules.length ? 'text-green-600' : 'text-slate-300'} />
+                                                    8-25 characters
+                                                </div>
+                                                <div className={`flex items-center gap-1.5 text-[10px] font-bold ${changePasswordRules.hasLetter ? 'text-green-600' : 'text-slate-400'}`}>
+                                                    <CheckCircle2 size={10} className={changePasswordRules.hasLetter ? 'text-green-600' : 'text-slate-300'} />
+                                                    One letter
+                                                </div>
+                                                <div className={`flex items-center gap-1.5 text-[10px] font-bold ${changePasswordRules.hasNumber ? 'text-green-600' : 'text-slate-400'}`}>
+                                                    <CheckCircle2 size={10} className={changePasswordRules.hasNumber ? 'text-green-600' : 'text-slate-300'} />
+                                                    One number
+                                                </div>
+                                                <div className={`flex items-center gap-1.5 text-[10px] font-bold ${changePasswordRules.match ? 'text-green-600' : 'text-slate-400'}`}>
+                                                    <CheckCircle2 size={10} className={changePasswordRules.match ? 'text-green-600' : 'text-slate-300'} />
+                                                    Passwords match
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="relative">
                                             {modal.type === 'email' ? <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50" size={18} /> : <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 opacity-50" size={18} />}
                                             <input 
                                                 type={modal.type === 'email' ? 'email' : 'password'}
                                                 value={modal.confirmValue}
                                                 onChange={(e) => setModal({...modal, confirmValue: e.target.value})}
-                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent focus:border-lime focus:bg-white rounded-2xl outline-none transition-all font-bold"
+                                                className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-bold ${
+                                                    modal.type === 'password' && modal.confirmValue 
+                                                        ? changePasswordRules.match ? 'border-green-100 focus:border-green-400' : 'border-red-50 focus:border-red-200'
+                                                        : 'border-transparent focus:border-lime focus:bg-white'
+                                                }`}
                                                 placeholder={modal.type === 'email' ? 'Confirm New Email' : 'Confirm Password'}
                                             />
                                         </div>
@@ -483,7 +527,7 @@ const Profile = () => {
                                     
                                     <button 
                                         onClick={handleSubmitChange}
-                                        disabled={!modal.newValue || !modal.confirmValue || modal.loading}
+                                        disabled={!modal.newValue || !modal.confirmValue || modal.loading || (modal.type === 'password' && (!isPassValid || !changePasswordRules.match))}
                                         className="w-full py-4 bg-lime text-navy font-bold rounded-xl shadow-lg shadow-lime/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100 flex justify-center items-center h-14"
                                     >
                                         {modal.loading ? <div className="w-5 h-5 border-2 border-navy/30 border-t-navy rounded-full animate-spin"></div> : "Save Changes"}
