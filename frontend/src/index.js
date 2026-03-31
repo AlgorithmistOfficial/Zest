@@ -56,6 +56,24 @@ const UserPresence = ({ children }) => {
 
 // Redirects to /auth if not logged in
 const ProtectedRoute = ({ children }) => {
+  const [paramsHandled, setParamsHandled] = React.useState(false);
+
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const user = urlParams.get('user');
+
+    if (token && user) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', decodeURIComponent(user));
+      // Remove params from URL to keep it clean
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    setParamsHandled(true);
+  }, []);
+
+  if (!paramsHandled) return null;
+
   return isAuthenticated() ? (
     <UserPresence>{children}</UserPresence>
   ) : (
