@@ -73,14 +73,14 @@ const StorageMetrics = () => {
                 <>
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="card bg-navy text-white border-none">
+                        <div className="card bg-white border-slate-100">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-                                    <HardDrive size={24} className="text-lime" />
+                                <div className="w-12 h-12 bg-lime/10 rounded-2xl flex items-center justify-center">
+                                    <HardDrive size={24} className="text-navy" />
                                 </div>
                                 <div>
-                                    <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Total Storage Used</p>
-                                    <h2 className="text-2xl font-black">{formatSize(data.totalStorageUsed)}</h2>
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Total Storage Used</p>
+                                    <h2 className="text-2xl font-black text-navy">{formatSize(data.totalStorageUsed)}</h2>
                                 </div>
                             </div>
                         </div>
