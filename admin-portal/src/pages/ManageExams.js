@@ -79,6 +79,9 @@ const ManageExams = () => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="text-xl font-extrabold text-navy truncate">{exam.examName}</h3>
+                                    <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-tight">
+                                        ID: {exam.testId}
+                                    </span>
                                     <span className={`${diffColor[exam.difficultyLevel]} text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full`}>
                                         {exam.difficultyLevel}
                                     </span>
