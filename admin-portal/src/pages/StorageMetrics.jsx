@@ -73,15 +73,26 @@ const StorageMetrics = () => {
                 <>
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="card bg-white border-slate-100">
-                            <div className="flex items-center gap-4">
+                        <div className="card bg-white border-slate-100 relative overflow-hidden group">
+                            <div className="flex items-center gap-4 relative z-10">
                                 <div className="w-12 h-12 bg-lime/10 rounded-2xl flex items-center justify-center">
                                     <HardDrive size={24} className="text-navy" />
                                 </div>
                                 <div>
                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Total Storage Used</p>
                                     <h2 className="text-2xl font-black text-navy">{formatSize(data.totalStorageUsed)}</h2>
+                                    <span className="text-[10px] font-black text-lime uppercase tracking-widest">
+                                        {data.totalPercentageUsed}% of {formatSize(data.maxStorageBytes)}
+                                    </span>
                                 </div>
+                            </div>
+                            {/* Simple background progress indicator */}
+                            <div className="absolute bottom-0 left-0 h-1 bg-lime/20 w-full">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${data.totalPercentageUsed}%` }}
+                                    className="h-full bg-lime"
+                                />
                             </div>
                         </div>
                         <div className="card bg-white border-slate-100">
@@ -101,8 +112,10 @@ const StorageMetrics = () => {
                                     <TrendingUp size={24} className="text-navy" />
                                 </div>
                                 <div>
-                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Health Status</p>
-                                    <h2 className="text-2xl font-black text-lime">Healthy</h2>
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Database Health</p>
+                                    <h2 className="text-2xl font-black text-lime">
+                                        {parseFloat(data.totalPercentageUsed) > 85 ? 'Critical' : parseFloat(data.totalPercentageUsed) > 70 ? 'Warning' : 'Excellent'}
+                                    </h2>
                                 </div>
                             </div>
                         </div>
@@ -110,6 +123,32 @@ const StorageMetrics = () => {
 
                     {/* Breakdown List */}
                     <div className="card">
+                        <div className="mb-8 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-black text-navy flex items-center gap-2 uppercase tracking-tighter">
+                                    <HardDrive size={20} className="text-lime" /> Total Capacity Usage
+                                </h3>
+                                <span className="text-sm font-black text-navy bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">
+                                    {data.totalPercentageUsed}% Used
+                                </span>
+                            </div>
+                            <div className="h-4 bg-white rounded-full overflow-hidden border border-slate-200 shadow-inner">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${data.totalPercentageUsed}%` }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                    className={`h-full rounded-full transition-colors ${
+                                        parseFloat(data.totalPercentageUsed) > 85 ? 'bg-red-500' : parseFloat(data.totalPercentageUsed) > 70 ? 'bg-amber-500' : 'bg-navy'
+                                    }`}
+                                />
+                            </div>
+                            <div className="flex justify-between mt-2 text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                <span>0 MB</span>
+                                <span>{formatSize(data.maxStorageBytes / 2)}</span>
+                                <span>{formatSize(data.maxStorageBytes)} Limit</span>
+                            </div>
+                        </div>
+
                         <h3 className="text-xl font-extrabold text-navy mb-6 flex items-center gap-2">
                             <Layout size={20} className="text-lime" /> Component Breakdown
                         </h3>
