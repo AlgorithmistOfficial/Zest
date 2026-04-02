@@ -6,6 +6,7 @@ import ManageExams from './pages/ManageExams';
 import ScheduleExam from './pages/ScheduleExam';
 import EditExam from './pages/EditExam';
 import ActiveStudents from './pages/ActiveStudents';
+import TestCreate from './pages/TestCreate';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ManageExams />} />
             <Route path="/create" element={<ScheduleExam />} />
+            <Route path="/create-content" element={<TestCreate />} />
             <Route path="/edit/:id" element={<EditExam />} />
             <Route path="/active-students" element={<ActiveStudents />} />
           </Routes>
