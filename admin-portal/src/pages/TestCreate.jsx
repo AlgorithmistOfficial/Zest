@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Clock, Award } from 'lucide-react';
+import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Clock, Award, RotateCcw } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 
@@ -136,6 +136,23 @@ const TestCreate = () => {
         const newQs = [...questions];
         newQs[qIndex].testCases = newQs[qIndex].testCases.filter((_, i) => i !== tcIndex);
         setQuestions(newQs);
+    };
+
+    const clearDesign = () => {
+        if (window.confirm('Are you sure you want to clear the entire test design? This will remove all questions.')) {
+            setQuestions([{ 
+                id: Date.now().toString(), 
+                ques: '', 
+                type: 'single option answer', 
+                options: ['Option 1'], 
+                testCases: [{ input: '', output: '' }],
+                marks: 1,
+                duration: 2,
+                answerKey: '' 
+            }]);
+            setSuccess('Design cleared.');
+            setTimeout(() => setSuccess(''), 3000);
+        }
     };
 
     const saveTest = async () => {
@@ -436,6 +453,9 @@ const TestCreate = () => {
                     </AnimatePresence>
 
                     <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-12 py-8 border-t border-slate-100">
+                        <button onClick={clearDesign} className="w-full md:w-auto bg-red-50 border-2 border-red-100 text-red-600 hover:bg-red-100 px-8 py-3.5 rounded-2xl font-black flex items-center justify-center gap-3 transition-all active:scale-95">
+                            <RotateCcw size={20} /> Clear Design
+                        </button>
                         <button onClick={addQuestion} className="w-full md:w-auto bg-white border-2 border-lime text-navy hover:bg-lime/10 px-10 py-3.5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl transition-all hover:-translate-y-1 active:scale-95">
                             <Plus size={22} /> Add Another Question
                         </button>
