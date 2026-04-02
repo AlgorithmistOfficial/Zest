@@ -7,6 +7,7 @@ import ScheduleExam from './pages/ScheduleExam';
 import EditExam from './pages/EditExam';
 import ActiveStudents from './pages/ActiveStudents';
 import TestCreate from './pages/TestCreate';
+import StorageMetrics from './pages/StorageMetrics';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/create-content" element={<TestCreate />} />
             <Route path="/edit/:id" element={<EditExam />} />
             <Route path="/active-students" element={<ActiveStudents />} />
+            <Route path="/storage" element={<StorageMetrics />} />
           </Routes>
         </main>
         <Footer />

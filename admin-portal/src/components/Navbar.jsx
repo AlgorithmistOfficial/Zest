@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarPlus, Users, FileEdit } from 'lucide-react';
+import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database } from 'lucide-react';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -62,6 +62,20 @@ const Navbar = () => {
                         >
                             <FileEdit size={16} />
                             <span>Build Content</span>
+                        </NavLink>
+
+                        <NavLink 
+                            to="/storage" 
+                            className={({ isActive }) => 
+                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isActive 
+                                        ? 'bg-navy text-white shadow-lg' 
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`
+                            }
+                        >
+                            <Database size={16} />
+                            <span>Storage</span>
                         </NavLink>
 
                         <NavLink 
