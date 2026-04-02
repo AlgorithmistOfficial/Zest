@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText } from 'lucide-react';
+import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Clock, Award } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 
@@ -37,7 +37,7 @@ const TestCreate = () => {
                     return;
                 }
             } catch (err) {
-                // Ignore 404 here
+                // Ignore 404
             }
 
             // Verify with matching Exam scheduled
@@ -55,6 +55,8 @@ const TestCreate = () => {
                     type: 'single option answer', 
                     options: ['Option 1'], 
                     testCases: [{ input: '', output: '' }],
+                    marks: 1,
+                    duration: 2,
                     answerKey: '' 
                 }]);
                 setSuccess('Test ID verified. You can generate questions now.');
@@ -75,6 +77,8 @@ const TestCreate = () => {
             type: 'single option answer', 
             options: ['Option 1'], 
             testCases: [{ input: '', output: '' }],
+            marks: 1,
+            duration: 2,
             answerKey: '' 
         }]);
     };
@@ -107,7 +111,7 @@ const TestCreate = () => {
         const removedVal = newQs[qIndex].options[oIndex];
         newQs[qIndex].options = newQs[qIndex].options.filter((_, i) => i !== oIndex);
         
-        // Clean up answerKey if removed
+        // Clean up answerKey
         if (newQs[qIndex].type === 'single option answer' && newQs[qIndex].answerKey === removedVal) {
             newQs[qIndex].answerKey = '';
         } else if (newQs[qIndex].type === 'multiple option answer' && Array.isArray(newQs[qIndex].answerKey)) {
@@ -157,6 +161,8 @@ const TestCreate = () => {
                     type: q.type,
                     options: ['single option answer', 'multiple option answer'].includes(q.type) ? q.options : [],
                     testCases: q.type === 'write code answer' ? q.testCases : [],
+                    marks: Number(q.marks),
+                    duration: Number(q.duration),
                     answerKey: q.answerKey
                 }))
             };
@@ -173,7 +179,7 @@ const TestCreate = () => {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-24 max-w-5xl mx-auto">
-            <PageHeader title="Advanced Test Designer" description="Build complex evaluations with dynamic answer keys and code evaluation." />
+            <PageHeader title="Advanced Test Designer" description="Build complex evaluations with dynamic answer keys, test cases, and question-level settings." />
 
             {error && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-2xl font-bold flex items-center gap-2 border border-red-100 mb-6">
@@ -222,13 +228,41 @@ const TestCreate = () => {
                                 initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="card border-l-4 border-l-lime group transition-all focus-within:shadow-2xl focus-within:border-l-navy"
+                                className="card border-l-4 border-l-lime group transition-all shadow-md hover:shadow-xl focus-within:shadow-2xl focus-within:border-l-navy"
                             >
-                                {/* Header: Question Statement and Type */}
                                 <div className="space-y-4 mb-6">
-                                    <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest">
-                                        <FileText size={14} /> Question {qIndex + 1}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest">
+                                            <FileText size={14} /> Question {qIndex + 1}
+                                        </div>
+                                        
+                                        {/* Row with individual settings */}
+                                        <div className="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-xl">
+                                            <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
+                                                <Award size={14} className="text-lime" />
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Marks</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    className="w-12 bg-transparent text-sm font-black text-navy focus:outline-none"
+                                                    value={q.marks}
+                                                    onChange={(e) => updateQuestion(qIndex, 'marks', e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Clock size={14} className="text-lime" />
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Time (m)</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    className="w-12 bg-transparent text-sm font-black text-navy focus:outline-none"
+                                                    value={q.duration}
+                                                    onChange={(e) => updateQuestion(qIndex, 'duration', e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
+                                    
                                     <div className="flex flex-col md:flex-row gap-6">
                                         <div className="flex-1">
                                             <textarea
@@ -254,7 +288,6 @@ const TestCreate = () => {
                                     </div>
                                 </div>
 
-                                {/* Options Configuration (For Choice types) */}
                                 {['single option answer', 'multiple option answer'].includes(q.type) && (
                                     <div className="mb-8 pl-4 space-y-3">
                                         <div className="text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest mb-2">
@@ -285,7 +318,6 @@ const TestCreate = () => {
                                     </div>
                                 )}
 
-                                {/* Code Evaluation - Test Cases */}
                                 {q.type === 'write code answer' && (
                                     <div className="mb-8 pl-4 space-y-4">
                                         <div className="text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest mb-2">
@@ -327,7 +359,6 @@ const TestCreate = () => {
                                     </div>
                                 )}
 
-                                {/* Final Answer Configuration */}
                                 <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
                                     <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
                                         <div className="flex items-center gap-2 min-w-32">
@@ -335,7 +366,6 @@ const TestCreate = () => {
                                             <span className="text-sm font-black text-navy uppercase tracking-tighter">Correct Answer</span>
                                         </div>
                                         
-                                        {/* Single Choice Answer Key */}
                                         {q.type === 'single option answer' && (
                                             <select
                                                 className="input-field bg-green-50/50 border-green-100 text-green-700 font-bold py-1.5"
@@ -349,7 +379,6 @@ const TestCreate = () => {
                                             </select>
                                         )}
 
-                                        {/* Multiple Choice Answer Key */}
                                         {q.type === 'multiple option answer' && (
                                             <div className="flex flex-wrap gap-2">
                                                 {q.options?.map((opt, i) => {
@@ -375,7 +404,6 @@ const TestCreate = () => {
                                             </div>
                                         )}
 
-                                        {/* Value Enter Answer Key */}
                                         {q.type === 'value enter answer' && (
                                             <input
                                                 type="text"
@@ -386,7 +414,6 @@ const TestCreate = () => {
                                             />
                                         )}
 
-                                        {/* Code Answer Key (Meta) */}
                                         {q.type === 'write code answer' && (
                                             <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100">
                                                 <p className="text-green-700 font-bold text-xs">Evaluated via Test Cases above.</p>
@@ -394,7 +421,6 @@ const TestCreate = () => {
                                         )}
                                     </div>
 
-                                    {/* Action Panel */}
                                     <div className="flex gap-2 shrink-0 self-end md:self-center">
                                         <button 
                                             onClick={() => deleteQuestion(qIndex)} 
@@ -409,7 +435,6 @@ const TestCreate = () => {
                         ))}
                     </AnimatePresence>
 
-                    {/* Designer Toolbar */}
                     <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-12 py-8 border-t border-slate-100">
                         <button onClick={addQuestion} className="w-full md:w-auto bg-white border-2 border-lime text-navy hover:bg-lime/10 px-10 py-3.5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl transition-all hover:-translate-y-1 active:scale-95">
                             <Plus size={22} /> Add Another Question
