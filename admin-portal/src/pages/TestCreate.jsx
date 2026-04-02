@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 
@@ -37,7 +37,7 @@ const TestCreate = () => {
                     return;
                 }
             } catch (err) {
-                // Ignore 404 here, it means content doesn't exist yet, which is fine
+                // Ignore 404 here
             }
 
             // Verify with matching Exam scheduled
@@ -49,7 +49,14 @@ const TestCreate = () => {
                     totalMarks: res.data.totalMarks,
                     duration: res.data.duration,
                 });
-                setQuestions([{ id: Date.now().toString(), ques: '', type: 'single option answer', options: ['Option 1'], answerKey: '' }]);
+                setQuestions([{ 
+                    id: Date.now().toString(), 
+                    ques: '', 
+                    type: 'single option answer', 
+                    options: ['Option 1'], 
+                    testCases: [{ input: '', output: '' }],
+                    answerKey: '' 
+                }]);
                 setSuccess('Test ID verified. You can generate questions now.');
             }
         } catch (err) {
@@ -67,6 +74,7 @@ const TestCreate = () => {
             ques: '', 
             type: 'single option answer', 
             options: ['Option 1'], 
+            testCases: [{ input: '', output: '' }],
             answerKey: '' 
         }]);
     };
@@ -96,7 +104,33 @@ const TestCreate = () => {
 
     const removeOption = (qIndex, oIndex) => {
         const newQs = [...questions];
+        const removedVal = newQs[qIndex].options[oIndex];
         newQs[qIndex].options = newQs[qIndex].options.filter((_, i) => i !== oIndex);
+        
+        // Clean up answerKey if removed
+        if (newQs[qIndex].type === 'single option answer' && newQs[qIndex].answerKey === removedVal) {
+            newQs[qIndex].answerKey = '';
+        } else if (newQs[qIndex].type === 'multiple option answer' && Array.isArray(newQs[qIndex].answerKey)) {
+            newQs[qIndex].answerKey = newQs[qIndex].answerKey.filter(v => v !== removedVal);
+        }
+        setQuestions(newQs);
+    };
+
+    const addTestCase = (qIndex) => {
+        const newQs = [...questions];
+        newQs[qIndex].testCases = [...(newQs[qIndex].testCases || []), { input: '', output: '' }];
+        setQuestions(newQs);
+    };
+
+    const updateTestCase = (qIndex, tcIndex, field, value) => {
+        const newQs = [...questions];
+        newQs[qIndex].testCases[tcIndex][field] = value;
+        setQuestions(newQs);
+    };
+
+    const removeTestCase = (qIndex, tcIndex) => {
+        const newQs = [...questions];
+        newQs[qIndex].testCases = newQs[qIndex].testCases.filter((_, i) => i !== tcIndex);
         setQuestions(newQs);
     };
 
@@ -106,7 +140,6 @@ const TestCreate = () => {
         setError('');
         setSuccess('');
 
-        // Provide minimal validation
         if (questions.length === 0) {
             setError('Please add at least one question.');
             setSaving(false);
@@ -123,6 +156,7 @@ const TestCreate = () => {
                     ques: q.ques,
                     type: q.type,
                     options: ['single option answer', 'multiple option answer'].includes(q.type) ? q.options : [],
+                    testCases: q.type === 'write code answer' ? q.testCases : [],
                     answerKey: q.answerKey
                 }))
             };
@@ -138,10 +172,9 @@ const TestCreate = () => {
     };
 
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-24 max-w-4xl mx-auto">
-            <PageHeader title="Create Test Content" description="Design and configure questions for a scheduled test." />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-24 max-w-5xl mx-auto">
+            <PageHeader title="Advanced Test Designer" description="Build complex evaluations with dynamic answer keys and code evaluation." />
 
-            {/* Error/Success Messages */}
             {error && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-2xl font-bold flex items-center gap-2 border border-red-100 mb-6">
                     <AlertCircle size={18} /> {error}
@@ -153,7 +186,6 @@ const TestCreate = () => {
                 </div>
             )}
 
-            {/* Step 1: Verify Test DB */}
             <div className="card mb-8">
                 <h3 className="text-xl font-extrabold text-navy flex items-center gap-2 mb-4">
                     <Search className="text-lime" /> Connect to Scheduled Test
@@ -181,84 +213,195 @@ const TestCreate = () => {
                 )}
             </div>
 
-            {/* Step 2: Question Builder (Google Forms Style) */}
             {examInfo && (
-                <div className="space-y-6 relative">
+                <div className="space-y-6">
                     <AnimatePresence>
                         {questions.map((q, qIndex) => (
                             <motion.div
                                 key={q.id || qIndex}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="card border-l-4 border-l-lime group transition-all focus-within:shadow-xl focus-within:border-l-navy"
+                                className="card border-l-4 border-l-lime group transition-all focus-within:shadow-2xl focus-within:border-l-navy"
                             >
-                                <div className="flex justify-between items-start mb-4 gap-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Question Statement..."
-                                        className="w-full text-xl font-bold text-navy placeholder:text-slate-300 border-b-2 border-transparent focus:border-navy pb-2 focus:outline-none transition-colors"
-                                        value={q.ques}
-                                        onChange={(e) => updateQuestion(qIndex, 'ques', e.target.value)}
-                                    />
-                                    <select
-                                        className="input-field w-56 shrink-0 bg-slate-50 font-semibold"
-                                        value={q.type}
-                                        onChange={(e) => updateQuestion(qIndex, 'type', e.target.value)}
-                                    >
-                                        <option value="single option answer">Single Choice</option>
-                                        <option value="multiple option answer">Multiple Choice</option>
-                                        <option value="value enter answer">Short Text / Value</option>
-                                        <option value="write code answer">Write Code (Java)</option>
-                                    </select>
+                                {/* Header: Question Statement and Type */}
+                                <div className="space-y-4 mb-6">
+                                    <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-widest">
+                                        <FileText size={14} /> Question {qIndex + 1}
+                                    </div>
+                                    <div className="flex flex-col md:flex-row gap-6">
+                                        <div className="flex-1">
+                                            <textarea
+                                                placeholder="Write your question statement here..."
+                                                className="w-full text-xl font-bold text-navy placeholder:text-slate-300 bg-slate-50/50 p-4 rounded-2xl min-h-[100px] border-2 border-transparent focus:border-lime/30 focus:outline-none transition-all resize-none shadow-inner"
+                                                value={q.ques}
+                                                onChange={(e) => updateQuestion(qIndex, 'ques', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="w-full md:w-64 shrink-0">
+                                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-tighter mb-1.5 block">Response Type</label>
+                                            <select
+                                                className="input-field w-full bg-white font-extrabold text-navy border-slate-200"
+                                                value={q.type}
+                                                onChange={(e) => updateQuestion(qIndex, 'type', e.target.value)}
+                                            >
+                                                <option value="single option answer">Single Choice</option>
+                                                <option value="multiple option answer">Multiple Choice</option>
+                                                <option value="value enter answer">Short Text / Value</option>
+                                                <option value="write code answer">Write Code (Java)</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* Options based on type */}
+                                {/* Options Configuration (For Choice types) */}
                                 {['single option answer', 'multiple option answer'].includes(q.type) && (
-                                    <div className="space-y-2 mt-4 ml-2">
+                                    <div className="mb-8 pl-4 space-y-3">
+                                        <div className="text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest mb-2">
+                                            <Layers size={14} /> Define Options
+                                        </div>
                                         {q.options?.map((opt, oIndex) => (
-                                            <div key={oIndex} className="flex items-center gap-3">
-                                                <div className={`w-5 h-5 rounded-full border-2 ${q.type === 'single option answer' ? 'border-slate-300' : 'border-slate-300 rounded-md'}`}></div>
+                                            <div key={oIndex} className="flex items-center gap-4">
+                                                <div className={`w-6 h-6 flex items-center justify-center shrink-0 border-2 rounded-lg font-bold text-[10px] ${q.type === 'single option answer' ? 'border-slate-200 rounded-full' : 'border-slate-200'}`}>
+                                                    {oIndex + 1}
+                                                </div>
                                                 <input
                                                     type="text"
                                                     value={opt}
                                                     onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
-                                                    className="flex-1 font-medium bg-transparent border-b border-transparent focus:border-slate-300 focus:outline-none py-1"
-                                                    placeholder={`Option ${oIndex + 1}`}
+                                                    className="flex-1 font-bold text-navy bg-transparent border-b-2 border-transparent focus:border-slate-200 focus:outline-none py-1.5"
+                                                    placeholder="Enter option text..."
                                                 />
                                                 {q.options.length > 1 && (
-                                                    <button onClick={() => removeOption(qIndex, oIndex)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => removeOption(qIndex, oIndex)} className="text-slate-300 hover:text-red-500 transition-colors px-2">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 )}
                                             </div>
                                         ))}
-                                        <div className="flex items-center gap-3 mt-2">
-                                            <div className="w-5 h-5"></div>
-                                            <button onClick={() => addOption(qIndex)} className="text-slate-400 hover:text-navy font-semibold text-sm transition-colors cursor-pointer">
-                                                Add option
+                                        <button onClick={() => addOption(qIndex)} className="ml-10 text-lime hover:text-navy font-bold text-sm flex items-center gap-2 transition-colors mt-2">
+                                            <Plus size={16} /> Add option
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Code Evaluation - Test Cases */}
+                                {q.type === 'write code answer' && (
+                                    <div className="mb-8 pl-4 space-y-4">
+                                        <div className="text-xs font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest mb-2">
+                                            <Code size={14} /> Java Test Cases
+                                        </div>
+                                        <div className="grid gap-4">
+                                            {q.testCases?.map((tc, tcIndex) => (
+                                                <div key={tcIndex} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col md:flex-row gap-4 relative group/tc">
+                                                    <div className="flex-1 space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Test Case Input</label>
+                                                        <textarea
+                                                            placeholder="Standard Input (stdin)"
+                                                            className="w-full bg-white p-3 rounded-xl border border-slate-200 font-mono text-sm focus:outline-none focus:border-lime/40"
+                                                            value={tc.input}
+                                                            onChange={(e) => updateTestCase(qIndex, tcIndex, 'input', e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expected Output</label>
+                                                        <textarea
+                                                            placeholder="Standard Output (stdout)"
+                                                            className="w-full bg-white p-3 rounded-xl border border-slate-200 font-mono text-sm focus:outline-none focus:border-lime/40"
+                                                            value={tc.output}
+                                                            onChange={(e) => updateTestCase(qIndex, tcIndex, 'output', e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => removeTestCase(qIndex, tcIndex)}
+                                                        className="absolute -top-2 -right-2 w-8 h-8 bg-white shadow-md border border-slate-100 text-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/tc:opacity-100 transition-opacity"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <button onClick={() => addTestCase(qIndex)} className="text-lime hover:text-navy font-bold text-sm flex items-center gap-2 transition-colors mt-2">
+                                                <Plus size={16} /> Add Test Case
                                             </button>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Answer Key */}
-                                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                                    <div className="flex-1 flex items-center gap-3">
-                                        <span className="text-sm font-bold text-green-600 bg-green-50 px-3 py-1 rounded-lg">Answer Key</span>
-                                        <input
-                                            type="text"
-                                            placeholder="Enter correct answer(s)..."
-                                            className="input-field py-1.5 flex-1"
-                                            value={q.answerKey}
-                                            onChange={(e) => updateQuestion(qIndex, 'answerKey', e.target.value)}
-                                        />
+                                {/* Final Answer Configuration */}
+                                <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
+                                        <div className="flex items-center gap-2 min-w-32">
+                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                            <span className="text-sm font-black text-navy uppercase tracking-tighter">Correct Answer</span>
+                                        </div>
+                                        
+                                        {/* Single Choice Answer Key */}
+                                        {q.type === 'single option answer' && (
+                                            <select
+                                                className="input-field bg-green-50/50 border-green-100 text-green-700 font-bold py-1.5"
+                                                value={q.answerKey}
+                                                onChange={(e) => updateQuestion(qIndex, 'answerKey', e.target.value)}
+                                            >
+                                                <option value="">Select correct option...</option>
+                                                {q.options?.map((opt, i) => (
+                                                    <option key={i} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        )}
+
+                                        {/* Multiple Choice Answer Key */}
+                                        {q.type === 'multiple option answer' && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {q.options?.map((opt, i) => {
+                                                    const isSelected = Array.isArray(q.answerKey) && q.answerKey.includes(opt);
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => {
+                                                                const current = Array.isArray(q.answerKey) ? q.answerKey : [];
+                                                                const next = isSelected ? current.filter(v => v !== opt) : [...current, opt];
+                                                                updateQuestion(qIndex, 'answerKey', next);
+                                                            }}
+                                                            className={`px-4 py-1.5 rounded-xl font-bold text-sm transition-all border-2 ${
+                                                                isSelected 
+                                                                    ? 'bg-navy text-white border-navy shadow-lg' 
+                                                                    : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'
+                                                            }`}
+                                                        >
+                                                            {opt}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+
+                                        {/* Value Enter Answer Key */}
+                                        {q.type === 'value enter answer' && (
+                                            <input
+                                                type="text"
+                                                placeholder="Enter correct numerical or text value..."
+                                                className="input-field py-1.5 flex-1 bg-green-50/50 border-green-100 text-green-700 font-bold"
+                                                value={q.answerKey}
+                                                onChange={(e) => updateQuestion(qIndex, 'answerKey', e.target.value)}
+                                            />
+                                        )}
+
+                                        {/* Code Answer Key (Meta) */}
+                                        {q.type === 'write code answer' && (
+                                            <div className="bg-green-50 px-4 py-2 rounded-xl border border-green-100">
+                                                <p className="text-green-700 font-bold text-xs">Evaluated via Test Cases above.</p>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Actions */}
-                                    <div className="flex gap-2 ml-4">
-                                        <button onClick={() => deleteQuestion(qIndex)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Delete Question">
-                                            <Trash2 size={20} />
+                                    {/* Action Panel */}
+                                    <div className="flex gap-2 shrink-0 self-end md:self-center">
+                                        <button 
+                                            onClick={() => deleteQuestion(qIndex)} 
+                                            className="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-all shadow-sm hover:shadow-md"
+                                            title="Delete Entire Question"
+                                        >
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
                                 </div>
@@ -266,13 +409,13 @@ const TestCreate = () => {
                         ))}
                     </AnimatePresence>
 
-                    {/* Floating Form Controls */}
-                    <div className="flex justify-center mt-8 gap-4">
-                        <button onClick={addQuestion} className="bg-white border-2 border-lime text-navy hover:bg-lime/10 px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg transition-all hover:-translate-y-1">
-                            <Plus size={20} /> Add Question
+                    {/* Designer Toolbar */}
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-12 py-8 border-t border-slate-100">
+                        <button onClick={addQuestion} className="w-full md:w-auto bg-white border-2 border-lime text-navy hover:bg-lime/10 px-10 py-3.5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl transition-all hover:-translate-y-1 active:scale-95">
+                            <Plus size={22} /> Add Another Question
                         </button>
-                        <button onClick={saveTest} disabled={saving} className="bg-navy border-2 border-navy text-white hover:bg-navy/90 px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg transition-all hover:-translate-y-1">
-                            <Save size={20} /> {saving ? 'Saving...' : 'Save Complete Test'}
+                        <button onClick={saveTest} disabled={saving} className="w-full md:w-auto bg-navy border-2 border-navy text-white hover:bg-navy/90 px-10 py-3.5 rounded-2xl font-black flex items-center justify-center gap-3 shadow-xl transition-all hover:-translate-y-1 active:scale-95">
+                            <Save size={22} /> {saving ? 'Finalizing...' : 'Save Entire Test Design'}
                         </button>
                     </div>
                 </div>
