@@ -40,8 +40,6 @@ A declarative frontend library providing a fast, component-based user interface 
 ### Node.js: 
 The asynchronous event-driven JavaScript runtime that powers our backend, ensuring fast server-side execution.
 
-## Getting Started
-
 #### Note: 
 Due to the proprietary nature of this project, environment variables and API keys are restricted.
 
