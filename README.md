@@ -45,12 +45,4 @@ The asynchronous event-driven JavaScript runtime that powers our backend, ensuri
 #### Note: 
 Due to the proprietary nature of this project, environment variables and API keys are restricted.
 
-## Clone the repository
-
-Install dependencies: ```npm install``` (in root, frontend, and backend)
-
-Configure Environment: Create a ```.env``` file based on ```.env.example```
-
-Run development: ```npm run dev```
-
 © 2026 Zest. All rights reserved.
