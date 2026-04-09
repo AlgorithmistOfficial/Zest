@@ -97,15 +97,7 @@ const ScheduleExam = () => {
                             <label className="label">Topics (Comma separated)</label>
                             <input type="text" id="topics" className="input-field" placeholder="Arrays, Pointers, Sorting" required onChange={handleChange} />
                         </div>
-                        <div className="span-2">
-                            <label className="label">Initial Status</label>
-                            <select id="status" className="input-field" onChange={handleChange} value={formData.status}>
-                                <option value="scheduled">Scheduled</option>
-                                <option value="ongoing">Ongoing</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
+
                         <div className="span-2 pt-2">
                             <button type="submit" disabled={loading}
                                 className="btn btn-primary w-full py-4 text-base font-bold rounded-2xl">
