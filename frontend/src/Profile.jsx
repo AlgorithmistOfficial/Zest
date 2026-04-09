@@ -229,7 +229,7 @@ const Profile = () => {
                             <div className="relative group">
                                 <div className="w-32 h-32 md:w-40 md:h-40 bg-slate-100 rounded-[2rem] flex items-center justify-center text-slate-400 border-4 border-white shadow-xl overflow-hidden">
                                     {userData.profilePic ? (
-                                        <img src={userData.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                                        <img src={userData.profilePic} alt="Profile" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                                     ) : (
                                         <User size={64} />
                                     )}

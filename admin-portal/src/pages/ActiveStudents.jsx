@@ -125,8 +125,12 @@ const ActiveStudents = () => {
                                     >
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-lime text-white flex items-center justify-center font-black text-lg shadow-lg">
-                                                    {student.name.charAt(0)}
+                                                <div className="w-10 h-10 rounded-full bg-lime text-white flex items-center justify-center font-black text-lg shadow-lg overflow-hidden">
+                                                    {student.dp ? (
+                                                        <img src={student.dp} alt="DP" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        student.name.charAt(0)
+                                                    )}
                                                 </div>
                                                 <span className="font-bold text-navy group-hover:text-black transition-colors">{student.name}</span>
                                             </div>

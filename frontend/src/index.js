@@ -41,7 +41,8 @@ const UserPresence = ({ children }) => {
         socket.emit('user-online', {
           name: user.name,
           email: user.email,
-          id: user._id || user.id
+          id: user._id || user.id,
+          dp: user.dp || user.profilePic || null
         });
       });
 

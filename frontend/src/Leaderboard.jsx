@@ -190,8 +190,17 @@ const Leaderboard = () => {
                                 className={`flex items-center justify-between p-6 rounded-3xl border-2 transition-all hover:scale-[1.01] ${getRowStyle(index)}`}
                             >
                                 <div className="flex items-center gap-6">
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white shadow-inner">
-                                        {getRankIcon(index)}
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white shadow-inner relative overflow-hidden">
+                                        {student.profilePicture ? (
+                                            <img src={student.profilePicture} alt="Profile" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                                        ) : (
+                                            getRankIcon(index)
+                                        )}
+                                        {student.profilePicture && (
+                                            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm scale-75">
+                                                {getRankIcon(index)}
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-navy leading-none mb-1">{student.name}</h3>
@@ -221,8 +230,12 @@ const Leaderboard = () => {
                                         <span className="text-sm font-bold text-slate-300">#{index + 4}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                                            <User size={16} />
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 overflow-hidden">
+                                            {student.profilePicture ? (
+                                                <img src={student.profilePicture} alt="Profile" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User size={16} />
+                                            )}
                                         </div>
                                         <h3 className="font-bold text-navy">{student.name}</h3>
                                     </div>
