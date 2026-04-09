@@ -17,7 +17,7 @@ const Profile = () => {
         name: initialUser.name || 'Anonymous User',
         email: initialUser.email || 'guest@zest.com',
         role: initialUser.role || 'Student',
-        profilePic: initialUser.profilePic || null
+        profilePic: initialUser.dp || initialUser.profilePic || null
     });
 
     const [isEditing, setIsEditing] = useState(false);
