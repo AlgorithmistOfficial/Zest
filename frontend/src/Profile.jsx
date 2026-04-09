@@ -226,7 +226,7 @@ const Profile = () => {
                         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-lime/20 to-lime/10"></div>
                         
                         <div className="relative flex flex-col md:flex-row items-center md:items-end gap-8 mt-4">
-                            <div className="relative group">
+                            <div className="relative">
                                 <div className="w-32 h-32 md:w-40 md:h-40 bg-slate-100 rounded-[2rem] flex items-center justify-center text-slate-400 border-4 border-white shadow-xl overflow-hidden">
                                     {userData.profilePic ? (
                                         <img src={userData.profilePic} alt="Profile" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
@@ -234,9 +234,6 @@ const Profile = () => {
                                         <User size={64} />
                                     )}
                                 </div>
-                                <button className="absolute bottom-2 right-2 p-3 bg-navy text-white rounded-2xl shadow-lg hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
-                                    <Camera size={20} />
-                                </button>
                             </div>
 
                             <div className="flex-1 text-center md:text-left">
