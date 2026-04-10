@@ -95,21 +95,21 @@ const UserPresence = ({ children }) => {
 
       // Background Web Push Registration for Persistent users
       if (isPersistent && 'serviceWorker' in navigator && 'PushManager' in window) {
-        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        navigator.serviceWorker.register('/sw.js').then(function (registration) {
           console.log('[Web Push] Service Worker registered with scope:', registration.scope);
 
           // Get the VAPID Public key from env (we'll provide a placeholder or process.env value)
-          const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
+          const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
 
           if (publicVapidKey !== 'YOUR_PUBLIC_VAPID_KEY_HERE') {
-            registration.pushManager.getSubscription().then(function(subscription) {
+            registration.pushManager.getSubscription().then(function (subscription) {
               if (subscription === null) {
                 // Not subscribed yet, ask for permission and subscribe
                 console.log('[Web Push] No subscription found, requesting push subscription...');
                 registration.pushManager.subscribe({
                   userVisibleOnly: true,
                   applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-                }).then(function(newSubscription) {
+                }).then(function (newSubscription) {
                   console.log('[Web Push] Subscribed to push backend!');
                   // Send to our backend
                   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
@@ -155,7 +155,7 @@ const ProtectedRoute = ({ children }) => {
 
     if (token && user) {
       const storage = remember ? localStorage : sessionStorage;
-      
+
       // Clear both first to avoid stale data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -164,7 +164,7 @@ const ProtectedRoute = ({ children }) => {
 
       storage.setItem('token', token);
       storage.setItem('user', decodeURIComponent(user));
-      
+
       // Remove params from URL to keep it clean
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -187,7 +187,7 @@ root.render(
       <Routes>
         <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
         <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-        
+
         <Route path="/about" element={<About />} />
 
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
