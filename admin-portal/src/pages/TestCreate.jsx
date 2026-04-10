@@ -56,7 +56,6 @@ const TestCreate = () => {
                     options: ['Option 1'], 
                     testCases: [{ input: '', output: '' }],
                     marks: 1,
-                    duration: 2,
                     answerKey: '' 
                 }]);
                 setSuccess('Test ID verified. You can generate questions now.');
@@ -78,7 +77,6 @@ const TestCreate = () => {
             options: ['Option 1'], 
             testCases: [{ input: '', output: '' }],
             marks: 1,
-            duration: 2,
             answerKey: '' 
         }]);
     };
@@ -147,7 +145,6 @@ const TestCreate = () => {
                 options: ['Option 1'], 
                 testCases: [{ input: '', output: '' }],
                 marks: 1,
-                duration: 2,
                 answerKey: '' 
             }]);
             setSuccess('Design cleared.');
@@ -179,7 +176,6 @@ const TestCreate = () => {
                     options: ['single option answer', 'multiple option answer'].includes(q.type) ? q.options : [],
                     testCases: q.type === 'write code answer' ? q.testCases : [],
                     marks: Number(q.marks),
-                    duration: Number(q.duration),
                     answerKey: q.answerKey
                 }))
             };
@@ -254,29 +250,16 @@ const TestCreate = () => {
                                         </div>
                                         
                                         {/* Row with individual settings */}
-                                        <div className="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-xl">
-                                            <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
-                                                <Award size={14} className="text-lime" />
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Marks</label>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    className="w-12 bg-transparent text-sm font-black text-navy focus:outline-none"
-                                                    value={q.marks}
-                                                    onChange={(e) => updateQuestion(qIndex, 'marks', e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Clock size={14} className="text-lime" />
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Time (m)</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    className="w-12 bg-transparent text-sm font-black text-navy focus:outline-none"
-                                                    value={q.duration}
-                                                    onChange={(e) => updateQuestion(qIndex, 'duration', e.target.value)}
-                                                />
-                                            </div>
+                                        <div className="bg-slate-50 px-4 py-2 rounded-xl flex items-center gap-2">
+                                            <Award size={14} className="text-lime" />
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Marks</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                className="w-12 bg-transparent text-sm font-black text-navy focus:outline-none"
+                                                value={q.marks}
+                                                onChange={(e) => updateQuestion(qIndex, 'marks', e.target.value)}
+                                            />
                                         </div>
                                     </div>
                                     
