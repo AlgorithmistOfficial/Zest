@@ -129,7 +129,7 @@ const Auth = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.open(`${API_URL}/api/auth/google`, "_self");
+    window.open(`${API_URL}/api/auth/google?remember=${persistent}`, "_self");
   };
 
   const handleForgotSendOtp = async () => {

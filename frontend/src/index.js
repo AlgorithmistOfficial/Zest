@@ -63,10 +63,20 @@ const ProtectedRoute = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     const user = urlParams.get('user');
+    const remember = urlParams.get('remember') === 'true';
 
     if (token && user) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', decodeURIComponent(user));
+      const storage = remember ? localStorage : sessionStorage;
+      
+      // Clear both first to avoid stale data
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+
+      storage.setItem('token', token);
+      storage.setItem('user', decodeURIComponent(user));
+      
       // Remove params from URL to keep it clean
       window.history.replaceState({}, document.title, window.location.pathname);
     }
