@@ -24,6 +24,22 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated() ? <Navigate to="/home" replace /> : children;
 };
 
+// Helper for Web Push
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 // Component to handle user presence via WebSocket
 const UserPresence = ({ children }) => {
   React.useEffect(() => {
@@ -76,10 +92,43 @@ const UserPresence = ({ children }) => {
         }
       });
 
-      // Request permission on mount if persistent and not set
-      if (isPersistent && Notification.permission === "default") {
-        console.log("[Presence] Initializing notification permissions on login...");
-        Notification.requestPermission();
+      // Background Web Push Registration for Persistent users
+      if (isPersistent && 'serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+          console.log('[Web Push] Service Worker registered with scope:', registration.scope);
+
+          // Get the VAPID Public key from env (we'll provide a placeholder or process.env value)
+          const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
+
+          if (publicVapidKey !== 'YOUR_PUBLIC_VAPID_KEY_HERE') {
+            registration.pushManager.getSubscription().then(function(subscription) {
+              if (subscription === null) {
+                // Not subscribed yet, ask for permission and subscribe
+                console.log('[Web Push] No subscription found, requesting push subscription...');
+                registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+                }).then(function(newSubscription) {
+                  console.log('[Web Push] Subscribed to push backend!');
+                  // Send to our backend
+                  fetch('https://Shreyansh6726-zest.hf.space/api/notifications/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user.email, subscription: newSubscription })
+                  });
+                }).catch(err => console.error('[Web Push] Failed to subscribe', err));
+              } else {
+                // Already subscribed, let's just make sure backend has it.
+                // In production, you might want to only send if it's new, but sending on login ensures sync.
+                fetch('https://Shreyansh6726-zest.hf.space/api/notifications/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: user.email, subscription: subscription })
+                });
+              }
+            });
+          }
+        }).catch(err => console.error('[Web Push] Service Worker registration failed', err));
       }
 
       return () => {
