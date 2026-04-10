@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Clock, Award, RotateCcw } from 'lucide-react';
+import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Award, RotateCcw } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 
