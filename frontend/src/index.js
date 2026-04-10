@@ -38,6 +38,7 @@ const UserPresence = ({ children }) => {
       });
 
       socket.on('connect', () => {
+        console.log(`[Presence] Connected via ${isPersistent ? 'Persistent' : 'Temporary'} session.`);
         // Emit user-online event to the server
         socket.emit('user-online', {
           name: user.name,
@@ -51,6 +52,7 @@ const UserPresence = ({ children }) => {
       // Handle Exam Reminders
       const triggerNotification = (data) => {
         const timeStr = new Date(data.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        console.log(`[Notification] Triggering browser notification for "${data.examName}" at ${timeStr}`);
         new Notification("Zest Exam Reminder", {
           body: `Your exam "${data.examName}" starts in 10 minutes (at ${timeStr})!`,
           icon: "https://cdn-icons-png.flaticon.com/512/2103/2103633.png"
@@ -58,19 +60,25 @@ const UserPresence = ({ children }) => {
       };
 
       socket.on('exam-reminder', (data) => {
+        console.log(`[Reminder Received] Data:`, data);
         if (Notification.permission === "granted") {
           triggerNotification(data);
         } else if (Notification.permission !== "denied") {
+          console.log("[Reminder] Requesting notification permission...");
           Notification.requestPermission().then(permission => {
+            console.log(`[Reminder] Permission ${permission}`);
             if (permission === "granted") {
               triggerNotification(data);
             }
           });
+        } else {
+          console.error("[Reminder] Notifications are blocked by the browser settings.");
         }
       });
 
       // Request permission on mount if persistent and not set
       if (isPersistent && Notification.permission === "default") {
+        console.log("[Presence] Initializing notification permissions on login...");
         Notification.requestPermission();
       }
 
