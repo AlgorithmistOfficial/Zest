@@ -251,7 +251,7 @@ const Practice = () => {
                             <div className="px-6 py-3 border-b border-white/10 bg-white/5 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <Terminal size={14} className="text-white/40" />
-                                    <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Interactive Terminal</span>
+                                    <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Ouput Terminal</span>
                                 </div>
                                 <div className="flex gap-1.5">
                                     <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>

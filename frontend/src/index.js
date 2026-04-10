@@ -27,6 +27,7 @@ const PublicRoute = ({ children }) => {
 // Component to handle user presence via WebSocket
 const UserPresence = ({ children }) => {
   React.useEffect(() => {
+    const isPersistent = !!localStorage.getItem('token');
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
@@ -42,9 +43,36 @@ const UserPresence = ({ children }) => {
           name: user.name,
           email: user.email,
           id: user._id || user.id,
-          dp: user.dp || user.profilePic || null
+          dp: user.dp || user.profilePic || null,
+          isPersistent: isPersistent
         });
       });
+
+      // Handle Exam Reminders
+      const triggerNotification = (data) => {
+        const timeStr = new Date(data.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        new Notification("Zest Exam Reminder", {
+          body: `Your exam "${data.examName}" starts in 10 minutes (at ${timeStr})!`,
+          icon: "https://cdn-icons-png.flaticon.com/512/2103/2103633.png"
+        });
+      };
+
+      socket.on('exam-reminder', (data) => {
+        if (Notification.permission === "granted") {
+          triggerNotification(data);
+        } else if (Notification.permission !== "denied") {
+          Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+              triggerNotification(data);
+            }
+          });
+        }
+      });
+
+      // Request permission on mount if persistent and not set
+      if (isPersistent && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
 
       return () => {
         socket.disconnect();
