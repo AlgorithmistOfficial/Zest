@@ -42,10 +42,10 @@ const Home = () => {
   };
 
   const dashboardItems = [
-    { title: "Syllabus", icon: BookOpen, path: "/syllabus", color: "bg-blue-500" },
-    { title: "Practice", icon: Code, path: "/practice", color: "bg-lime" },
-    { title: "Leaderboard", icon: Trophy, path: "/leaderboard", color: "bg-yellow-500" },
-    { title: "Schedule", icon: Calendar, path: "/schedule", color: "bg-purple-500" },
+    { title: "Syllabus", icon: BookOpen, path: "/syllabus", color: "bg-blue-500", hoverBg: "hover:bg-blue-50", hoverBorder: "hover:border-blue-200" },
+    { title: "Practice", icon: Code, path: "/practice", color: "bg-lime", hoverBg: "hover:bg-lime/10", hoverBorder: "hover:border-lime/30" },
+    { title: "Leaderboard", icon: Trophy, path: "/leaderboard", color: "bg-yellow-500", hoverBg: "hover:bg-yellow-50", hoverBorder: "hover:border-yellow-200" },
+    { title: "Schedule", icon: Calendar, path: "/schedule", color: "bg-purple-500", hoverBg: "hover:bg-purple-50", hoverBorder: "hover:border-purple-200" },
   ];
 
   const [upcomingTest, setUpcomingTest] = React.useState(null);
@@ -209,7 +209,7 @@ const Home = () => {
               >
                 <Link
                   to={item.path}
-                  className="block p-8 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group"
+                  className={`block p-8 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group ${item.hoverBg} ${item.hoverBorder}`}
                 >
                   <div className={`w-14 h-14 rounded-2xl ${item.color} flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform`}>
                     <item.icon size={28} />
