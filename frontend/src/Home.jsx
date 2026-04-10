@@ -53,7 +53,8 @@ const Home = () => {
   React.useEffect(() => {
     const fetchNearestTest = async () => {
       try {
-        const res = await fetch('https://Shreyansh6726-zest.hf.space/api/exams');
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const res = await fetch(`${backendUrl}/api/exams`);
         if (!res.ok) return;
         const exams = await res.json();
         console.log('[Home] Fetched exams:', exams);

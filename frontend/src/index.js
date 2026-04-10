@@ -49,7 +49,8 @@ const UserPresence = ({ children }) => {
 
     if (token && user.email) {
       // Connect to the backend socket server
-      const socket = io('https://Shreyansh6726-zest.hf.space', {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+      const socket = io(backendUrl, {
         auth: { token }
       });
 
@@ -111,7 +112,8 @@ const UserPresence = ({ children }) => {
                 }).then(function(newSubscription) {
                   console.log('[Web Push] Subscribed to push backend!');
                   // Send to our backend
-                  fetch('https://Shreyansh6726-zest.hf.space/api/notifications/subscribe', {
+                  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+                  fetch(`${backendUrl}/api/notifications/subscribe`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: user.email, subscription: newSubscription })
@@ -120,7 +122,8 @@ const UserPresence = ({ children }) => {
               } else {
                 // Already subscribed, let's just make sure backend has it.
                 // In production, you might want to only send if it's new, but sending on login ensures sync.
-                fetch('https://Shreyansh6726-zest.hf.space/api/notifications/subscribe', {
+                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+                fetch(`${backendUrl}/api/notifications/subscribe`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ email: user.email, subscription: subscription })
