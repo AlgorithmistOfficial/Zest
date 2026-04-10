@@ -1,8 +1,89 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Award, RotateCcw } from 'lucide-react';
+import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Award, RotateCcw, ChevronDown, Circle, Square, Type, Check } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
+
+const ResponseTypeDropdown = ({ value, onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const options = [
+        { value: 'single option answer', label: 'Single Choice', icon: Circle, desc: 'One correct answer' },
+        { value: 'multiple option answer', label: 'Multiple Choice', icon: Square, desc: 'Multi-select correct' },
+        { value: 'value enter answer', label: 'Short Text / Value', icon: Type, desc: 'Text or numeric input' },
+        { value: 'write code answer', label: 'Write Code (Java)', icon: Code, desc: 'Auto-evaluated compiler' },
+    ];
+
+    const selectedOption = options.find(opt => opt.value === value) || options[0];
+
+    return (
+        <div className="relative">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full flex items-center justify-between gap-3 px-4 py-3 bg-white border-2 rounded-2xl transition-all duration-300 ${
+                    isOpen ? 'border-lime shadow-[0_0_0_4px_rgba(146,194,17,0.1)]' : 'border-slate-100 hover:border-slate-200'
+                }`}
+            >
+                <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="p-2 bg-slate-50 text-navy rounded-xl shrink-0">
+                        <selectedOption.icon size={18} />
+                    </div>
+                    <div className="text-left">
+                        <p className="text-sm font-black text-navy leading-none mb-0.5">{selectedOption.label}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter leading-none">{selectedOption.desc}</p>
+                    </div>
+                </div>
+                <ChevronDown size={18} className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-lime' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <>
+                        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 5, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            className="absolute left-0 right-0 top-full z-50 bg-white border-2 border-slate-100 rounded-[1.5rem] shadow-2xl p-2 overflow-hidden"
+                        >
+                            {options.map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => {
+                                        onChange(opt.value);
+                                        setIsOpen(false);
+                                    }}
+                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all group ${
+                                        value === opt.value ? 'bg-lime/5' : 'hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg transition-colors ${
+                                            value === opt.value ? 'bg-lime text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white group-hover:text-navy'
+                                        }`}>
+                                            <opt.icon size={16} />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className={`text-sm font-bold leading-none mb-0.5 ${value === opt.value ? 'text-navy' : 'text-slate-600'}`}>{opt.label}</p>
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">{opt.desc}</p>
+                                        </div>
+                                    </div>
+                                    {value === opt.value && (
+                                        <div className="w-5 h-5 bg-lime text-white rounded-full flex items-center justify-center">
+                                            <Check size={12} strokeWidth={4} />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const TestCreate = () => {
     const [testIdInput, setTestIdInput] = useState('');
@@ -272,18 +353,12 @@ const TestCreate = () => {
                                                 onChange={(e) => updateQuestion(qIndex, 'ques', e.target.value)}
                                             />
                                         </div>
-                                        <div className="w-full md:w-64 shrink-0">
-                                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-tighter mb-1.5 block">Response Type</label>
-                                            <select
-                                                className="input-field w-full bg-white font-extrabold text-navy border-slate-200"
+                                        <div className="w-full md:w-72 shrink-0">
+                                            <label className="text-[10px] uppercase font-bold text-slate-500 tracking-tighter mb-2 block ml-1">Response Type</label>
+                                            <ResponseTypeDropdown
                                                 value={q.type}
-                                                onChange={(e) => updateQuestion(qIndex, 'type', e.target.value)}
-                                            >
-                                                <option value="single option answer">Single Choice</option>
-                                                <option value="multiple option answer">Multiple Choice</option>
-                                                <option value="value enter answer">Short Text / Value</option>
-                                                <option value="write code answer">Write Code (Java)</option>
-                                            </select>
+                                                onChange={(val) => updateQuestion(qIndex, 'type', val)}
+                                            />
                                         </div>
                                     </div>
                                 </div>
