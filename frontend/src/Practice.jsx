@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play, RotateCcw, Copy, CheckCircle2, Terminal, Sun, Moon, LogOut } from 'lucide-react';
+import { ArrowLeft, Play, RotateCcw, Copy, CheckCircle2, Terminal, Sun, Moon, LogOut, Download } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
@@ -177,6 +177,25 @@ const Practice = () => {
                                     title="Copy Code"
                                 >
                                     {copySuccess ? <CheckCircle2 size={18} className="text-green-500" /> : <Copy size={18} />}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const classMatch = code.match(/public\s+class\s+([a-zA-Z0-9_$]+)/) || code.match(/class\s+([a-zA-Z0-9_$]+)/);
+                                        const fileName = (classMatch ? classMatch[1] : 'Main') + '.java';
+                                        const blob = new Blob([code], { type: 'text/plain' });
+                                        const url = URL.createObjectURL(blob);
+                                        const link = document.createElement('a');
+                                        link.href = url;
+                                        link.download = fileName;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                    className="p-2 text-slate-400 hover:text-navy transition-colors rounded-lg hover:bg-slate-100"
+                                    title="Download as .java"
+                                >
+                                    <Download size={18} />
                                 </button>
                                 <button
                                     onClick={handleReset}
