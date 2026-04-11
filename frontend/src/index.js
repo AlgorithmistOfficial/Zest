@@ -133,8 +133,6 @@ const UserPresence = ({ children }) => {
           } else {
             console.warn('[Web Push] WARNING: Registration skipped - VAPID public key not found in env.');
           }
-            });
-          }
         }).catch(err => console.error('[Web Push] Service Worker registration failed', err));
       }
 
