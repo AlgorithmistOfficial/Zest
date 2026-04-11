@@ -13,6 +13,7 @@ import Auth from './Auth';
 import Home from './Home';
 import Profile from './Profile';
 import Analytics from './Analytics';
+import Test from './Test';
 
 // Helper to check for token
 const isAuthenticated = () => {
@@ -114,6 +115,7 @@ root.render(
         <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+        <Route path="/test/:testId" element={<ProtectedRoute><Test /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

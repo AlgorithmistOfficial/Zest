@@ -9,9 +9,12 @@ import {
   Calendar,
   Clock,
   Timer,
-  Award
+  Award,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -39,6 +42,25 @@ const Home = () => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
     navigate('/auth');
+  };
+
+  const [entryAlert, setEntryAlert] = React.useState(null); // { type: 'early' | 'late' }
+
+  const handleStartTest = () => {
+    if (!upcomingTest) return;
+
+    const now = new Date();
+    const startTime = upcomingTest.startAt;
+    const entryDeadline = new Date(startTime.getTime() + 5 * 60 * 1000); // 5 minutes extra
+
+    if (now < startTime) {
+      setEntryAlert({ type: 'early' });
+    } else if (now > entryDeadline) {
+      setEntryAlert({ type: 'late' });
+    } else {
+      // Within window (or for debugging, you can add an override here)
+      navigate(`/test/${upcomingTest.testId}`);
+    }
   };
 
   const dashboardItems = [
@@ -270,17 +292,77 @@ const Home = () => {
             </div>
 
             {upcomingTest && (
-              <Link to="/practice" className="w-full md:w-auto">
+              <div className="w-full md:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={handleStartTest}
                   className="w-full px-10 py-4 bg-lime text-white font-extrabold rounded-2xl hover:bg-lime/90 transition-all flex items-center justify-center gap-2"
                 >
                   Start Test <ArrowRight size={20} />
                 </motion.button>
-              </Link>
+              </div>
             )}
           </motion.div>
+
+          {/* Entry Timing Alerts */}
+          <AnimatePresence>
+            {entryAlert && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setEntryAlert(null)}
+                  className="absolute inset-0 bg-navy/80 backdrop-blur-sm"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="relative w-full max-w-md bg-white rounded-[3rem] p-10 shadow-2xl overflow-hidden"
+                >
+                  {/* Background Accents */}
+                  <div className={`absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full blur-2xl -mr-16 -mt-16 ${entryAlert.type === 'early' ? 'bg-blue-500' : 'bg-red-500'}`} />
+                  
+                  <button 
+                    onClick={() => setEntryAlert(null)}
+                    className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <X size={20} className="text-slate-400" />
+                  </button>
+
+                  <div className="flex flex-col items-center text-center">
+                    <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-6 ${
+                      entryAlert.type === 'early' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
+                    }`}>
+                      <AlertCircle size={40} />
+                    </div>
+
+                    <h3 className="text-2xl font-extrabold text-navy mb-4">
+                      {entryAlert.type === 'early' ? "Test hasn't started yet" : "Entry Window Closed"}
+                    </h3>
+                    
+                    <p className="text-slate-600 font-medium leading-relaxed mb-8">
+                      {entryAlert.type === 'early' 
+                        ? `This test is scheduled to begin at ${fmtTime(upcomingTest.examTime)}. Please wait for the start signal.`
+                        : "The 5-minute entry window for this test has expired. Late entries are strictly prohibited by secure protocols."
+                      }
+                    </p>
+
+                    <button
+                      onClick={() => setEntryAlert(null)}
+                      className={`w-full py-4 rounded-2xl font-extrabold text-white transition-all shadow-lg ${
+                        entryAlert.type === 'early' ? 'bg-blue-600 shadow-blue-200' : 'bg-red-600 shadow-red-200'
+                      }`}
+                    >
+                      Understood
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
 
