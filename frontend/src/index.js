@@ -96,11 +96,13 @@ const UserPresence = ({ children }) => {
       // Background Web Push Registration for Persistent users
       if (isPersistent && 'serviceWorker' in navigator && 'PushManager' in window) {
         navigator.serviceWorker.register('/sw.js').then(function (registration) {
-          console.log('[Web Push] Service Worker registered with scope:', registration.scope);
+          console.log('[Web Push] Service Worker registered. Checking for updates...');
+          
+          // Force update check to bypass browser caching of sw.js
+          registration.update();
 
           const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
-          console.log('[Web Push] Checking for VAPID key...', publicVapidKey === 'YOUR_PUBLIC_VAPID_KEY_HERE' ? 'NOT FOUND (using placeholder)' : 'FOUND');
-          console.log(`[Web Push] Key value (first 10): ${publicVapidKey.substring(0, 10)}...`);
+          console.log('[Web Push] VAPID Key status:', publicVapidKey === 'YOUR_PUBLIC_VAPID_KEY_HERE' ? 'MISSING' : 'OK');
 
           if (publicVapidKey !== 'YOUR_PUBLIC_VAPID_KEY_HERE') {
             registration.pushManager.getSubscription().then(function (subscription) {

@@ -12,7 +12,15 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('push', function(event) {
-    console.log('[SW] Push received.');
+    console.log('[SW] Push received. Triggering heartbeat notification...');
+    
+    // Heartbeat: Prove that the push reached the browser, even before parsing data.
+    event.waitUntil(
+        self.registration.showNotification("Zest: Push Received", {
+            body: "The background push reached your browser successfully.",
+            tag: 'heartbeat'
+        })
+    );
     
     let data = {};
     if (event.data) {
