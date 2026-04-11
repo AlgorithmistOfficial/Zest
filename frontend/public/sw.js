@@ -2,34 +2,23 @@
 
 // Force activation immediately
 self.addEventListener('install', (event) => {
-    console.log('[SW] Service Worker installing...');
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Service Worker activating...');
     event.waitUntil(clients.claim());
 });
 
 self.addEventListener('push', function(event) {
-    console.log('[SW] Push received. Triggering heartbeat notification...');
-    
-    // Heartbeat: Prove that the push reached the browser, even before parsing data.
-    event.waitUntil(
-        self.registration.showNotification("Zest: Push Received", {
-            body: "The background push reached your browser successfully.",
-            tag: 'heartbeat'
-        })
-    );
+    console.log('[SW] Push received.');
     
     let data = {};
     if (event.data) {
         try {
             data = event.data.json();
-            console.log('[SW] Push data parsed as JSON:', data);
         } catch (err) {
-            console.warn('[SW] Push data not JSON, trying text:', event.data.text());
-            data = { title: "Zest Message", body: event.data.text() };
+            console.warn('[SW] Push data not JSON, using text:', err);
+            data = { title: "Zest Platform", body: event.data.text() };
         }
     }
 
@@ -39,7 +28,7 @@ self.addEventListener('push', function(event) {
         icon: data.icon || 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png',
         vibrate: [200, 100, 200],
         badge: 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png',
-        tag: 'exam-reminder', // Ensures multiple reminders group appropriately
+        tag: 'exam-reminder',
         renotify: true,
         data: {
             url: data.url || 'https://zest-kohl-xi.vercel.app/home'
@@ -52,21 +41,17 @@ self.addEventListener('push', function(event) {
 });
 
 self.addEventListener('notificationclick', function(event) {
-    console.log('[SW] Notification clicked.');
     event.notification.close();
-    
     const clickUrl = event.notification.data.url;
     
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-            // If a window is already open, focus it
             for (let i = 0; i < clientList.length; i++) {
                 let client = clientList[i];
                 if (client.url === clickUrl && 'focus' in client) {
                     return client.focus();
                 }
             }
-            // If no window is open, open a new one
             if (clients.openWindow) {
                 return clients.openWindow(clickUrl);
             }
