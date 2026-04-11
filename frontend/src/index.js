@@ -123,6 +123,7 @@ const UserPresence = ({ children }) => {
                 }).catch(err => console.error('[Web Push] ERROR: Failed to subscribe browser', err));
               } else {
                 console.log('[Web Push] Active subscription found. Syncing with backend...');
+                console.log(`[Web Push] CURRENT ENDPOINT: ${subscription.endpoint}`);
                 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
                 fetch(`${backendUrl}/api/notifications/subscribe`, {
                   method: 'POST',
