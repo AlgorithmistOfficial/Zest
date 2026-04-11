@@ -99,35 +99,40 @@ const UserPresence = ({ children }) => {
           console.log('[Web Push] Service Worker registered with scope:', registration.scope);
 
           const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
+          console.log('[Web Push] Checking for VAPID key...', publicVapidKey === 'YOUR_PUBLIC_VAPID_KEY_HERE' ? 'NOT FOUND (using placeholder)' : 'FOUND');
+          console.log(`[Web Push] Key value (first 10): ${publicVapidKey.substring(0, 10)}...`);
 
           if (publicVapidKey !== 'YOUR_PUBLIC_VAPID_KEY_HERE') {
             registration.pushManager.getSubscription().then(function (subscription) {
               if (subscription === null) {
-                // Not subscribed yet, ask for permission and subscribe
                 console.log('[Web Push] No subscription found, requesting push subscription...');
                 registration.pushManager.subscribe({
                   userVisibleOnly: true,
                   applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
                 }).then(function (newSubscription) {
-                  console.log('[Web Push] Subscribed to push backend!');
-                  // Send to our backend
+                  console.log('[Web Push] SUCCESS: Subscribed to push backend!');
                   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
                   fetch(`${backendUrl}/api/notifications/subscribe`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: user.email, subscription: newSubscription })
-                  });
-                }).catch(err => console.error('[Web Push] Failed to subscribe', err));
+                  }).then(() => console.log('[Web Push] SUCCESS: Subscription details sent to server.'))
+                    .catch(e => console.error('[Web Push] ERROR: Failed to send subscription to server', e));
+                }).catch(err => console.error('[Web Push] ERROR: Failed to subscribe browser', err));
               } else {
-                // Already subscribed, let's just make sure backend has it.
-                // In production, you might want to only send if it's new, but sending on login ensures sync.
+                console.log('[Web Push] Active subscription found. Syncing with backend...');
                 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
                 fetch(`${backendUrl}/api/notifications/subscribe`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ email: user.email, subscription: subscription })
-                });
+                }).then(() => console.log('[Web Push] SUCCESS: Subscription synced with server.'))
+                  .catch(e => console.error('[Web Push] ERROR: Failed to sync subscription with server', e));
               }
+            });
+          } else {
+            console.warn('[Web Push] WARNING: Registration skipped - VAPID public key not found in env.');
+          }
             });
           }
         }).catch(err => console.error('[Web Push] Service Worker registration failed', err));
