@@ -24,21 +24,6 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated() ? <Navigate to="/home" replace /> : children;
 };
 
-// Helper for Web Push
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
 
 // Component to handle user presence via WebSocket
 const UserPresence = ({ children }) => {
@@ -66,81 +51,7 @@ const UserPresence = ({ children }) => {
         });
       });
 
-      // Handle Exam Reminders
-      const triggerNotification = (data) => {
-        const timeStr = new Date(data.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        console.log(`[Notification] Triggering browser notification for "${data.examName}" at ${timeStr}`);
-        new Notification("Zest Exam Reminder", {
-          body: `Your exam "${data.examName}" starts in 10 minutes (at ${timeStr})!`,
-          icon: "https://cdn-icons-png.flaticon.com/512/2103/2103633.png"
-        });
-      };
-
-      socket.on('exam-reminder', (data) => {
-        console.log(`[Reminder Received] Data:`, data);
-        if (Notification.permission === "granted") {
-          triggerNotification(data);
-        } else if (Notification.permission !== "denied") {
-          console.log("[Reminder] Requesting notification permission...");
-          Notification.requestPermission().then(permission => {
-            console.log(`[Reminder] Permission ${permission}`);
-            if (permission === "granted") {
-              triggerNotification(data);
-            }
-          });
-        } else {
-          console.error("[Reminder] Notifications are blocked by the browser settings.");
-        }
-      });
-
-      // Background Web Push Registration for Persistent users
-      if (isPersistent && 'serviceWorker' in navigator && 'PushManager' in window) {
-        navigator.serviceWorker.register('/sw.js').then(function (registration) {
-          console.log('[Web Push] Service Worker registered. Checking for updates...');
-          
-          // Force update check to bypass browser caching of sw.js
-          registration.update();
-
-          const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
-          console.log('[Web Push] VAPID Key status:', publicVapidKey === 'YOUR_PUBLIC_VAPID_KEY_HERE' ? 'MISSING' : 'OK');
-
-          if (publicVapidKey !== 'YOUR_PUBLIC_VAPID_KEY_HERE') {
-            registration.pushManager.getSubscription().then(function (subscription) {
-              if (subscription === null) {
-                console.log('[Web Push] No subscription found, requesting push subscription...');
-                registration.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-                }).then(function (newSubscription) {
-                  console.log('[Web Push] SUCCESS: Subscribed to push backend!');
-                  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
-                  fetch(`${backendUrl}/api/notifications/subscribe`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: user.email, subscription: newSubscription })
-                  }).then(() => console.log('[Web Push] SUCCESS: Subscription details sent to server.'))
-                    .catch(e => console.error('[Web Push] ERROR: Failed to send subscription to server', e));
-                }).catch(err => console.error('[Web Push] ERROR: Failed to subscribe browser', err));
-              } else {
-                console.log('[Web Push] Active subscription found. Syncing with backend...');
-                console.log(`[Web Push] CURRENT ENDPOINT: ${subscription.endpoint}`);
-                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
-                fetch(`${backendUrl}/api/notifications/subscribe`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: user.email, subscription: subscription })
-                }).then(() => console.log('[Web Push] SUCCESS: Subscription synced with server.'))
-                  .catch(e => console.error('[Web Push] ERROR: Failed to sync subscription with server', e));
-              }
-            });
-          } else {
-            console.warn('[Web Push] WARNING: Registration skipped - VAPID public key not found in env.');
-          }
-        }).catch(err => console.error('[Web Push] Service Worker registration failed', err));
-      }
-
-      return () => {
-        socket.disconnect();
+      return () => {        socket.disconnect();
       };
     }
   }, []);
@@ -148,17 +59,6 @@ const UserPresence = ({ children }) => {
   return children;
 };
 
-// Global Test Helper (Outside the component for reliable access)
-window.testSW = () => {
-  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    console.log('[Web Push] Pinging Service Worker with local test message...');
-    navigator.serviceWorker.controller.postMessage({ type: 'TEST_NOTIFICATION' });
-  } else {
-    console.error('[Web Push] No active Service Worker controller found. Try refreshing the page.');
-    alert('No active Service Worker found. Please refresh the page and wait for the [Web Push] logs.');
-  }
-};
-console.log('[Zest] Diagnostic bundle loaded. window.testSW is ready.');
 
 // Redirects to /auth if not logged in
 const ProtectedRoute = ({ children }) => {
