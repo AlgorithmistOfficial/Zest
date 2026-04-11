@@ -139,6 +139,16 @@ const UserPresence = ({ children }) => {
         }).catch(err => console.error('[Web Push] Service Worker registration failed', err));
       }
 
+      // Local Test Helper: Directly ping the Service Worker to verify notification capability
+      window.testSW = () => {
+        if (navigator.serviceWorker.controller) {
+          console.log('[Web Push] Pinging Service Worker with local test message...');
+          navigator.serviceWorker.controller.postMessage({ type: 'TEST_NOTIFICATION' });
+        } else {
+          console.error('[Web Push] No active Service Worker controller found.');
+        }
+      };
+
       return () => {
         socket.disconnect();
       };

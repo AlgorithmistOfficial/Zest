@@ -9,6 +9,16 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(clients.claim());
 });
 
+// Listener for local tests from the React app
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'TEST_NOTIFICATION') {
+        self.registration.showNotification("Zest: Local Connection OK", {
+            body: "The React app successfully talked to the Service Worker!",
+            tag: 'test'
+        });
+    }
+});
+
 self.addEventListener('push', function(event) {
     console.log('[SW] Push received.');
     
@@ -16,27 +26,33 @@ self.addEventListener('push', function(event) {
     if (event.data) {
         try {
             data = event.data.json();
+            console.log('[SW] Payload found (JSON):', data);
         } catch (err) {
-            console.warn('[SW] Push data not JSON, using text:', err);
+            console.warn('[SW] Payload found (Text):', event.data.text());
             data = { title: "Zest Platform", body: event.data.text() };
         }
+    } else {
+        console.warn('[SW] No data found in push event.');
     }
 
+    // STRIPPED DOWN FOR DEBUGGING
     const title = data.title || "Zest Platform";
     const options = {
-        body: data.body || "You have a new update from Zest.",
-        icon: data.icon || 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png',
-        vibrate: [200, 100, 200],
-        badge: 'https://cdn-icons-png.flaticon.com/512/2103/2103633.png',
+        body: data.body || "Update from Zest.",
         tag: 'exam-reminder',
         renotify: true,
+        // REMOVED ICONS AND BADGES TO PREVENT LOAD FAILURES
         data: {
             url: data.url || 'https://zest-kohl-xi.vercel.app/home'
         }
     };
 
+    console.log(`[SW] Attempting to showNotification: "${title}"`);
+
     event.waitUntil(
         self.registration.showNotification(title, options)
+            .then(() => console.log('[SW] SUCCESS: showNotification completed.'))
+            .catch(err => console.error('[SW] ERROR: showNotification failed:', err))
     );
 });
 
