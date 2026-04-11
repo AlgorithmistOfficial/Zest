@@ -98,8 +98,7 @@ const UserPresence = ({ children }) => {
         navigator.serviceWorker.register('/sw.js').then(function (registration) {
           console.log('[Web Push] Service Worker registered with scope:', registration.scope);
 
-          // Get the VAPID Public key from env (we'll provide a placeholder or process.env value)
-          const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
+          const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY || 'YOUR_PUBLIC_VAPID_KEY_HERE';
 
           if (publicVapidKey !== 'YOUR_PUBLIC_VAPID_KEY_HERE') {
             registration.pushManager.getSubscription().then(function (subscription) {
