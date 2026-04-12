@@ -144,14 +144,16 @@ const ActiveStudents = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                filteredStudents.map((student, idx) => (
-                                    <motion.tr
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.05 }}
-                                        key={student.id || idx}
-                                        className="hover:bg-slate-50/30 transition-colors group"
-                                    >
+                                filteredStudents.map((student, idx) => {
+                                    const isTesting = student.location && student.location.startsWith('/test/');
+                                    return (
+                                        <motion.tr
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            key={student.id || idx}
+                                            className="hover:bg-slate-50/30 transition-colors group"
+                                        >
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-lime text-white flex items-center justify-center font-black text-lg shadow-lg overflow-hidden">
@@ -186,8 +188,9 @@ const ActiveStudents = () => {
                                                 {view === 'test' ? 'In Test Environment' : 'On Dashboard'}
                                             </div>
                                         </td>
-                                    </motion.tr>
-                                ))
+                                        </motion.tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
