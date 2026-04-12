@@ -101,19 +101,57 @@ const Navbar = () => {
                             <span>Storage</span>
                         </NavLink>
 
-                        <NavLink 
-                            to="/active-students" 
-                            className={({ isActive }) => 
-                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                    isActive 
+                        {/* Online Students Dropdown */}
+                        <div className="relative group">
+                            <button 
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    location.pathname === '/active-students' 
                                         ? 'bg-navy text-white shadow-lg' 
                                         : 'text-white/80 hover:bg-white/15'
-                                }`
-                            }
-                        >
-                            <Users size={16} />
-                            <span>Active Students</span>
-                        </NavLink>
+                                }`}
+                            >
+                                <Users size={16} />
+                                <span>Online Students</span>
+                                <ChevronDown size={14} className="opacity-50 group-hover:rotate-180 transition-transform duration-300" />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            <div className="absolute top-full left-0 mt-2 w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top translate-y-2 group-hover:translate-y-0">
+                                <div className="bg-navy/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1.5 overflow-hidden">
+                                    <NavLink 
+                                        to="/active-students?view=dashboard" 
+                                        className={() => {
+                                            const search = new URLSearchParams(location.search);
+                                            const isActive = location.pathname === '/active-students' && search.get('view') === 'dashboard';
+                                            return `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                                isActive 
+                                                    ? 'bg-lime/20 text-lime' 
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                            }`;
+                                        }}
+                                    >
+                                        <LayoutDashboard size={14} />
+                                        <span>Dashboard</span>
+                                    </NavLink>
+                                    
+                                    <NavLink 
+                                        to="/active-students?view=test" 
+                                        className={() => {
+                                            const search = new URLSearchParams(location.search);
+                                            const isActive = location.pathname === '/active-students' && search.get('view') === 'test';
+                                            return `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                                isActive 
+                                                    ? 'bg-lime/20 text-lime' 
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                            }`;
+                                        }}
+                                    >
+                                        <Users size={14} />
+                                        <span>Test</span>
+                                    </NavLink>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right: brand */}

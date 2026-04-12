@@ -28,6 +28,9 @@ const PublicRoute = ({ children }) => {
 
 // Component to handle user presence via WebSocket
 const UserPresence = ({ children }) => {
+  const location = useLocation();
+  const socketRef = React.useRef(null);
+
   React.useEffect(() => {
     const isPersistent = !!localStorage.getItem('token');
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -39,6 +42,7 @@ const UserPresence = ({ children }) => {
       const socket = io(backendUrl, {
         auth: { token }
       });
+      socketRef.current = socket;
 
       socket.on('connect', () => {
         console.log(`[Presence] Connected via ${isPersistent ? 'Persistent' : 'Temporary'} session.`);
@@ -48,14 +52,23 @@ const UserPresence = ({ children }) => {
           email: user.email,
           id: user._id || user.id,
           dp: user.dp || user.profilePic || null,
-          isPersistent: isPersistent
+          isPersistent: isPersistent,
+          location: window.location.pathname
         });
       });
 
       return () => {        socket.disconnect();
+        socketRef.current = null;
       };
     }
   }, []);
+
+  // Update location on route changes
+  React.useEffect(() => {
+    if (socketRef.current && socketRef.current.connected) {
+      socketRef.current.emit('page-view', { location: location.pathname });
+    }
+  }, [location]);
 
   return children;
 };
