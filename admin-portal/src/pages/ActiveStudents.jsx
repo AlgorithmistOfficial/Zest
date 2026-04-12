@@ -26,10 +26,11 @@ const ActiveStudents = () => {
             setError('Could not connect to the backend server. Displaying demo data instead.');
 
             // MOCK DATA for demonstration purposes if backend is down
+            // MOCK DATA for demonstration purposes if backend is down
             setStudents([
-                { id: 1, name: 'Alex Rivera', email: 'alex@gmail.com', lastActive: '2 minutes ago', location: '/home' },
-                { id: 2, name: 'Samantha Lee', email: 'sam@gmail.com', lastActive: 'Just now', location: '/test/demo-test' },
-                { id: 3, name: 'Jordan Smith', email: 'jordan@gmail.com', lastActive: '5 minutes ago', location: '/home' }
+                { id: 1, name: 'Alex Rivera', email: 'alex@gmail.com', location: '/home', locationStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString() },
+                { id: 2, name: 'Samantha Lee', email: 'sam@gmail.com', location: '/test/demo-test', locationStartedAt: new Date(Date.now() - 12 * 60 * 1000).toISOString() },
+                { id: 3, name: 'Jordan Smith', email: 'jordan@gmail.com', location: '/home', locationStartedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString() }
             ]);
         } finally {
             setLoading(false);
@@ -61,7 +62,8 @@ const ActiveStudents = () => {
         const start = new Date(startedAt);
         const now = new Date();
         const diffMs = now - start;
-        return Math.floor(diffMs / (1000 * 60));
+        const mins = Math.floor(diffMs / (1000 * 60));
+        return Math.max(0, mins); // Prevent negative numbers due to sync drift
     };
 
     return (
@@ -177,12 +179,10 @@ const ActiveStudents = () => {
                                         <td className="px-8 py-5 text-right">
                                             <div className={`inline-flex items-center gap-2 px-4 py-2 ${view === 'test' ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-green-50 text-green-600 border-green-100'} rounded-xl font-bold text-sm border shadow-sm`}>
                                                 <div className={`w-2 h-2 rounded-full ${view === 'test' ? 'bg-yellow-500' : 'bg-green-500'} animate-pulse`}></div>
-                                                {view === 'test'
-                                                    ? `Joined since ${getDurationMinutes(student.locationStartedAt)} min ago`
-                                                    : 'Online'}
+                                                Joined since {getDurationMinutes(student.locationStartedAt)} min ago
                                             </div>
                                             <div className="text-[10px] font-black text-slate-300 uppercase tracking-tighter mt-1 mr-1">
-                                                {view === 'test' ? 'In Test Environment' : `Active ${student.lastActive || 'now'}`}
+                                                {view === 'test' ? 'In Test Environment' : 'Currently on Dashboard'}
                                             </div>
                                         </td>
                                     </motion.tr>
