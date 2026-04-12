@@ -106,6 +106,7 @@ const TestCreate = () => {
             try {
                 const existingContentRes = await api.get(`/test-contents/${testIdInput}`);
                 if (existingContentRes.data) {
+                    // Metadata comes from the Exams DB (merged by the backend GET handler)
                     setExamInfo({
                         testId: existingContentRes.data.testId,
                         examName: existingContentRes.data.examName,
@@ -246,11 +247,9 @@ const TestCreate = () => {
         }
 
         try {
+            // Only persist testId + questions; exam metadata stays in the Exams collection
             const payload = {
                 testId: examInfo.testId,
-                examName: examInfo.examName,
-                totalMarks: examInfo.totalMarks,
-                duration: examInfo.duration,
                 questions: questions.map(q => ({
                     ques: q.ques,
                     type: q.type,
