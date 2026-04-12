@@ -24,7 +24,7 @@ const ActiveStudents = () => {
         } catch (err) {
             console.error('Error fetching active students:', err);
             setError('Could not connect to the backend server. Displaying demo data instead.');
-            
+
             // MOCK DATA for demonstration purposes if backend is down
             setStudents([
                 { id: 1, name: 'Alex Rivera', email: 'alex@gmail.com', lastActive: '2 minutes ago', location: '/home' },
@@ -51,25 +51,33 @@ const ActiveStudents = () => {
     });
 
     const pageTitle = view === 'test' ? 'In-Test Students' : 'Online on Dashboard';
-    const pageSubtitle = view === 'test' 
-        ? 'Students currently engaged in a secure test environment.' 
+    const pageSubtitle = view === 'test'
+        ? 'Students currently engaged in a secure test environment.'
         : 'Students currently browsing their personalized dashboard.';
     const pageIcon = view === 'test' ? FileEdit : LayoutDashboard;
+
+    const getDurationMinutes = (startedAt) => {
+        if (!startedAt) return 0;
+        const start = new Date(startedAt);
+        const now = new Date();
+        const diffMs = now - start;
+        return Math.floor(diffMs / (1000 * 60));
+    };
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <PageHeader 
-                    title={pageTitle} 
+                <PageHeader
+                    title={pageTitle}
                     subtitle={pageSubtitle}
                     icon={pageIcon}
                 />
-                
+
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                         Last updated: {lastUpdated.toLocaleTimeString()}
                     </span>
-                    <button 
+                    <button
                         onClick={fetchActiveStudents}
                         className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-navy hover:border-navy transition-all shadow-sm"
                         title="Refresh now"
@@ -88,7 +96,7 @@ const ActiveStudents = () => {
                     <div>
                         <h3 className="text-lg font-bold text-red-900 mb-1">Connection Issue</h3>
                         <p className="text-red-700 font-medium">
-                            {error} 
+                            {error}
                             <span className="block mt-2 text-sm opacity-80">
                                 Note: Ensure the backend is running at {api.defaults.baseURL}
                             </span>
@@ -124,8 +132,8 @@ const ActiveStudents = () => {
                                             {view === 'test' ? <FileEdit size={48} className="opacity-20" /> : <Users size={48} className="opacity-20" />}
                                             <span className="text-xl font-bold">No students found here</span>
                                             <p className="text-sm font-medium text-slate-400 max-w-xs">
-                                                {view === 'test' 
-                                                    ? 'No students are currently active within a test page.' 
+                                                {view === 'test'
+                                                    ? 'No students are currently active within a test page.'
                                                     : 'No students are currently active on the main dashboard.'
                                                 }
                                             </p>
@@ -134,11 +142,11 @@ const ActiveStudents = () => {
                                 </tr>
                             ) : (
                                 filteredStudents.map((student, idx) => (
-                                    <motion.tr 
+                                    <motion.tr
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.05 }}
-                                        key={student.id || idx} 
+                                        key={student.id || idx}
                                         className="hover:bg-slate-50/30 transition-colors group"
                                     >
                                         <td className="px-8 py-5">
@@ -167,12 +175,14 @@ const ActiveStudents = () => {
                                             </div>
                                         </td>
                                         <td className="px-8 py-5 text-right">
-                                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl font-bold text-sm border border-green-100 shadow-sm">
-                                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                                {view === 'test' ? 'In Test' : 'Online'}
+                                            <div className={`inline-flex items-center gap-2 px-4 py-2 ${view === 'test' ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-green-50 text-green-600 border-green-100'} rounded-xl font-bold text-sm border shadow-sm`}>
+                                                <div className={`w-2 h-2 rounded-full ${view === 'test' ? 'bg-yellow-500' : 'bg-green-500'} animate-pulse`}></div>
+                                                {view === 'test'
+                                                    ? `Joined since ${getDurationMinutes(student.locationStartedAt)} min ago`
+                                                    : 'Online'}
                                             </div>
                                             <div className="text-[10px] font-black text-slate-300 uppercase tracking-tighter mt-1 mr-1">
-                                                Active {student.lastActive || 'now'}
+                                                {view === 'test' ? 'In Test Environment' : `Active ${student.lastActive || 'now'}`}
                                             </div>
                                         </td>
                                     </motion.tr>
@@ -192,7 +202,7 @@ const ActiveStudents = () => {
                     <p className="text-4xl font-black mb-1">{students.length}</p>
                     <p className="text-sm font-medium text-white/60">Combined active sessions</p>
                 </div>
-                
+
                 <div className="bg-lime p-8 rounded-[2.5rem] text-white shadow-xl shadow-lime/20 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                         <LayoutDashboard size={80} />
@@ -208,7 +218,7 @@ const ActiveStudents = () => {
                     </div>
                     <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-2">In Test</h4>
                     <p className="text-4xl font-black mb-1">{students.filter(s => s.location && s.location.startsWith('/test/')).length}</p>
-                    <p className="text-sm font-medium text-white/60">Currently testing</p>
+                    <p className="text-sm font-medium text-white/60">Currently giving test</p>
                 </div>
             </div>
         </div>
