@@ -30,10 +30,10 @@ const PublicRoute = ({ children }) => {
 const UserPresence = ({ children }) => {
   const location = useLocation();
   const socketRef = React.useRef(null);
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
   React.useEffect(() => {
     const isPersistent = !!localStorage.getItem('token');
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
     if (token && user.email) {
@@ -57,18 +57,22 @@ const UserPresence = ({ children }) => {
         });
       });
 
-      return () => {        socket.disconnect();
-        socketRef.current = null;
+      return () => {
+        if (socket) {
+          socket.disconnect();
+          socketRef.current = null;
+        }
       };
     }
-  }, []);
+  }, [token]); // Sync connection when token is available
 
   // Update location on route changes
   React.useEffect(() => {
     if (socketRef.current && socketRef.current.connected) {
+      console.log(`[Presence] Navigation detected. Updating location to: ${location.pathname}`);
       socketRef.current.emit('page-view', { location: location.pathname });
     }
-  }, [location]);
+  }, [location.pathname]);
 
   return children;
 };
@@ -105,7 +109,7 @@ const ProtectedRoute = ({ children }) => {
   if (!paramsHandled) return null;
 
   return isAuthenticated() ? (
-    <UserPresence>{children}</UserPresence>
+    children
   ) : (
     <Navigate to="/auth" replace />
   );
@@ -115,21 +119,23 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-        <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+      <UserPresence>
+        <Routes>
+          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+          <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
 
-        <Route path="/about" element={<About />} />
+          <Route path="/about" element={<About />} />
 
-        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
-        <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
-        <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-        <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-        <Route path="/test/:testId" element={<ProtectedRoute><Test /></ProtectedRoute>} />
-      </Routes>
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
+          <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
+          <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/test/:testId" element={<ProtectedRoute><Test /></ProtectedRoute>} />
+        </Routes>
+      </UserPresence>
     </BrowserRouter>
   </React.StrictMode>
 );
