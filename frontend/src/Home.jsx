@@ -87,11 +87,17 @@ const Home = () => {
         if (token) {
           try {
             const studentRes = await fetch(`${backendUrl}/api/student/submitted-tests`, {
-              headers: { 'Authorization': `Bearer ${token}` }
+              headers: { 'Authorization': `Bearer ${token}` },
+              credentials: 'include'
             });
+            console.log('[Home] submitted-tests response status:', studentRes.status);
             if (studentRes.ok) {
               const studentData = await studentRes.json();
               submittedTestIds = studentData.submittedTestIds || [];
+              console.log('[Home] Student has submitted these testIds:', submittedTestIds);
+            } else {
+              const errBody = await studentRes.text();
+              console.warn('[Home] submitted-tests fetch failed:', studentRes.status, errBody);
             }
           } catch (e) {
             console.error('[Home] Failed to fetch submitted tests:', e);
