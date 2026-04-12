@@ -44,17 +44,18 @@ const ActiveStudents = () => {
     }, []);
 
     const filteredStudents = students.filter(student => {
+        const isTesting = student.location && student.location.startsWith('/test/');
         if (view === 'test') {
-            return student.location && student.location.startsWith('/test/');
+            return isTesting;
         }
-        // Default to dashboard view (home or root)
-        return !student.location || student.location === '/home' || student.location === '/';
+        // Dashboard view includes anyone NOT in a test
+        return !isTesting;
     });
 
     const pageTitle = view === 'test' ? 'In-Test Students' : 'Online on Dashboard';
     const pageSubtitle = view === 'test'
         ? 'Students currently engaged in a secure test environment.'
-        : 'Students currently browsing their personalized dashboard.';
+        : 'Students currently browsing the portal (Home, Profile, Syllabus, etc).';
     const pageIcon = view === 'test' ? FileEdit : LayoutDashboard;
 
     const getDurationMinutes = (startedAt) => {
@@ -162,7 +163,7 @@ const ActiveStudents = () => {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-navy group-hover:text-black transition-colors">{student.name}</span>
-                                                    {view === 'test' && student.location && (
+                                                    {isTesting && student.location && (
                                                         <span className="text-[10px] font-bold text-lime uppercase tracking-wider">
                                                             Test ID: {student.location.split('/').pop()}
                                                         </span>
@@ -182,7 +183,7 @@ const ActiveStudents = () => {
                                                 Joined since {getDurationMinutes(student.locationStartedAt)} min ago
                                             </div>
                                             <div className="text-[10px] font-black text-slate-300 uppercase tracking-tighter mt-1 mr-1">
-                                                {view === 'test' ? 'In Test Environment' : 'Currently on Dashboard'}
+                                                {view === 'test' ? 'In Test Environment' : 'On Dashboard'}
                                             </div>
                                         </td>
                                     </motion.tr>
@@ -208,7 +209,7 @@ const ActiveStudents = () => {
                         <LayoutDashboard size={80} />
                     </div>
                     <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white/40 mb-2">On Dashboard</h4>
-                    <p className="text-4xl font-black mb-1">{students.filter(s => !s.location || s.location === '/home' || s.location === '/').length}</p>
+                    <p className="text-4xl font-black mb-1">{students.filter(s => !(s.location && s.location.startsWith('/test/'))).length}</p>
                     <p className="text-sm font-medium text-white/60">Waiting for tests</p>
                 </div>
 
