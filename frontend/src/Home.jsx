@@ -81,6 +81,23 @@ const Home = () => {
         const exams = await res.json();
         console.log('[Home] Fetched exams:', exams);
 
+        // Fetch student's already-submitted test IDs
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        let submittedTestIds = [];
+        if (token) {
+          try {
+            const studentRes = await fetch(`${backendUrl}/api/student/submitted-tests`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (studentRes.ok) {
+              const studentData = await studentRes.json();
+              submittedTestIds = studentData.submittedTestIds || [];
+            }
+          } catch (e) {
+            console.error('[Home] Failed to fetch submitted tests:', e);
+          }
+        }
+
         const now = new Date();
 
         const parseDateTime = (d, t) => {
@@ -98,21 +115,19 @@ const Home = () => {
 
         const activeExams = exams
           .filter(e => e.status === 'scheduled' || e.status === 'ongoing')
+          .filter(e => !submittedTestIds.includes(e.testId)) // Skip already-submitted tests
           .map(e => ({ ...e, startAt: parseDateTime(e.examDate, e.examTime) }))
           .sort((a, b) => a.startAt - b.startAt);
 
-        console.log('[Home] All active exams sorted:', activeExams);
+        console.log('[Home] Active exams (excluding submitted):', activeExams);
 
-        // Logic to find the "best" test to show:
-        // 1. First upcoming test (startAt > now)
-        // 2. Or the most recent ongoing/scheduled test that started today
-        const upcoming = activeExams.find(e => e.startAt > now);
-        const mostRecentStarted = [...activeExams].reverse().find(e => e.startAt <= now);
-
-        const bestTest = upcoming || mostRecentStarted;
+        // Prioritize: ongoing test first, then next scheduled test
+        const ongoingTest = activeExams.find(e => e.status === 'ongoing');
+        const nextScheduled = activeExams.find(e => e.startAt > now);
+        const bestTest = ongoingTest || nextScheduled;
 
         if (bestTest) {
-          console.log('[Home] Best test selected:', bestTest.examName);
+          console.log('[Home] Best test selected:', bestTest.examName, '| Status:', bestTest.status);
           setUpcomingTest(bestTest);
         }
       } catch (err) {
