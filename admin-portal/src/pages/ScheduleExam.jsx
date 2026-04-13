@@ -75,7 +75,7 @@ const ScheduleExam = () => {
                         </div>
                         <div>
                             <label className="label">Duration (Minutes)</label>
-                            <input type="number" id="duration" className="input-field" placeholder="60" required onChange={handleChange} />
+                            <input type="number" id="duration" className="input-field" placeholder="60" required min="1" onChange={handleChange} />
                         </div>
                         <div>
                             <label className="label">Difficulty</label>
@@ -87,11 +87,11 @@ const ScheduleExam = () => {
                         </div>
                         <div>
                             <label className="label">Total Marks</label>
-                            <input type="number" id="totalMarks" className="input-field" placeholder="100" required onChange={handleChange} />
+                            <input type="number" id="totalMarks" className="input-field" placeholder="100" required min="1" onChange={handleChange} />
                         </div>
                         <div>
                             <label className="label">Passing Marks</label>
-                            <input type="number" id="passingMarks" className="input-field" placeholder="40" required onChange={handleChange} />
+                            <input type="number" id="passingMarks" className="input-field" placeholder="40" required min="1" onChange={handleChange} />
                         </div>
                         <div className="span-2">
                             <label className="label">Topics (Comma separated)</label>

@@ -24,7 +24,15 @@ const Test = () => {
     const [answers, setAnswers] = useState({});
     const [timeLeft, setTimeLeft] = useState(0);
     const [submitting, setSubmitting] = useState(false);
+    const [warningsCount, setWarningsCount] = useState(0);
     
+    // Exit fullscreen on test end
+    useEffect(() => {
+        if (phase === 'results' && document.fullscreenElement) {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        }
+    }, [phase]);
+
     // Code execution
     const [codeRunning, setCodeRunning] = useState(false);
     const [codeResults, setCodeResults] = useState({});
@@ -150,7 +158,6 @@ const Test = () => {
     useEffect(() => {
         if (phase !== 'testing') return;
         
-        let warningsCount = 0;
         const maxWarnings = 3;
 
         const handleVisibilityChange = () => {
@@ -170,15 +177,18 @@ const Test = () => {
         };
 
         const issueWarning = (reason) => {
-            warningsCount += 1;
-            if (warningsCount >= maxWarnings) {
-                alert(`SECURITY BREACH: ${reason}.\n\nYou have received ${warningsCount} warnings. The test is now terminating and you will be suspended.`);
-                if (!hasSubmitted.current && submitFnRef.current) {
-                    submitFnRef.current(true);
+            setWarningsCount(prev => {
+                const newCount = prev + 1;
+                if (newCount >= maxWarnings) {
+                    alert(`SECURITY BREACH: ${reason}.\n\nYou have received ${newCount} warnings. The test is now terminating and you will be suspended.`);
+                    if (!hasSubmitted.current && submitFnRef.current) {
+                        submitFnRef.current(true);
+                    }
+                } else {
+                    alert(`SECURITY WARNING ${newCount}/${maxWarnings}: ${reason}.\n\nThe test environment strictly prohibits cheating methods, tab switching, or exiting fullscreen. Reaching 3 warnings will terminate the test.`);
                 }
-            } else {
-                alert(`SECURITY WARNING ${warningsCount}/${maxWarnings}: ${reason}.\n\nThe test environment strictly prohibits cheating methods, tab switching, or exiting fullscreen. Reaching 3 warnings will terminate the test.`);
-            }
+                return newCount;
+            });
         };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -511,9 +521,9 @@ const Test = () => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Test ID: {testId}</p>
                     </div>
                 </div>
-                <div className={`flex items-center gap-2 font-mono font-black text-2xl ${getTimerColor()} ${timeLeft <= 60 ? 'animate-pulse' : ''}`}>
-                    <Clock size={20} />
-                    {formatTime(timeLeft)}
+                <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 font-bold text-sm">
+                    <AlertTriangle size={18} />
+                    {warningsCount} / 3 Warnings
                 </div>
             </div>
 
@@ -562,7 +572,13 @@ const Test = () => {
                                     {question.options?.map((opt, i) => (
                                         <button
                                             key={i}
-                                            onClick={() => setAnswer(currentQ, opt)}
+                                            onClick={() => {
+                                                if (answers[currentQ] === opt) {
+                                                    setAnswer(currentQ, null);
+                                                } else {
+                                                    setAnswer(currentQ, opt);
+                                                }
+                                            }}
                                             className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 group ${
                                                 answers[currentQ] === opt
                                                     ? 'border-lime bg-lime/5 shadow-lg shadow-lime/10'
@@ -660,6 +676,9 @@ const Test = () => {
                                     </div>
                                     <textarea
                                         value={answers[currentQ] || ''}
+                                        onCopy={(e) => e.preventDefault()}
+                                        onPaste={(e) => e.preventDefault()}
+                                        onCut={(e) => e.preventDefault()}
                                         onChange={(e) => setAnswer(currentQ, e.target.value)}
                                         placeholder={`public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}`}
                                         className="w-full h-72 p-5 rounded-2xl bg-[#1e1e2e] text-[#cdd6f4] font-mono text-sm border-2 border-[#313244] focus:border-lime/50 focus:outline-none resize-none leading-relaxed shadow-inner"

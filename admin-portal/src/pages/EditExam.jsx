@@ -107,7 +107,7 @@ const EditExam = () => {
                         </div>
                         <div>
                             <label className="label">Duration (Minutes)</label>
-                            <input type="number" id="duration" className="input-field" required onChange={handleChange} value={formData.duration} />
+                            <input type="number" id="duration" className="input-field" required min="1" onChange={handleChange} value={formData.duration} />
                         </div>
                         <div>
                             <label className="label">Difficulty</label>
@@ -119,11 +119,11 @@ const EditExam = () => {
                         </div>
                         <div>
                             <label className="label">Total Marks</label>
-                            <input type="number" id="totalMarks" className="input-field" required onChange={handleChange} value={formData.totalMarks} />
+                            <input type="number" id="totalMarks" className="input-field" required min="1" onChange={handleChange} value={formData.totalMarks} />
                         </div>
                         <div>
                             <label className="label">Passing Marks</label>
-                            <input type="number" id="passingMarks" className="input-field" required onChange={handleChange} value={formData.passingMarks} />
+                            <input type="number" id="passingMarks" className="input-field" required min="1" onChange={handleChange} value={formData.passingMarks} />
                         </div>
                         <div className="span-2">
                             <label className="label">Topics (Comma separated)</label>
