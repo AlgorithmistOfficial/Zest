@@ -1,15 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck } from 'lucide-react';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
+    const [pendingNotifications, setPendingNotifications] = useState(0);
     const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const fetchPendingCount = async () => {
+            try {
+                const res = await fetch(`${apiUrl}/api/admin/notifications`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const pending = Array.isArray(data) ? data.filter(n => n.status === 'pending').length : 0;
+                setPendingNotifications(pending);
+            } catch (err) {
+                // Silent fail to keep navbar responsive even if API is down
+            }
+        };
+
+        fetchPendingCount();
+        const intervalId = setInterval(fetchPendingCount, 10000);
+        return () => clearInterval(intervalId);
     }, []);
 
     const isExamsActive = ['/', '/create', '/create-content'].includes(location.pathname);
@@ -99,6 +119,53 @@ const Navbar = () => {
                         >
                             <Database size={16} />
                             <span>Storage</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/notifications"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-navy text-white shadow-lg'
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`
+                            }
+                        >
+                            <Bell size={16} />
+                            <span>Notification</span>
+                            {pendingNotifications > 0 && (
+                                <span className="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">
+                                    {pendingNotifications > 99 ? '99+' : pendingNotifications}
+                                </span>
+                            )}
+                        </NavLink>
+
+                        <NavLink
+                            to="/reports"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-navy text-white shadow-lg'
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`
+                            }
+                        >
+                            <Table size={16} />
+                            <span>Reports</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/attendance"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-navy text-white shadow-lg'
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`
+                            }
+                        >
+                            <ClipboardCheck size={16} />
+                            <span>Attendance</span>
                         </NavLink>
 
                         {/* Online Students Dropdown */}

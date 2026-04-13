@@ -26,6 +26,7 @@ const Test = () => {
     const [submitting, setSubmitting] = useState(false);
     const [warningsCount, setWarningsCount] = useState(0);
     const [warningPrompt, setWarningPrompt] = useState(null);
+    const [warningLimitExceeded, setWarningLimitExceeded] = useState(false);
 
     // Exit fullscreen on test end
     useEffect(() => {
@@ -44,6 +45,8 @@ const Test = () => {
     const timerRef = useRef(null);
     const hasSubmitted = useRef(false);
     const submitFnRef = useRef(null);
+    const warningPromptOpenRef = useRef(false);
+    const audioContextRef = useRef(null);
 
     // Fetch test data
     useEffect(() => {
@@ -103,7 +106,7 @@ const Test = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ testId, answers: payloadAnswers })
+                body: JSON.stringify({ testId, answers: payloadAnswers, alarmCount: warningsCount })
             });
             const data = await res.json();
             if (res.ok) {
@@ -120,10 +123,11 @@ const Test = () => {
         } finally {
             setSubmitting(false);
         }
-    }, [testId, answers, testData, submitting]);
+    }, [testId, answers, testData, warningsCount, submitting]);
 
     // Keep ref updated for timer callback
     submitFnRef.current = handleSubmit;
+    warningPromptOpenRef.current = Boolean(warningPrompt);
 
     // Timer effect
     useEffect(() => {
@@ -160,28 +164,111 @@ const Test = () => {
     useEffect(() => {
         if (phase !== 'testing') return;
 
+        const playAlarmTone = () => {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                if (!audioContextRef.current) {
+                    audioContextRef.current = new AudioCtx();
+                }
+                const ctx = audioContextRef.current;
+                if (ctx.state === 'suspended') {
+                    ctx.resume().catch(() => { });
+                }
+
+                const durationSec = 2.2;
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.value = 760;
+                gainNode.gain.value = 0;
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+                gainNode.gain.setValueAtTime(0.0001, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.25, now + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.08, now + durationSec);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + durationSec + 0.05);
+                oscillator.start(now);
+                oscillator.stop(now + durationSec + 0.08);
+            } catch (err) {
+                console.warn('Alarm tone could not be played:', err);
+            }
+        };
+
+        const triggerWarningPrompt = () => {
+            if (warningPromptOpenRef.current) return;
+            playAlarmTone();
+            setWarningPrompt('Attempt of unfair means observed, giving you a warning!');
+        };
+
         const handleVisibilityChange = () => {
             if (document.hidden) {
-                setWarningPrompt(prev => prev || 'Tab switching or minimizing window detected');
+                triggerWarningPrompt();
             }
         };
 
         const handleFullscreenChange = () => {
             if (!document.fullscreenElement) {
-                setWarningPrompt(prev => prev || 'Exiting fullscreen mode detected');
+                triggerWarningPrompt();
             }
         };
 
-        const issueWarning = () => { }; // Legacy
+        const handleWindowBlur = () => {
+            triggerWarningPrompt();
+        };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
+        window.addEventListener('blur', handleWindowBlur);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            window.removeEventListener('blur', handleWindowBlur);
         };
     }, [phase]);
+
+    const handleContinueAfterWarning = () => {
+        const nextWarnings = warningsCount + 1;
+        setWarningsCount(nextWarnings);
+        setWarningPrompt(null);
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            fetch(`${backendUrl}/api/test/alarm`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ testId, alarmCount: nextWarnings })
+            }).catch((err) => console.warn('Failed to sync alarm count:', err));
+        }
+
+        if (nextWarnings >= 3) {
+            setWarningLimitExceeded(true);
+            return;
+        }
+
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => { });
+        }
+    };
+
+    const handleTerminateWithZero = () => {
+        setWarningPrompt(null);
+        setWarningLimitExceeded(false);
+        handleSubmit(false, true);
+    };
+
+    useEffect(() => {
+        if (!warningLimitExceeded) return;
+        const timeoutId = setTimeout(() => {
+            handleSubmit(false, true);
+        }, 1500);
+        return () => clearTimeout(timeoutId);
+    }, [warningLimitExceeded, handleSubmit]);
 
     // Format time
     const formatTime = (seconds) => {
@@ -508,46 +595,50 @@ const Test = () => {
                         >
                             <AlertTriangle size={64} className="text-red-500 mx-auto mb-6" />
                             <h2 className="text-2xl font-black text-navy mb-2">Attempt of unfair means observed!</h2>
-                            <p className="text-lg text-slate-600 font-medium mb-6">Warning generated for: {warningPrompt}</p>
+                            <p className="text-lg text-slate-600 font-medium mb-2">{warningPrompt}</p>
+                            <p className="text-sm text-slate-500 font-bold mb-6">Current warnings: {warningsCount} / 3</p>
 
-                            {warningsCount >= 2 ? (
-                                <div>
-                                    <p className="text-red-600 font-bold mb-6">You have exceeded the warning limit. Your test will now terminate and you will receive 0 marks.</p>
-                                    <button
-                                        onClick={() => {
-                                            setWarningPrompt(null);
-                                            handleSubmit(false, true); // autoSubmit=false, forceZero=true
-                                        }}
-                                        className="w-full py-4 bg-red-600 text-white rounded-xl font-bold transition-all hover:bg-red-700 shadow-lg"
-                                    >
-                                        Acknowledge & Exit
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={() => {
-                                            setWarningsCount(prev => prev + 1);
-                                            setWarningPrompt(null);
-                                            if (document.documentElement.requestFullscreen) {
-                                                document.documentElement.requestFullscreen().catch(() => { });
-                                            }
-                                        }}
-                                        className="w-full py-4 bg-navy text-white rounded-xl font-bold hover:bg-navy/90 transition-colors shadow-lg"
-                                    >
-                                        Continue (Return to test)
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setWarningPrompt(null);
-                                            handleSubmit(false, true); // force zero
-                                        }}
-                                        className="w-full py-4 bg-slate-100 text-red-600 hover:bg-red-50 rounded-xl font-bold transition-colors"
-                                    >
-                                        Exit (Finish test with 0 marks)
-                                    </button>
-                                </div>
-                            )}
+                            <div className="space-y-3">
+                                <button
+                                    onClick={handleTerminateWithZero}
+                                    className="w-full py-4 bg-slate-100 text-red-600 hover:bg-red-50 rounded-xl font-bold transition-colors"
+                                >
+                                    Exit (Finish test with 0 marks)
+                                </button>
+                                <button
+                                    onClick={handleContinueAfterWarning}
+                                    className="w-full py-4 bg-navy text-white rounded-xl font-bold hover:bg-navy/90 transition-colors shadow-lg"
+                                >
+                                    Continue (Return to test)
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {warningLimitExceeded && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-red-900/90 backdrop-blur-md z-[110] flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            className="bg-white p-10 rounded-3xl shadow-2xl max-w-lg w-full text-center"
+                        >
+                            <AlertTriangle size={64} className="text-red-500 mx-auto mb-6" />
+                            <h2 className="text-2xl font-black text-navy mb-3">You have exceeded warning limit.</h2>
+                            <p className="text-slate-600 font-medium mb-6">Your test is being terminated and you will receive 0 marks.</p>
+                            <button
+                                onClick={handleTerminateWithZero}
+                                className="w-full py-4 bg-red-600 text-white rounded-xl font-bold transition-all hover:bg-red-700 shadow-lg"
+                            >
+                                Acknowledge
+                            </button>
                         </motion.div>
                     </motion.div>
                 )}

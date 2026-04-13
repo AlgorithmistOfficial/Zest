@@ -46,7 +46,7 @@ const Home = () => {
 
   const [entryAlert, setEntryAlert] = React.useState(null); // { type: 'early' | 'late' }
 
-  const handleStartTest = () => {
+  const handleStartTest = async () => {
     if (!upcomingTest) return;
 
     const now = new Date();
@@ -56,6 +56,35 @@ const Home = () => {
     if (now < startTime) {
       setEntryAlert({ type: 'early' });
     } else if (now > entryDeadline) {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        setEntryAlert({ type: 'late' });
+        return;
+      }
+      try {
+        const statusRes = await fetch(`${backendUrl}/api/test/late-entry-status/${upcomingTest.testId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.status === 'allowed') {
+            navigate(`/test/${upcomingTest.testId}`);
+            return;
+          }
+        }
+
+        await fetch(`${backendUrl}/api/test/late-entry-request`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ testId: upcomingTest.testId })
+        });
+      } catch (err) {
+        console.warn('Failed to create late-entry request:', err);
+      }
       setEntryAlert({ type: 'late' });
     } else {
       // Within window (or for debugging, you can add an override here)
@@ -367,7 +396,7 @@ const Home = () => {
                     <p className="text-slate-600 font-medium leading-relaxed mb-8">
                       {entryAlert.type === 'early' 
                         ? `This test is scheduled to begin at ${fmtTime(upcomingTest.examTime)}. Please wait for the start signal.`
-                        : "The 5-minute entry window for this test has expired. Late entries are strictly prohibited by secure protocols."
+                        : "The 5-minute entry window has expired. A late-entry request has been sent to admin. You can join only if admin allows it."
                       }
                     </p>
 
