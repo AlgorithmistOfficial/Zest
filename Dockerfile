@@ -1,0 +1,41 @@
+# Stage 1: Get Java 21 from the official Eclipse Temurin image
+FROM eclipse-temurin:21-jdk AS java_base
+
+# Stage 2: Main application image
+FROM node:20-slim
+
+# Install necessary runtime libraries for Java
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libatomic1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy Java from the first stage
+COPY --from=java_base /opt/java/openjdk /opt/java/openjdk
+
+# Set environment variables for Java
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Set the working directory to the backend folder
+WORKDIR /app/backend
+
+# Copy backend package files and install dependencies
+COPY backend/package*.json ./
+RUN npm install --production
+
+# Copy the backend source code
+COPY backend/ .
+
+# Create the temp directory for compilation storage inside the backend folder
+RUN mkdir -p temp && chmod 777 temp
+
+# Set environmental variables for Hugging Face
+ENV PORT=7860
+ENV NODE_ENV=production
+
+# Expose the Hugging Face default port
+EXPOSE 7860
+
+# Start the application from the backend directory
+CMD ["node", "index.js"]
