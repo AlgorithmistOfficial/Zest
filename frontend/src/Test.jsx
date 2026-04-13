@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  LogOut, Info, ShieldCheck, PlayCircle, Clock, Send, 
-  ChevronLeft, ChevronRight, Code, CheckCircle2, XCircle,
-  Award, AlertTriangle, Trophy, Home, Loader2, Play,
-  Circle, Square, Type
+import {
+    LogOut, Info, ShieldCheck, PlayCircle, Clock, Send,
+    ChevronLeft, ChevronRight, Code, CheckCircle2, XCircle,
+    Award, AlertTriangle, Trophy, Home, Loader2, Play,
+    Circle, Square, Type
 } from 'lucide-react';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
@@ -13,12 +13,12 @@ const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-z
 const Test = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
-    
+
     // Core state
     const [testData, setTestData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [phase, setPhase] = useState('lobby'); // lobby | testing | results
-    
+
     // Test interaction state
     const [currentQ, setCurrentQ] = useState(0);
     const [answers, setAnswers] = useState({});
@@ -26,21 +26,21 @@ const Test = () => {
     const [submitting, setSubmitting] = useState(false);
     const [warningsCount, setWarningsCount] = useState(0);
     const [warningPrompt, setWarningPrompt] = useState(null);
-    
+
     // Exit fullscreen on test end
     useEffect(() => {
         if (phase === 'results' && document.fullscreenElement) {
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => { });
         }
     }, [phase]);
 
     // Code execution
     const [codeRunning, setCodeRunning] = useState(false);
     const [codeResults, setCodeResults] = useState({});
-    
+
     // Results
     const [results, setResults] = useState(null);
-    
+
     const timerRef = useRef(null);
     const hasSubmitted = useRef(false);
     const submitFnRef = useRef(null);
@@ -75,7 +75,7 @@ const Test = () => {
                 }
             };
             enterFullscreen();
-            
+
             // Fallback for browsers requiring a user gesture
             const handleFirstClick = () => {
                 enterFullscreen();
@@ -99,7 +99,7 @@ const Test = () => {
             const payloadAnswers = forceZeroMarks ? {} : answers;
             const res = await fetch(`${backendUrl}/api/test/submit`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -128,7 +128,7 @@ const Test = () => {
     // Timer effect
     useEffect(() => {
         if (phase !== 'testing') return;
-        
+
         timerRef.current = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
@@ -172,7 +172,7 @@ const Test = () => {
             }
         };
 
-        const issueWarning = () => {}; // Legacy
+        const issueWarning = () => { }; // Legacy
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -276,7 +276,7 @@ const Test = () => {
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime/5 rounded-full blur-[100px] -mr-64 -mt-64"></div>
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-navy/5 rounded-full blur-[100px] -ml-64 -mb-64"></div>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className="max-w-2xl w-full bg-white/70 backdrop-blur-xl p-12 rounded-[3.5rem] border border-white shadow-2xl relative z-10"
@@ -317,7 +317,7 @@ const Test = () => {
                             <Info className="text-navy shrink-0" size={24} />
                             <h2 className="font-bold text-navy text-lg">Test Guidelines & Security Protocols</h2>
                         </div>
-                        
+
                         <div className="text-sm text-slate-700 space-y-4">
                             <div className="flex gap-3">
                                 <Clock className="text-slate-500 shrink-0 mt-0.5" size={16} />
@@ -351,13 +351,13 @@ const Test = () => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <button 
+                        <button
                             onClick={startTest}
                             className="flex-1 py-4 bg-lime text-white rounded-2xl font-extrabold shadow-lg shadow-lime/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                         >
                             <PlayCircle size={20} /> Start Solving
                         </button>
-                        <button 
+                        <button
                             onClick={handleExit}
                             className="flex-1 py-4 bg-white text-navy border-2 border-slate-200 rounded-2xl font-extrabold hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                         >
@@ -386,7 +386,7 @@ const Test = () => {
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-lime/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-navy/5 rounded-full blur-[120px] -ml-64 -mb-64"></div>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 30 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -399,7 +399,7 @@ const Test = () => {
                         className="mx-auto mb-6"
                     >
                         <div className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto ${isPassed ? 'bg-lime/10' : 'bg-red-50'}`}>
-                            {isPassed 
+                            {isPassed
                                 ? <Trophy size={56} className="text-lime" />
                                 : <AlertTriangle size={56} className="text-red-400" />
                             }
@@ -420,9 +420,9 @@ const Test = () => {
                             {results.totalScore}
                         </div>
                         <p className="text-lg text-slate-400 font-bold">out of {results.totalMarks}</p>
-                        
+
                         <div className="w-full bg-slate-100 rounded-full h-3 mt-6 mb-8 overflow-hidden">
-                            <motion.div 
+                            <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${percentage}%` }}
                                 transition={{ delay: 0.7, duration: 1, ease: 'easeOut' }}
@@ -478,7 +478,7 @@ const Test = () => {
             {/* Submitting overlay */}
             <AnimatePresence>
                 {submitting && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-50 flex items-center justify-center"
                     >
@@ -498,7 +498,7 @@ const Test = () => {
             {/* Warning Prompt overlay */}
             <AnimatePresence>
                 {warningPrompt && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="fixed inset-0 bg-red-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-6"
                     >
@@ -509,11 +509,11 @@ const Test = () => {
                             <AlertTriangle size={64} className="text-red-500 mx-auto mb-6" />
                             <h2 className="text-2xl font-black text-navy mb-2">Attempt of unfair means observed!</h2>
                             <p className="text-lg text-slate-600 font-medium mb-6">Warning generated for: {warningPrompt}</p>
-                            
+
                             {warningsCount >= 2 ? (
                                 <div>
                                     <p className="text-red-600 font-bold mb-6">You have exceeded the warning limit. Your test will now terminate and you will receive 0 marks.</p>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setWarningPrompt(null);
                                             handleSubmit(false, true); // autoSubmit=false, forceZero=true
@@ -525,19 +525,19 @@ const Test = () => {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setWarningsCount(prev => prev + 1);
                                             setWarningPrompt(null);
                                             if (document.documentElement.requestFullscreen) {
-                                                document.documentElement.requestFullscreen().catch(() => {});
+                                                document.documentElement.requestFullscreen().catch(() => { });
                                             }
                                         }}
                                         className="w-full py-4 bg-navy text-white rounded-xl font-bold hover:bg-navy/90 transition-colors shadow-lg"
                                     >
                                         Continue (Return to test)
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setWarningPrompt(null);
                                             handleSubmit(false, true); // force zero
@@ -620,19 +620,17 @@ const Test = () => {
                                                     setAnswer(currentQ, opt);
                                                 }
                                             }}
-                                            className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 group ${
-                                                answers[currentQ] === opt
+                                            className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 group ${answers[currentQ] === opt
                                                     ? 'border-lime bg-lime/5 shadow-lg shadow-lime/10'
                                                     : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
-                                            }`}
+                                                }`}
                                         >
-                                            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                                                answers[currentQ] === opt 
-                                                    ? 'border-lime bg-lime' 
+                                            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${answers[currentQ] === opt
+                                                    ? 'border-lime bg-lime'
                                                     : 'border-slate-200 group-hover:border-slate-300'
-                                            }`}>
+                                                }`}>
                                                 {answers[currentQ] === opt && (
-                                                    <motion.div 
+                                                    <motion.div
                                                         initial={{ scale: 0 }} animate={{ scale: 1 }}
                                                         className="w-3 h-3 bg-white rounded-full"
                                                     />
@@ -658,15 +656,13 @@ const Test = () => {
                                             <button
                                                 key={i}
                                                 onClick={() => toggleMultiAnswer(currentQ, opt)}
-                                                className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 group ${
-                                                    selected
+                                                className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 group ${selected
                                                         ? 'border-lime bg-lime/5 shadow-lg shadow-lime/10'
                                                         : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
-                                                }`}
+                                                    }`}
                                             >
-                                                <div className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
-                                                    selected ? 'border-lime bg-lime' : 'border-slate-200 group-hover:border-slate-300'
-                                                }`}>
+                                                <div className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${selected ? 'border-lime bg-lime' : 'border-slate-200 group-hover:border-slate-300'
+                                                    }`}>
                                                     {selected && (
                                                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
                                                             <CheckCircle2 size={18} className="text-white" />
@@ -725,7 +721,7 @@ const Test = () => {
                                         className="w-full h-72 p-5 rounded-2xl bg-[#1e1e2e] text-[#cdd6f4] font-mono text-sm border-2 border-[#313244] focus:border-lime/50 focus:outline-none resize-none leading-relaxed shadow-inner"
                                         spellCheck={false}
                                     />
-                                    
+
                                     {/* Test case results */}
                                     {codeResults[currentQ] && (
                                         <div className="mt-4 space-y-2">
@@ -744,11 +740,10 @@ const Test = () => {
                                                         Test Results — {codeResults[currentQ].results?.filter(r => r.passed).length}/{codeResults[currentQ].results?.length} passed
                                                     </p>
                                                     {codeResults[currentQ].results?.map((r, i) => (
-                                                        <div key={i} className={`p-3 rounded-xl border text-sm ${
-                                                            r.passed ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'
-                                                        }`}>
+                                                        <div key={i} className={`p-3 rounded-xl border text-sm ${r.passed ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'
+                                                            }`}>
                                                             <div className="flex items-center gap-2 font-bold">
-                                                                {r.passed 
+                                                                {r.passed
                                                                     ? <CheckCircle2 size={14} className="text-green-500" />
                                                                     : <XCircle size={14} className="text-red-500" />
                                                                 }
@@ -798,11 +793,10 @@ const Test = () => {
                 {/* RIGHT: Question Panel + Timer (38%) */}
                 <div className="w-[38%] bg-white border-l border-slate-100 p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 60px)' }}>
                     {/* Timer Display */}
-                    <div className={`text-center p-6 rounded-3xl mb-6 transition-colors ${
-                        timeLeft <= 60 ? 'bg-red-50 border border-red-100' : 
-                        timeLeft <= 300 ? 'bg-amber-50 border border-amber-100' : 
-                        'bg-lime/5 border border-lime/10'
-                    }`}>
+                    <div className={`text-center p-6 rounded-3xl mb-6 transition-colors ${timeLeft <= 60 ? 'bg-red-50 border border-red-100' :
+                            timeLeft <= 300 ? 'bg-amber-50 border border-amber-100' :
+                                'bg-lime/5 border border-lime/10'
+                        }`}>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Time Remaining</p>
                         <p className={`text-4xl font-black font-mono tracking-wider ${getTimerColor()} ${timeLeft <= 60 ? 'animate-pulse' : ''}`}>
                             {formatTime(timeLeft)}
@@ -817,13 +811,12 @@ const Test = () => {
                                 <button
                                     key={i}
                                     onClick={() => setCurrentQ(i)}
-                                    className={`w-full aspect-square rounded-xl font-bold text-sm flex items-center justify-center transition-all duration-200 border-2 ${
-                                        i === currentQ
+                                    className={`w-full aspect-square rounded-xl font-bold text-sm flex items-center justify-center transition-all duration-200 border-2 ${i === currentQ
                                             ? 'bg-navy text-white border-navy shadow-lg scale-110'
                                             : isAnswered(i)
-                                            ? 'bg-lime/10 text-lime border-lime/30 hover:bg-lime/20'
-                                            : 'bg-slate-50 text-slate-400 border-transparent hover:border-slate-200 hover:bg-slate-100'
-                                    }`}
+                                                ? 'bg-lime/10 text-lime border-lime/30 hover:bg-lime/20'
+                                                : 'bg-slate-50 text-slate-400 border-transparent hover:border-slate-200 hover:bg-slate-100'
+                                        }`}
                                 >
                                     {i + 1}
                                 </button>
@@ -846,7 +839,7 @@ const Test = () => {
                             <span className="font-black text-navy">{totalQuestions - answeredCount}</span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div 
+                            <div
                                 className="h-full rounded-full bg-lime transition-all duration-500"
                                 style={{ width: `${totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}%` }}
                             />

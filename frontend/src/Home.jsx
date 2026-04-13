@@ -104,8 +104,6 @@ const Home = () => {
           }
         }
 
-        const now = new Date();
-
         const parseDateTime = (d, t) => {
           const ds = d.toString().padStart(8, '0');
           const ts = t.toString().padStart(6, '0');
@@ -119,22 +117,24 @@ const Home = () => {
           );
         };
 
+        const submittedSet = new Set((submittedTestIds || []).map(id => String(id)));
+
         const activeExams = exams
           .filter(e => e.status === 'scheduled' || e.status === 'ongoing')
-          .filter(e => !submittedTestIds.includes(e.testId)) // Skip already-submitted tests
+          .filter(e => !submittedSet.has(String(e.testId))) // Show first test not yet attempted
           .map(e => ({ ...e, startAt: parseDateTime(e.examDate, e.examTime) }))
           .sort((a, b) => a.startAt - b.startAt);
 
         console.log('[Home] Active exams (excluding submitted):', activeExams);
 
-        // Prioritize: ongoing test first, then next scheduled test
-        const ongoingTest = activeExams.find(e => e.status === 'ongoing');
-        const nextScheduled = activeExams.find(e => e.startAt > now);
-        const bestTest = ongoingTest || nextScheduled;
+        // Student should always see the earliest pending test (not present in student testIds)
+        const bestTest = activeExams.find(e => e.status === 'ongoing') || activeExams[0] || null;
 
         if (bestTest) {
           console.log('[Home] Best test selected:', bestTest.examName, '| Status:', bestTest.status);
           setUpcomingTest(bestTest);
+        } else {
+          setUpcomingTest(null);
         }
       } catch (err) {
         console.error('Failed to fetch nearest test:', err);
