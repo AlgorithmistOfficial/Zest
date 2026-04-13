@@ -80,20 +80,6 @@ const Test = () => {
     // Submit handler
     const handleSubmit = useCallback(async (autoSubmit = false) => {
         if (hasSubmitted.current || submitting) return;
-        
-        if (!autoSubmit && testData) {
-            const answered = Object.keys(answers).filter(k => {
-                const a = answers[k];
-                return a !== undefined && a !== null && a !== '' && !(Array.isArray(a) && a.length === 0);
-            }).length;
-            const unanswered = testData.questions.length - answered;
-            
-            if (unanswered > 0) {
-                if (!window.confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
-            } else {
-                if (!window.confirm('Are you sure you want to submit the test?')) return;
-            }
-        }
 
         hasSubmitted.current = true;
         setSubmitting(true);
