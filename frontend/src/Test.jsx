@@ -25,6 +25,7 @@ const Test = () => {
     const [timeLeft, setTimeLeft] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [warningsCount, setWarningsCount] = useState(0);
+    const [warningPrompt, setWarningPrompt] = useState(null);
     
     // Exit fullscreen on test end
     useEffect(() => {
@@ -86,7 +87,7 @@ const Test = () => {
     }, [loading, phase]);
 
     // Submit handler
-    const handleSubmit = useCallback(async (autoSubmit = false) => {
+    const handleSubmit = useCallback(async (autoSubmit = false, forceZeroMarks = false) => {
         if (hasSubmitted.current || submitting) return;
 
         hasSubmitted.current = true;
@@ -95,13 +96,14 @@ const Test = () => {
 
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const payloadAnswers = forceZeroMarks ? {} : answers;
             const res = await fetch(`${backendUrl}/api/test/submit`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ testId, answers })
+                body: JSON.stringify({ testId, answers: payloadAnswers })
             });
             const data = await res.json();
             if (res.ok) {
@@ -157,39 +159,20 @@ const Test = () => {
     // Security monitoring (Tab switching, Fullscreen exit)
     useEffect(() => {
         if (phase !== 'testing') return;
-        
-        const maxWarnings = 3;
 
         const handleVisibilityChange = () => {
             if (document.hidden) {
-                issueWarning('Tab switching or minimizing window detected');
+                setWarningPrompt(prev => prev || 'Tab switching or minimizing window detected');
             }
         };
 
         const handleFullscreenChange = () => {
             if (!document.fullscreenElement) {
-                issueWarning('Exiting fullscreen mode detected');
-                // Attempt to re-enter fullscreen
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(() => {});
-                }
+                setWarningPrompt(prev => prev || 'Exiting fullscreen mode detected');
             }
         };
 
-        const issueWarning = (reason) => {
-            setWarningsCount(prev => {
-                const newCount = prev + 1;
-                if (newCount >= maxWarnings) {
-                    alert(`SECURITY BREACH: ${reason}.\n\nYou have received ${newCount} warnings. The test is now terminating and you will be suspended.`);
-                    if (!hasSubmitted.current && submitFnRef.current) {
-                        submitFnRef.current(true);
-                    }
-                } else {
-                    alert(`SECURITY WARNING ${newCount}/${maxWarnings}: ${reason}.\n\nThe test environment strictly prohibits cheating methods, tab switching, or exiting fullscreen. Reaching 3 warnings will terminate the test.`);
-                }
-                return newCount;
-            });
-        };
+        const issueWarning = () => {}; // Legacy
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -507,6 +490,64 @@ const Test = () => {
                             <Loader2 size={48} className="text-lime animate-spin mx-auto mb-4" />
                             <p className="text-xl font-extrabold text-navy">Evaluating your answers...</p>
                             <p className="text-slate-500 font-medium mt-2">Please wait while we grade your test</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Warning Prompt overlay */}
+            <AnimatePresence>
+                {warningPrompt && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-red-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }} animate={{ scale: 1 }}
+                            className="bg-white p-10 rounded-3xl shadow-2xl max-w-lg w-full text-center"
+                        >
+                            <AlertTriangle size={64} className="text-red-500 mx-auto mb-6" />
+                            <h2 className="text-2xl font-black text-navy mb-2">Attempt of unfair means observed!</h2>
+                            <p className="text-lg text-slate-600 font-medium mb-6">Warning generated for: {warningPrompt}</p>
+                            
+                            {warningsCount >= 2 ? (
+                                <div>
+                                    <p className="text-red-600 font-bold mb-6">You have exceeded the warning limit. Your test will now terminate and you will receive 0 marks.</p>
+                                    <button 
+                                        onClick={() => {
+                                            setWarningPrompt(null);
+                                            handleSubmit(false, true); // autoSubmit=false, forceZero=true
+                                        }}
+                                        className="w-full py-4 bg-red-600 text-white rounded-xl font-bold transition-all hover:bg-red-700 shadow-lg"
+                                    >
+                                        Acknowledge & Exit
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <button 
+                                        onClick={() => {
+                                            setWarningsCount(prev => prev + 1);
+                                            setWarningPrompt(null);
+                                            if (document.documentElement.requestFullscreen) {
+                                                document.documentElement.requestFullscreen().catch(() => {});
+                                            }
+                                        }}
+                                        className="w-full py-4 bg-navy text-white rounded-xl font-bold hover:bg-navy/90 transition-colors shadow-lg"
+                                    >
+                                        Continue (Return to test)
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setWarningPrompt(null);
+                                            handleSubmit(false, true); // force zero
+                                        }}
+                                        className="w-full py-4 bg-slate-100 text-red-600 hover:bg-red-50 rounded-xl font-bold transition-colors"
+                                    >
+                                        Exit (Finish test with 0 marks)
+                                    </button>
+                                </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}
