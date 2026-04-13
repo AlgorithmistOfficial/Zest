@@ -55,6 +55,28 @@ const Test = () => {
         fetchTest();
     }, [testId, navigate]);
 
+    // Fullscreen on load
+    useEffect(() => {
+        if (!loading && phase === 'lobby') {
+            const enterFullscreen = () => {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log("Could not auto-start fullscreen:", err);
+                    });
+                }
+            };
+            enterFullscreen();
+            
+            // Fallback for browsers requiring a user gesture
+            const handleFirstClick = () => {
+                enterFullscreen();
+                document.removeEventListener('click', handleFirstClick);
+            };
+            document.addEventListener('click', handleFirstClick);
+            return () => document.removeEventListener('click', handleFirstClick);
+        }
+    }, [loading, phase]);
+
     // Submit handler
     const handleSubmit = useCallback(async (autoSubmit = false) => {
         if (hasSubmitted.current || submitting) return;
@@ -136,6 +158,50 @@ const Test = () => {
         };
         window.addEventListener('beforeunload', handler);
         return () => window.removeEventListener('beforeunload', handler);
+    }, [phase]);
+
+    // Security monitoring (Tab switching, Fullscreen exit)
+    useEffect(() => {
+        if (phase !== 'testing') return;
+        
+        let warningsCount = 0;
+        const maxWarnings = 3;
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                issueWarning('Tab switching or minimizing window detected');
+            }
+        };
+
+        const handleFullscreenChange = () => {
+            if (!document.fullscreenElement) {
+                issueWarning('Exiting fullscreen mode detected');
+                // Attempt to re-enter fullscreen
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+            }
+        };
+
+        const issueWarning = (reason) => {
+            warningsCount += 1;
+            if (warningsCount >= maxWarnings) {
+                alert(`SECURITY BREACH: ${reason}.\n\nYou have received ${warningsCount} warnings. The test is now terminating and you will be suspended.`);
+                if (!hasSubmitted.current && submitFnRef.current) {
+                    submitFnRef.current(true);
+                }
+            } else {
+                alert(`SECURITY WARNING ${warningsCount}/${maxWarnings}: ${reason}.\n\nThe test environment strictly prohibits cheating methods, tab switching, or exiting fullscreen. Reaching 3 warnings will terminate the test.`);
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
     }, [phase]);
 
     // Format time
@@ -266,14 +332,42 @@ const Test = () => {
                         </div>
                     </div>
 
-                    {/* Secure Protocol Notice */}
-                    <div className="bg-navy/5 border border-navy/10 p-6 rounded-3xl mb-10 flex gap-4 items-start">
-                        <Info className="text-navy shrink-0 mt-1" size={20} />
-                        <div className="text-sm">
-                            <p className="font-bold text-navy mb-1">Security Protocols Active</p>
-                            <p className="text-slate-600 leading-relaxed">
-                                This is a secure browser window. Tab switching and exiting fullscreen mode are monitored. Do not navigate away during the test.
-                            </p>
+                    {/* Instructions & Guidelines */}
+                    <div className="bg-navy/5 border border-navy/10 p-6 rounded-3xl mb-10 text-left">
+                        <div className="flex items-center gap-3 mb-4">
+                            <Info className="text-navy shrink-0" size={24} />
+                            <h2 className="font-bold text-navy text-lg">Test Guidelines & Security Protocols</h2>
+                        </div>
+                        
+                        <div className="text-sm text-slate-700 space-y-4">
+                            <div className="flex gap-3">
+                                <Clock className="text-slate-500 shrink-0 mt-0.5" size={16} />
+                                <p>
+                                    <strong>Duration & Submission:</strong> The test is {testData?.duration} minutes long. When the timer expires, the test will automatically submit your saved responses. You may also choose to submit manually before the time runs out.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <CheckCircle2 className="text-slate-500 shrink-0 mt-0.5" size={16} />
+                                <div>
+                                    <p className="mb-2"><strong>Question Formats:</strong> This test contains four types of questions:</p>
+                                    <ul className="list-disc pl-5 space-y-2">
+                                        <li><strong>Single Option:</strong> Click the single correct option. (Noted as "Choose one answer")</li>
+                                        <li><strong>Multiple Options:</strong> Select all applicable correct options. (Noted as "Select all that apply")</li>
+                                        <li><strong>Numerical/Character Value:</strong> Type a single number or character into the given input field.</li>
+                                        <li><strong>Java Code:</strong> Write Java code to pass the visible test case. Additional test cases will be validated securely on the backend.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                                <p>
+                                    <strong>Security Protocols:</strong> The test environment strictly prohibits cheating. Any attempt to switch tabs, minimize the window, or exit fullscreen mode will raise an alarm, resulting in a formal warning. Accumulating 3 warnings will immediately terminate the test and lead to a suspension.
+                                </p>
+                            </div>
+
+                            <p className="font-bold text-navy mt-6 text-center text-base">Best of luck!</p>
                         </div>
                     </div>
 
