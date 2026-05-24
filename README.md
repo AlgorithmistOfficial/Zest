@@ -22,7 +22,7 @@ The project is organized as a monorepo with three main applications.
 
 ## Repository Structure
 
-- `frontend/` - Student web application (React).
+- `student-portal/` - Student web application (React).
 - `admin-portal/` - Admin dashboard (React).
 - `backend/` - API server and real-time services (Node.js + Express + MongoDB).
 - `Dockerfile` - Production container setup for the backend with Java runtime support.
@@ -41,7 +41,7 @@ The project is organized as a monorepo with three main applications.
 - Real-time: Socket.IO
 - Code execution: Java compilation/execution via spawned processes (`javac`, `java`)
 
-### Student App (`frontend/`)
+### Student App (`student-portal/`)
 
 - UI framework: React 19
 - Routing: `react-router-dom`
@@ -170,7 +170,7 @@ Run in each app folder:
 
 ```bash
 cd backend && npm install
-cd ../frontend && npm install
+cd ../student-portal && npm install
 cd ../admin-portal && npm install
 ```
 
@@ -182,7 +182,7 @@ cd backend
 npm start
 
 # Terminal 2
-cd frontend
+cd student-portal
 npm start
 
 # Terminal 3
@@ -207,7 +207,7 @@ The exact values are intentionally not published in this repository.
 ## Deployment Notes
 
 - Backend is containerized with Node + Java runtime support for compile/evaluate features.
-- Frontend/admin apps are standard React builds and can be deployed independently.
+- student-portal/admin apps are standard React builds and can be deployed independently.
 - Ensure CORS and callback URLs are aligned with deployment domains.
 
 ## License and Usage Policy
