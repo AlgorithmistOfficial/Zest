@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck } from 'lucide-react';
+import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck, Layers3 } from 'lucide-react';
+import { setActiveAdminBatch, useActiveAdminBatch } from '../batch';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [pendingNotifications, setPendingNotifications] = useState(0);
+    const [batches, setBatches] = useState([]);
+    const activeBatch = useActiveAdminBatch();
+    const [activeBatchId, setActiveBatchId] = useState(activeBatch?._id || '');
     const location = useLocation();
+
+    useEffect(() => {
+        setActiveBatchId(activeBatch?._id || '');
+    }, [activeBatch?._id]);
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -31,6 +39,33 @@ const Navbar = () => {
         const intervalId = setInterval(fetchPendingCount, 10000);
         return () => clearInterval(intervalId);
     }, []);
+
+    useEffect(() => {
+        const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const fetchBatches = async () => {
+            try {
+                const res = await fetch(`${apiUrl}/api/batches`);
+                if (!res.ok) return;
+                const data = await res.json();
+                setBatches(Array.isArray(data) ? data : []);
+                if (!activeBatchId && Array.isArray(data) && data.length > 0) {
+                    setActiveBatchId(data[0]._id);
+                    setActiveAdminBatch(data[0]);
+                }
+            } catch (err) {
+                // Keep navbar usable even if the API is temporarily unavailable.
+            }
+        };
+
+        fetchBatches();
+    }, [activeBatchId]);
+
+    const handleBatchChange = (event) => {
+        const nextBatchId = event.target.value;
+        const nextBatch = batches.find((batch) => batch._id === nextBatchId) || null;
+        setActiveBatchId(nextBatchId);
+        setActiveAdminBatch(nextBatch);
+    };
 
     const isExamsActive = ['/', '/create', '/create-content'].includes(location.pathname);
 
@@ -168,6 +203,20 @@ const Navbar = () => {
                             <span>Attendance</span>
                         </NavLink>
 
+                        <NavLink
+                            to="/batches"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-navy text-white shadow-lg'
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`
+                            }
+                        >
+                            <Layers3 size={16} />
+                            <span>Batches</span>
+                        </NavLink>
+
                         {/* Online Students Dropdown */}
                         <div className="relative group">
                             <button 
@@ -223,11 +272,26 @@ const Navbar = () => {
 
                     {/* Right: brand */}
                     <div className="flex items-center gap-3">
-                        <img 
-                            src="/logo.png" 
-                            alt="Zest Logo" 
-                            className="w-8 h-8 object-contain" 
-                            onError={(e) => e.target.style.display = 'none'} 
+                        <div className="hidden xl:flex items-center gap-2 bg-white/10 rounded-2xl px-3 py-2 border border-white/10">
+                            <Layers3 size={16} className="text-white" />
+                            <select
+                                value={activeBatchId}
+                                onChange={handleBatchChange}
+                                className="bg-transparent text-white text-sm font-bold outline-none min-w-[180px]"
+                            >
+                                <option value="" className="text-navy">Select batch</option>
+                                {batches.map((batch) => (
+                                    <option key={batch._id} value={batch._id} className="text-navy">
+                                        {batch.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <img
+                            src="/logo.png"
+                            alt="Zest Logo"
+                            className="w-8 h-8 object-contain"
+                            onError={(e) => e.target.style.display = 'none'}
                         />
                         <span className="text-white font-bold text-xl tracking-tight">Zest</span>
                     </div>

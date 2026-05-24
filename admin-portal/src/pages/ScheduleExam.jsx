@@ -4,11 +4,13 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
+import { useActiveAdminBatch } from '../batch';
 
 const ScheduleExam = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const activeBatch = useActiveAdminBatch();
     const [formData, setFormData] = useState({
         testId: '', examName: '', examDate: '', examTime: '', duration: '',
         difficultyLevel: 'medium', totalMarks: '', passingMarks: '',
@@ -31,8 +33,15 @@ const ScheduleExam = () => {
             duration: parseInt(formData.duration),
             totalMarks: parseInt(formData.totalMarks),
             passingMarks: parseInt(formData.passingMarks),
-            topics: formData.topics.split(',').map(s => s.trim())
+            topics: formData.topics.split(',').map(s => s.trim()),
+            batchId: activeBatch?._id || ''
         };
+
+        if (!payload.batchId) {
+            alert('Select a batch from the navbar first.');
+            setLoading(false);
+            return;
+        }
 
         try {
             await api.post('/exams', payload);

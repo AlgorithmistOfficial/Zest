@@ -11,6 +11,7 @@ import StorageMetrics from './pages/StorageMetrics';
 import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
 import Attendance from './pages/Attendance';
+import Batches from './pages/Batches';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/edit/:id" element={<EditExam />} />
             <Route path="/active-students" element={<ActiveStudents />} />
             <Route path="/storage" element={<StorageMetrics />} />
+            <Route path="/batches" element={<Batches />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/attendance" element={<Attendance />} />

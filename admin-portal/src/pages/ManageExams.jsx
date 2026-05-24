@@ -4,6 +4,7 @@ import { Edit2, Trash2, Calendar, Clock, Award, AlertCircle, CheckCircle2 } from
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
+import { useActiveAdminBatch } from '../batch';
 
 const ManageExams = () => {
     const [exams, setExams] = useState([]);
@@ -11,12 +12,19 @@ const ManageExams = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
+    const activeBatch = useActiveAdminBatch();
+    const batchId = activeBatch?._id || '';
 
-    useEffect(() => { fetchExams(); }, []);
+    useEffect(() => { fetchExams(); }, [batchId]);
 
     const fetchExams = async () => {
         try {
-            const res = await api.get('/exams');
+            if (!batchId) {
+                setError('Select a batch from the navbar first.');
+                setExams([]);
+                return;
+            }
+            const res = await api.get('/exams', { params: { batchId } });
             setExams(res.data);
         } catch (err) {
             setError('Failed to load exams.');
@@ -45,6 +53,12 @@ const ManageExams = () => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
             <PageHeader title="Manage Your Exams" description="Overview and manage all scheduled evaluations for the Algorithmist DSA platform." />
+
+            {!batchId && (
+                <div className="bg-amber-50 text-amber-700 p-4 rounded-2xl font-bold border border-amber-100 mb-6">
+                    Select a batch from the navbar to view or manage exams.
+                </div>
+            )}
 
             {error && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-2xl font-bold flex items-center gap-2 border border-red-100 mb-6">

@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useActiveAdminBatch } from '../batch';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
 const Attendance = () => {
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const activeBatch = useActiveAdminBatch();
 
     useEffect(() => {
         const fetchAttendance = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/admin/attendance`);
+                if (!activeBatch?._id) {
+                    setTests([]);
+                    return;
+                }
+                const res = await fetch(`${API_URL}/api/admin/attendance?batchId=${activeBatch._id}`);
                 if (!res.ok) throw new Error('Failed to fetch attendance');
                 const data = await res.json();
                 setTests(data);
@@ -20,7 +26,7 @@ const Attendance = () => {
             }
         };
         fetchAttendance();
-    }, []);
+    }, [activeBatch?._id]);
 
     return (
         <section className="space-y-6">
@@ -29,6 +35,9 @@ const Attendance = () => {
                 <p className="text-slate-500 font-medium">
                     Attendance is based on test score entries. Score -1 means absent.
                 </p>
+                {!activeBatch?._id && (
+                    <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view attendance.</p>
+                )}
             </div>
 
             {loading ? (

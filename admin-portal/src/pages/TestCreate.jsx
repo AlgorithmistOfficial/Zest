@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Award, RotateCcw, ChevronDown, Circle, Square, Type, Check } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
+import { useActiveAdminBatch } from '../batch';
 
 const ResponseTypeDropdown = ({ value, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -94,9 +95,14 @@ const TestCreate = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const activeBatch = useActiveAdminBatch();
 
     const verifyTestId = async () => {
         if (!testIdInput.trim()) return;
+        if (!activeBatch?._id) {
+            setError('Select a batch from the navbar first.');
+            return;
+        }
         setVerifying(true);
         setError('');
         setSuccess('');
@@ -104,7 +110,7 @@ const TestCreate = () => {
         try {
             // Check if test content already exists
             try {
-                const existingContentRes = await api.get(`/test-contents/${testIdInput}`);
+                const existingContentRes = await api.get(`/test-contents/${testIdInput}`, { params: { batchId: activeBatch._id } });
                 if (existingContentRes.data) {
                     // Metadata comes from the Exams DB (merged by the backend GET handler)
                     setExamInfo({
@@ -112,6 +118,7 @@ const TestCreate = () => {
                         examName: existingContentRes.data.examName,
                         totalMarks: existingContentRes.data.totalMarks,
                         duration: existingContentRes.data.duration,
+                        batchId: existingContentRes.data.batchId || activeBatch?._id || ''
                     });
                     setQuestions(existingContentRes.data.questions || []);
                     setSuccess('Existing test content loaded. You can edit it now.');
@@ -123,13 +130,14 @@ const TestCreate = () => {
             }
 
             // Verify with matching Exam scheduled
-            const res = await api.get(`/exams/by-testid/${testIdInput}`);
+            const res = await api.get(`/exams/by-testid/${testIdInput}`, { params: { batchId: activeBatch._id } });
             if (res.data) {
                 setExamInfo({
                     testId: res.data.testId,
                     examName: res.data.examName,
                     totalMarks: res.data.totalMarks,
                     duration: res.data.duration,
+                    batchId: res.data.batchId || activeBatch?._id || ''
                 });
                 setQuestions([{ 
                     id: Date.now().toString(), 
@@ -236,6 +244,10 @@ const TestCreate = () => {
 
     const saveTest = async () => {
         if (!examInfo) return;
+        if (!examInfo.batchId) {
+            setError('Select a batch from the navbar first.');
+            return;
+        }
         setSaving(true);
         setError('');
         setSuccess('');
@@ -250,6 +262,7 @@ const TestCreate = () => {
             // Only persist testId + questions; exam metadata stays in the Exams collection
             const payload = {
                 testId: examInfo.testId,
+                batchId: examInfo.batchId,
                 questions: questions.map(q => ({
                     ques: q.ques,
                     type: q.type,

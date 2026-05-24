@@ -20,6 +20,8 @@ const Home = () => {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = React.useState(false);
   const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const selectedBatchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
+  const selectedBatchName = user.batch?.name || 'your batch';
 
   React.useEffect(() => {
     // Redirect if not logged in
@@ -105,7 +107,7 @@ const Home = () => {
     const fetchNearestTest = async () => {
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
-        const res = await fetch(`${backendUrl}/api/exams`);
+        const res = await fetch(`${backendUrl}/api/exams${selectedBatchId ? `?batchId=${selectedBatchId}` : ''}`);
         if (!res.ok) return;
         const exams = await res.json();
         console.log('[Home] Fetched exams:', exams);
@@ -170,7 +172,7 @@ const Home = () => {
       }
     };
     fetchNearestTest();
-  }, []);
+  }, [selectedBatchId]);
 
 
   const fmtDate = (n) => {
@@ -266,6 +268,7 @@ const Home = () => {
                 return 'Hello';
               })()}, <span className="text-lime">{user.name || 'Student'}</span>! 👋
             </h1>
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{selectedBatchName}</p>
             <p className="text-slate-600 text-lg">
               Pick up right where you left off in your DSA journey.
             </p>

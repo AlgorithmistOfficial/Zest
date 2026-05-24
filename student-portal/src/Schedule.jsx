@@ -12,6 +12,8 @@ const Schedule = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const selectedBatchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -30,7 +32,7 @@ const Schedule = () => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/exams`);
+        const res = await fetch(`${API_URL}/api/exams${selectedBatchId ? `?batchId=${selectedBatchId}` : ''}`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setExams(data);
@@ -41,7 +43,7 @@ const Schedule = () => {
       }
     };
     fetchExams();
-  }, []);
+  }, [selectedBatchId]);
 
   const fmtDate = (n) => {
     const s = n.toString().padStart(8, '0');

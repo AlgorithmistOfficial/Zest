@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useActiveAdminBatch } from '../batch';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
 const Reports = () => {
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(true);
+    const activeBatch = useActiveAdminBatch();
 
     useEffect(() => {
         const fetchReport = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/admin/reports/alarms`);
+                if (!activeBatch?._id) {
+                    setRows([]);
+                    return;
+                }
+                const res = await fetch(`${API_URL}/api/admin/reports/alarms?batchId=${activeBatch._id}`);
                 if (!res.ok) throw new Error('Failed to fetch report');
                 const data = await res.json();
                 setRows(data);
@@ -20,7 +26,7 @@ const Reports = () => {
             }
         };
         fetchReport();
-    }, []);
+    }, [activeBatch?._id]);
 
     return (
         <section className="space-y-6">
@@ -29,6 +35,9 @@ const Reports = () => {
                 <p className="text-slate-500 font-medium">
                     Alarm buzz count by student and test.
                 </p>
+                {!activeBatch?._id && (
+                    <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view reports.</p>
+                )}
             </div>
 
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm overflow-x-auto">

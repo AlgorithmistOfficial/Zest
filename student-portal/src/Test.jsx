@@ -52,7 +52,9 @@ const Test = () => {
     useEffect(() => {
         const fetchTest = async () => {
             try {
-                const res = await fetch(`${backendUrl}/api/test-contents/${testId}`);
+                const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+                const batchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
+                const res = await fetch(`${backendUrl}/api/test-contents/${testId}${batchId ? `?batchId=${batchId}` : ''}`);
                 if (!res.ok) throw new Error('Test not found');
                 const data = await res.json();
                 setTestData(data);

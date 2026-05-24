@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, Check, X } from 'lucide-react';
+import { useActiveAdminBatch } from '../batch';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
@@ -7,10 +8,15 @@ const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoadingId, setActionLoadingId] = useState(null);
+    const activeBatch = useActiveAdminBatch();
 
     const fetchNotifications = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/admin/notifications`);
+            if (!activeBatch?._id) {
+                setNotifications([]);
+                return;
+            }
+            const res = await fetch(`${API_URL}/api/admin/notifications?batchId=${activeBatch._id}`);
             if (!res.ok) throw new Error('Failed to fetch notifications');
             const data = await res.json();
             setNotifications(data);
@@ -25,7 +31,7 @@ const Notifications = () => {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 10000);
         return () => clearInterval(interval);
-    }, []);
+    }, [activeBatch?._id]);
 
     const handleDecision = async (id, decision) => {
         try {
@@ -54,6 +60,9 @@ const Notifications = () => {
                 <p className="text-slate-500 font-medium">
                     Late-entry requests raised by students appear here for approval.
                 </p>
+                {!activeBatch?._id && (
+                    <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view notifications.</p>
+                )}
             </div>
 
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm overflow-x-auto">

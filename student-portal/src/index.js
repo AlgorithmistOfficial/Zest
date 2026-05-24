@@ -10,6 +10,7 @@ import Practice from './Practice';
 import Leaderboard from './Leaderboard';
 import Schedule from './Schedule';
 import Auth from './Auth';
+import SelectBatch from './SelectBatch';
 import Home from './Home';
 import Profile from './Profile';
 import Analytics from './Analytics';
@@ -52,6 +53,8 @@ const UserPresence = ({ children }) => {
           email: user.email,
           id: user._id || user.id,
           dp: user.dp || user.profilePic || null,
+          batchId: user.batchId || (user.batch && user.batch._id) || null,
+          batch: user.batch || null,
           isPersistent: isPersistent,
           location: window.location.pathname
         });
@@ -81,6 +84,7 @@ const UserPresence = ({ children }) => {
 // Redirects to /auth if not logged in
 const ProtectedRoute = ({ children }) => {
   const [paramsHandled, setParamsHandled] = React.useState(false);
+  const location = useLocation();
 
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -108,6 +112,18 @@ const ProtectedRoute = ({ children }) => {
 
   if (!paramsHandled) return null;
 
+  const token = isAuthenticated();
+  const storedUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const hasBatch = !!storedUser.batchId || !!(storedUser.batch && storedUser.batch._id) || !!storedUser.batch?.id;
+
+  if (token && !hasBatch && location.pathname !== '/select-batch') {
+    return <Navigate to="/select-batch" replace />;
+  }
+
+  if (token && hasBatch && location.pathname === '/select-batch') {
+    return <Navigate to="/home" replace />;
+  }
+
   return isAuthenticated() ? (
     children
   ) : (
@@ -127,6 +143,7 @@ root.render(
           <Route path="/about" element={<About />} />
 
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/select-batch" element={<ProtectedRoute><SelectBatch /></ProtectedRoute>} />
           <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
           <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
           <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />

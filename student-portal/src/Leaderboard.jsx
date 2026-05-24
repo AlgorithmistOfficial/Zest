@@ -12,6 +12,9 @@ const Leaderboard = () => {
     const [rankings, setRankings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const selectedBatchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
+    const selectedBatchName = user.batch?.name || 'your batch';
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -30,7 +33,7 @@ const Leaderboard = () => {
     useEffect(() => {
         const fetchLeaderboard = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/leaderboard`);
+                const res = await fetch(`${API_URL}/api/leaderboard${selectedBatchId ? `?batchId=${selectedBatchId}` : ''}`);
                 if (!res.ok) throw new Error('Failed to fetch leaderboard');
                 const data = await res.json();
                 setRankings(data);
@@ -41,7 +44,7 @@ const Leaderboard = () => {
             }
         };
         fetchLeaderboard();
-    }, []);
+    }, [selectedBatchId]);
 
     const getRankIcon = (index) => {
         if (index === 0) return <Crown className="text-yellow-500" size={24} />;
@@ -131,6 +134,7 @@ const Leaderboard = () => {
                             <Trophy size={40} />
                         </div>
                         <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-navy">Global Rankings</h1>
+                        <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{selectedBatchName}</p>
                         <p className="text-slate-600 text-lg max-w-2xl mx-auto">
                             The best of Algorithmist DSA classes. Keep practicing to climb the ranks!
                         </p>

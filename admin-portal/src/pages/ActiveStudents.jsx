@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Users, Mail, RefreshCw, AlertCircle, LayoutDashboard, FileEdit } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import api from '../api';
+import { useActiveAdminBatch } from '../batch';
 
 const ActiveStudents = () => {
     const [students, setStudents] = useState([]);
@@ -11,6 +12,7 @@ const ActiveStudents = () => {
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(new Date());
     const location = useLocation();
+    const activeBatch = useActiveAdminBatch();
     const query = new URLSearchParams(location.search);
     const view = query.get('view') || 'dashboard';
 
@@ -18,7 +20,12 @@ const ActiveStudents = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await api.get('/admin/active-students');
+            if (!activeBatch?._id) {
+                setStudents([]);
+                setError('Select a batch from the navbar first.');
+                return;
+            }
+            const response = await api.get('/admin/active-students', { params: activeBatch?._id ? { batchId: activeBatch._id } : {} });
             setStudents(response.data);
             setLastUpdated(new Date());
         } catch (err) {
@@ -41,7 +48,7 @@ const ActiveStudents = () => {
         fetchActiveStudents();
         const interval = setInterval(fetchActiveStudents, 30000); // Refresh every 30 seconds
         return () => clearInterval(interval);
-    }, []);
+    }, [activeBatch?._id]);
 
     const filteredStudents = students.filter(student => {
         const isTesting = student.location && student.location.startsWith('/test/');
