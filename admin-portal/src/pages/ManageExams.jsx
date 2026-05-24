@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Edit2, Trash2, Calendar, Clock, Award, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,9 +15,7 @@ const ManageExams = () => {
     const activeBatch = useActiveAdminBatch();
     const batchId = activeBatch?._id || '';
 
-    useEffect(() => { fetchExams(); }, [batchId]);
-
-    const fetchExams = async () => {
+    const fetchExams = useCallback(async () => {
         try {
             if (!batchId) {
                 setError('Select a batch from the navbar first.');
@@ -29,7 +27,9 @@ const ManageExams = () => {
         } catch (err) {
             setError('Failed to load exams.');
         } finally { setLoading(false); }
-    };
+    }, [batchId]);
+
+    useEffect(() => { fetchExams(); }, [fetchExams]);
 
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this exam?')) return;

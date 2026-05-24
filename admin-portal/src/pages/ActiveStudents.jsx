@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { Users, Mail, RefreshCw, AlertCircle, LayoutDashboard, FileEdit } from 'lucide-react';
@@ -16,7 +16,7 @@ const ActiveStudents = () => {
     const query = new URLSearchParams(location.search);
     const view = query.get('view') || 'dashboard';
 
-    const fetchActiveStudents = async () => {
+    const fetchActiveStudents = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -42,13 +42,13 @@ const ActiveStudents = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeBatch?._id]);
 
     useEffect(() => {
         fetchActiveStudents();
         const interval = setInterval(fetchActiveStudents, 30000); // Refresh every 30 seconds
         return () => clearInterval(interval);
-    }, [activeBatch?._id]);
+    }, [fetchActiveStudents]);
 
     const filteredStudents = students.filter(student => {
         const isTesting = student.location && student.location.startsWith('/test/');

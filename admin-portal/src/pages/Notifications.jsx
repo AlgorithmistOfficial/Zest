@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Bell, Check, X } from 'lucide-react';
 import { useActiveAdminBatch } from '../batch';
 
@@ -10,7 +10,7 @@ const Notifications = () => {
     const [actionLoadingId, setActionLoadingId] = useState(null);
     const activeBatch = useActiveAdminBatch();
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         try {
             if (!activeBatch?._id) {
                 setNotifications([]);
@@ -25,13 +25,13 @@ const Notifications = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeBatch?._id]);
 
     useEffect(() => {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 10000);
         return () => clearInterval(interval);
-    }, [activeBatch?._id]);
+    }, [fetchNotifications]);
 
     const handleDecision = async (id, decision) => {
         try {

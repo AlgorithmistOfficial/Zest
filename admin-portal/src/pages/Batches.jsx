@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Layers3, Plus, Pencil, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import api from '../api';
@@ -16,7 +16,7 @@ const Batches = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const loadBatches = async () => {
+  const loadBatches = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -31,11 +31,11 @@ const Batches = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeBatchId]);
 
   useEffect(() => {
     loadBatches();
-  }, []);
+  }, [loadBatches]);
 
   const flashSuccess = (message) => {
     setSuccess(message);
