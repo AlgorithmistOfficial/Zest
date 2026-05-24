@@ -129,7 +129,7 @@ const Auth = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.open(`${API_URL}/api/auth/google?remember=${persistent}`, "_self");
+    window.location.assign(`${API_URL}/api/auth/google?remember=${persistent}&returnTo=${encodeURIComponent(window.location.origin)}`);
   };
 
   const handleForgotSendOtp = async () => {
@@ -505,6 +505,7 @@ const Auth = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  type="button"
                   onClick={handleGoogleLogin}
                   className="w-full py-4 bg-white border-2 border-slate-100 hover:border-lime/30 hover:bg-slate-50 text-navy font-bold rounded-2xl shadow-sm transition-all flex items-center justify-center gap-3 group"
                 >
