@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { Database, RefreshCcw, HardDrive, Layout, Users, FileText, Lock, AlertCircle, TrendingUp } from 'lucide-react';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
@@ -47,10 +48,23 @@ const StorageMetrics = () => {
         return <Database size={16} />;
     };
 
-    if (loading) return <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading storage metrics...</div>;
+    if (loading) {
+        return (
+            <>
+                <Helmet>
+                    <title>ABCD - Storage Metrics</title>
+                </Helmet>
+                <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading storage metrics...</div>
+            </>
+        );
+    }
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16 max-w-5xl mx-auto">
+            <Helmet>
+                <title>ABCD - Storage Metrics</title>
+            </Helmet>
+
             <div className="flex justify-between items-start mb-2">
                 <PageHeader title="Database Storage" description="Real-time breakdown of MongoDB space usage by system components." />
                 <button 

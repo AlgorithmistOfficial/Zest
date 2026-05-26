@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Bell, Check, X } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { useActiveAdminBatch } from '../batch';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
@@ -53,6 +54,10 @@ const Notifications = () => {
 
     return (
         <section className="space-y-6">
+            <Helmet>
+                <title>ABCD - Notifications</title>
+            </Helmet>
+
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
                 <h1 className="text-3xl font-black text-navy mb-2 flex items-center gap-3">
                     <Bell className="text-lime" /> Notifications

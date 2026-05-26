@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { Users, Mail, RefreshCw, AlertCircle, LayoutDashboard, FileEdit } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import PageHeader from '../components/PageHeader';
 import api from '../api';
 import { useActiveAdminBatch } from '../batch';
@@ -76,6 +77,10 @@ const ActiveStudents = () => {
 
     return (
         <div className="space-y-6">
+            <Helmet>
+                <title>ABCD - Active Students</title>
+            </Helmet>
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <PageHeader
                     title={pageTitle}

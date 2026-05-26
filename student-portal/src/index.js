@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import { io } from 'socket.io-client';
 import LandingPage from './LandingPage';
@@ -134,25 +135,27 @@ const ProtectedRoute = ({ children }) => {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <UserPresence>
-        <Routes>
-          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-          <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+    <HelmetProvider>
+      <BrowserRouter>
+        <UserPresence>
+          <Routes>
+            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+            <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
 
-          <Route path="/about" element={<About />} />
+            <Route path="/about" element={<About />} />
 
-          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/select-batch" element={<ProtectedRoute><SelectBatch /></ProtectedRoute>} />
-          <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
-          <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
-          <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-          <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-          <Route path="/test/:testId" element={<ProtectedRoute><Test /></ProtectedRoute>} />
-        </Routes>
-      </UserPresence>
-    </BrowserRouter>
+            <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/select-batch" element={<ProtectedRoute><SelectBatch /></ProtectedRoute>} />
+            <Route path="/syllabus" element={<ProtectedRoute><Syllabus /></ProtectedRoute>} />
+            <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
+            <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/test/:testId" element={<ProtectedRoute><Test /></ProtectedRoute>} />
+          </Routes>
+        </UserPresence>
+      </BrowserRouter>
+    </HelmetProvider>
   </React.StrictMode>
 );

@@ -10,6 +10,7 @@ import {
   Heart
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const About = () => {
   const [isScrolled, setIsScrolled] = React.useState(false);
@@ -24,6 +25,10 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
+      <Helmet>
+        <title>Zest - About</title>
+      </Helmet>
+
       {/* Navigation */}
       <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
         ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'

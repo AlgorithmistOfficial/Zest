@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, BarChart3, LogOut, TrendingUp, TrendingDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
@@ -74,6 +75,10 @@ const Analytics = () => {
 
     return (
         <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col overflow-x-hidden">
+            <Helmet>
+                <title>Zest - Analytics</title>
+            </Helmet>
+
             {/* Navigation */}
             <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
                 ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'

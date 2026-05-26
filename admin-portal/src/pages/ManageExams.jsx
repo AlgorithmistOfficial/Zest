@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Edit2, Trash2, Calendar, Clock, Award, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 import { useActiveAdminBatch } from '../batch';
@@ -48,10 +49,23 @@ const ManageExams = () => {
     const diffColor = { hard: 'bg-red-500', medium: 'bg-amber-500', easy: 'bg-green-500' };
     const statusColor = { scheduled: 'bg-blue-100 text-blue-700', ongoing: 'bg-amber-100 text-amber-700', completed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700' };
 
-    if (loading) return <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading exams…</div>;
+    if (loading) {
+        return (
+            <>
+                <Helmet>
+                    <title>ABCD - Manage Exams</title>
+                </Helmet>
+                <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading exams…</div>
+            </>
+        );
+    }
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
+            <Helmet>
+                <title>ABCD - Manage Exams</title>
+            </Helmet>
+
             <PageHeader title="Manage Your Exams" description="Overview and manage all scheduled evaluations for the Algorithmist DSA platform." />
 
             {!batchId && (

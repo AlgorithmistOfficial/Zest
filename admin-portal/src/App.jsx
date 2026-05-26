@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ManageExams from './pages/ManageExams';
@@ -17,6 +18,10 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-off-white flex flex-col selection:bg-lime/30">
+        <Helmet>
+          <title>ABCD - Manage Exams</title>
+        </Helmet>
+
         <Navbar />
         <main className="flex-grow pt-24 pb-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
           <Routes>

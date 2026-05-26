@@ -4,6 +4,7 @@ import { ArrowLeft, Play, RotateCcw, Copy, CheckCircle2, Terminal, Sun, Moon, Lo
 import { Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
+import { Helmet } from 'react-helmet-async';
 
 const Practice = () => {
     const navigate = useNavigate();
@@ -92,6 +93,10 @@ const Practice = () => {
 
     return (
         <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col overflow-x-hidden">
+            <Helmet>
+                <title>Zest - Practice</title>
+            </Helmet>
+
             {/* Navigation */}
             <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
                 ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'

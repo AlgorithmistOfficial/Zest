@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useActiveAdminBatch } from '../batch';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
@@ -30,6 +31,10 @@ const Reports = () => {
 
     return (
         <section className="space-y-6">
+            <Helmet>
+                <title>ABCD - Reports</title>
+            </Helmet>
+
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
                 <h1 className="text-3xl font-black text-navy mb-2">Reports</h1>
                 <p className="text-slate-500 font-medium">

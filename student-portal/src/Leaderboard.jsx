@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Trophy, Medal, Crown, Star, User, Target, AlertCircle, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
@@ -62,6 +63,10 @@ const Leaderboard = () => {
 
     return (
         <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col overflow-x-hidden">
+            <Helmet>
+                <title>Zest - Leaderboard</title>
+            </Helmet>
+
             {/* Navigation */}
             <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
                 ? 'bg-[#92c211] md:bg-[#92c211]/60 py-1'

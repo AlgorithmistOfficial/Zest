@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Trash2, Save, CheckCircle2, AlertCircle, Code, Layers, FileText, Award, RotateCcw, ChevronDown, Circle, Square, Type, Check } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 import { useActiveAdminBatch } from '../batch';
@@ -285,6 +286,10 @@ const TestCreate = () => {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-24 max-w-5xl mx-auto">
+            <Helmet>
+                <title>ABCD - Create Content</title>
+            </Helmet>
+
             <PageHeader title="Advanced Test Designer" description="Build complex evaluations with dynamic answer keys, test cases, and question-level settings." />
 
             {error && (

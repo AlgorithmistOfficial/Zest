@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 import { useActiveAdminBatch } from '../batch';
@@ -53,6 +54,10 @@ const ScheduleExam = () => {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
+            <Helmet>
+                <title>ABCD - Schedule Exam</title>
+            </Helmet>
+
             <PageHeader title="Schedule New Exam" description="Configure and launch a new DSA evaluation for your students." />
 
             <div className="card max-w-2xl mx-auto">

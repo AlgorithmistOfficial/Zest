@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Layers3, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
@@ -79,6 +80,10 @@ const SelectBatch = () => {
 
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30 flex flex-col overflow-x-hidden">
+      <Helmet>
+        <title>Zest - Select Batch</title>
+      </Helmet>
+
       <nav className="fixed w-full z-50 bg-[#92c211] backdrop-blur-md border-b border-white/20 py-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">

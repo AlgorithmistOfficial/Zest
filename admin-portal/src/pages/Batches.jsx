@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Layers3, Plus, Pencil, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import api from '../api';
 import { getActiveAdminBatch, setActiveAdminBatch } from '../batch';
 import PageHeader from '../components/PageHeader';
@@ -114,6 +115,10 @@ const Batches = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16 space-y-6">
+      <Helmet>
+        <title>ABCD - Batches</title>
+      </Helmet>
+
       <PageHeader
         title="Batch Manager"
         description="Create, rename, delete, and select the batch that the admin panel should operate on."

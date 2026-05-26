@@ -18,6 +18,7 @@ import {
 } from 'react-icons/si';
 import { FaLinkedin, FaMicrosoft as FaMs } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 import LogoLoop from './LogoLoop';
 import CardSwap, { Card } from './CardSwap';
@@ -169,6 +170,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#fffef2] text-navy font-sans selection:bg-lime/30">
+      <Helmet>
+        <title>Zest - Welcome</title>
+      </Helmet>
+
       {/* Page transition overlay */}
       <AnimatePresence>
         {navigating && (

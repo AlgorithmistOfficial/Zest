@@ -7,6 +7,7 @@ import {
     Award, AlertTriangle, Trophy, Home, Loader2, Play,
     Circle, Square, Type
 } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
 
@@ -353,6 +354,10 @@ const Test = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#fffef2] flex items-center justify-center">
+                <Helmet>
+                    <title>{pageTitle}</title>
+                </Helmet>
+
                 <div className="w-16 h-16 border-4 border-lime border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
@@ -362,6 +367,10 @@ const Test = () => {
     if (phase === 'lobby') {
         return (
             <div className="min-h-screen bg-[#fffef2] text-navy selection:bg-lime/30 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                <Helmet>
+                    <title>{pageTitle}</title>
+                </Helmet>
+
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime/5 rounded-full blur-[100px] -mr-64 -mt-64"></div>
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-navy/5 rounded-full blur-[100px] -ml-64 -mb-64"></div>
 
@@ -472,6 +481,10 @@ const Test = () => {
 
         return (
             <div className="min-h-screen bg-[#fffef2] text-navy flex items-center justify-center p-6 relative overflow-hidden">
+                <Helmet>
+                    <title>{pageTitle}</title>
+                </Helmet>
+
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-lime/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-navy/5 rounded-full blur-[120px] -ml-64 -mb-64"></div>
 
@@ -561,9 +574,14 @@ const Test = () => {
     const question = testData?.questions?.[currentQ];
     const totalQuestions = testData?.questions?.length || 0;
     const answeredCount = Object.keys(answers).filter(k => isAnswered(parseInt(k))).length;
+    const pageTitle = testData?.examName ? `Zest - ${testData.examName}` : 'Zest - Test';
 
     return (
         <div className="min-h-screen bg-[#fffef2] text-navy flex flex-col">
+            <Helmet>
+                <title>{pageTitle}</title>
+            </Helmet>
+
             {/* Submitting overlay */}
             <AnimatePresence>
                 {submitting && (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '../api';
 import PageHeader from '../components/PageHeader';
 
@@ -72,10 +73,23 @@ const EditExam = () => {
         finally { setSaving(false); }
     };
 
-    if (loading) return <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading exam data…</div>;
+    if (loading) {
+        return (
+            <>
+                <Helmet>
+                    <title>ABCD - Edit Exam</title>
+                </Helmet>
+                <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading exam data…</div>
+            </>
+        );
+    }
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
+            <Helmet>
+                <title>ABCD - Edit Exam</title>
+            </Helmet>
+
             <PageHeader title="Edit Exam" description={`Modify the details for: ${formData.examName}`} />
 
             <div className="card max-w-2xl mx-auto">
