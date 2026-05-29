@@ -42,7 +42,7 @@ const Attendance = () => {
                 </p>
                 {!activeBatch?._id && (
                     <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view attendance.</p>
-                )}
+                )} 
             </div>
 
             {loading ? (
