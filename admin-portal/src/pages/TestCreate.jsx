@@ -267,7 +267,7 @@ const TestCreate = () => {
             const payload = {
                 testId: examInfo.testId,
                 batchId: examInfo.batchId,
-                questions: questions.map(q => ({
+                questions: questions.map((q, qIndex) => ({
                     questionNo: qIndex + 1,
                     ques: q.ques,
                     type: q.type,
