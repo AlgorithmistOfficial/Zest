@@ -19,6 +19,7 @@ const Test = () => {
     const [testData, setTestData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [phase, setPhase] = useState('lobby'); // lobby | testing | results
+    const pageTitle = testData?.examName ? `Zest - ${testData.examName}` : 'Zest - Test';
 
     // Test interaction state
     const [currentQ, setCurrentQ] = useState(0);
@@ -637,7 +638,6 @@ const Test = () => {
     const question = testData?.questions?.[currentQ];
     const totalQuestions = testData?.questions?.length || 0;
     const answeredCount = Object.keys(answers).filter(k => isAnswered(parseInt(k))).length;
-    const pageTitle = testData?.examName ? `Zest - ${testData.examName}` : 'Zest - Test';
     const questionNumber = question?.questionNo || currentQ + 1;
 
     return (
