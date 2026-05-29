@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck, Layers3, ShieldCheck, FileText } from 'lucide-react';
 import { setActiveAdminBatch, useActiveAdminBatch } from '../batch';
 
@@ -7,13 +8,26 @@ const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [pendingNotifications, setPendingNotifications] = useState(0);
     const [batches, setBatches] = useState([]);
+    const [isBatchMenuOpen, setIsBatchMenuOpen] = useState(false);
     const activeBatch = useActiveAdminBatch();
     const [activeBatchId, setActiveBatchId] = useState(activeBatch?._id || '');
     const location = useLocation();
+    const batchMenuRef = useRef(null);
 
     useEffect(() => {
         setActiveBatchId(activeBatch?._id || '');
     }, [activeBatch?._id]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (batchMenuRef.current && !batchMenuRef.current.contains(event.target)) {
+                setIsBatchMenuOpen(false);
+            }
+        };
+
+        window.addEventListener('mousedown', handleClickOutside);
+        return () => window.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -65,6 +79,13 @@ const Navbar = () => {
         const nextBatch = batches.find((batch) => batch._id === nextBatchId) || null;
         setActiveBatchId(nextBatchId);
         setActiveAdminBatch(nextBatch);
+        setIsBatchMenuOpen(false);
+    };
+
+    const handleBatchSelect = (batch) => {
+        setActiveBatchId(batch._id);
+        setActiveAdminBatch(batch);
+        setIsBatchMenuOpen(false);
     };
 
     const isExamsActive = ['/', '/create', '/create-content'].includes(location.pathname);
@@ -320,20 +341,92 @@ const Navbar = () => {
 
                     {/* Right: brand */}
                     <div className="flex items-center gap-3">
-                        <div className="hidden xl:flex items-center gap-2 bg-white/10 rounded-2xl px-3 py-2 border border-white/10">
-                            <Layers3 size={16} className="text-white" />
-                            <select
-                                value={activeBatchId}
-                                onChange={handleBatchChange}
-                                className="bg-transparent text-white text-sm font-bold outline-none min-w-[180px]"
+                        <div ref={batchMenuRef} className="hidden xl:block relative">
+                            <button
+                                type="button"
+                                onClick={() => setIsBatchMenuOpen((prev) => !prev)}
+                                className={`group flex items-center gap-3 rounded-2xl border px-4 py-2.5 shadow-lg backdrop-blur-xl transition-all duration-300 ${
+                                    isBatchMenuOpen
+                                        ? 'bg-white/20 border-white/30 shadow-white/10'
+                                        : 'bg-white/10 border-white/10 hover:bg-white/15 hover:border-white/20'
+                                }`}
                             >
-                                <option value="" className="text-navy">Select batch</option>
-                                {batches.map((batch) => (
-                                    <option key={batch._id} value={batch._id} className="text-navy">
-                                        {batch.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-105">
+                                    <Layers3 size={16} />
+                                </div>
+                                <div className="text-left leading-tight">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/60">Batch</p>
+                                    <p className="max-w-[180px] truncate text-sm font-bold text-white">
+                                        {activeBatch?.name || 'Select batch'}
+                                    </p>
+                                </div>
+                                <ChevronDown size={16} className={`text-white/70 transition-transform duration-300 ${isBatchMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                                {isBatchMenuOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                                        className="absolute right-0 top-full z-50 mt-3 w-80 overflow-hidden rounded-[1.5rem] border border-white/10 bg-navy/95 p-2 shadow-[0_20px_60px_rgba(2,6,23,0.35)] backdrop-blur-2xl"
+                                    >
+                                        <div className="mb-2 flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">Active Batch</p>
+                                                <p className="text-sm font-bold text-white">{activeBatch?.name || 'No batch selected'}</p>
+                                            </div>
+                                            <div className="rounded-xl bg-lime/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-lime">
+                                                {batches.length} total
+                                            </div>
+                                        </div>
+
+                                        <div className="max-h-72 overflow-auto pr-1">
+                                            {batches.length === 0 ? (
+                                                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-sm text-white/60">
+                                                    No batches available.
+                                                </div>
+                                            ) : (
+                                                batches.map((batch, index) => {
+                                                    const isSelected = batch._id === activeBatchId;
+                                                    return (
+                                                        <motion.button
+                                                            key={batch._id}
+                                                            type="button"
+                                                            onClick={() => handleBatchSelect(batch)}
+                                                            initial={{ opacity: 0, x: 6 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ duration: 0.15, delay: index * 0.03 }}
+                                                            className={`mb-1 w-full rounded-2xl border px-4 py-3 text-left transition-all duration-200 ${
+                                                                isSelected
+                                                                    ? 'border-lime/40 bg-lime/15 shadow-[0_0_0_1px_rgba(146,194,17,0.18)]'
+                                                                    : 'border-white/10 bg-white/0 hover:border-white/20 hover:bg-white/5'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <div>
+                                                                    <p className={`text-sm font-bold ${isSelected ? 'text-lime' : 'text-white'}`}>
+                                                                        {batch.name}
+                                                                    </p>
+                                                                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/35">
+                                                                        {batch.slug}
+                                                                    </p>
+                                                                </div>
+                                                                {isSelected && (
+                                                                    <span className="rounded-full bg-lime px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-navy">
+                                                                        Active
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </motion.button>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                         <img
                             src="/logo.png"
