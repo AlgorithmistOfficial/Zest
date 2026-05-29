@@ -38,7 +38,7 @@ const Attendance = () => {
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
                 <h1 className="text-3xl font-black text-navy mb-2">Attendance Panel</h1>
                 <p className="text-slate-500 font-medium">
-                    Attendance is based on test score entries. Score -1 means absent.
+                    Attendance is based on test score entries.
                 </p>
                 {!activeBatch?._id && (
                     <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view attendance.</p>
