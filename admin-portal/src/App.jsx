@@ -11,6 +11,7 @@ import TestCreate from './pages/TestCreate';
 import StorageMetrics from './pages/StorageMetrics';
 import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
+import AnswerReports from './pages/AnswerReports';
 import Attendance from './pages/Attendance';
 import Batches from './pages/Batches';
 
@@ -34,6 +35,7 @@ function App() {
             <Route path="/batches" element={<Batches />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/answer-reports" element={<AnswerReports />} />
             <Route path="/attendance" element={<Attendance />} />
           </Routes>
         </main>

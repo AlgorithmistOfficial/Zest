@@ -142,6 +142,7 @@ const TestCreate = () => {
                 });
                 setQuestions([{ 
                     id: Date.now().toString(), 
+                    questionNo: 1,
                     ques: '', 
                     type: 'single option answer', 
                     options: ['Option 1'], 
@@ -163,6 +164,7 @@ const TestCreate = () => {
     const addQuestion = () => {
         setQuestions([...questions, { 
             id: Date.now().toString(), 
+            questionNo: questions.length + 1,
             ques: '', 
             type: 'single option answer', 
             options: ['Option 1'], 
@@ -231,6 +233,7 @@ const TestCreate = () => {
         if (window.confirm('Are you sure you want to clear the entire test design? This will remove all questions.')) {
             setQuestions([{ 
                 id: Date.now().toString(), 
+                questionNo: 1,
                 ques: '', 
                 type: 'single option answer', 
                 options: ['Option 1'], 
@@ -265,6 +268,7 @@ const TestCreate = () => {
                 testId: examInfo.testId,
                 batchId: examInfo.batchId,
                 questions: questions.map(q => ({
+                    questionNo: qIndex + 1,
                     ques: q.ques,
                     type: q.type,
                     options: ['single option answer', 'multiple option answer'].includes(q.type) ? q.options : [],

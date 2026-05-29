@@ -288,6 +288,69 @@ const Test = () => {
         return 'text-lime';
     };
 
+    const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    const isWrongAttempt = (question, studentAnswer, codeResult) => {
+        if (!question) return false;
+
+        if (question.type === 'write code answer') {
+            return Boolean(codeResult) && (!codeResult.compiled || !codeResult.allPassed);
+        }
+
+        const isEmptyAnswer = studentAnswer === undefined || studentAnswer === null || studentAnswer === '' || (Array.isArray(studentAnswer) && studentAnswer.length === 0);
+        if (isEmptyAnswer) return false;
+
+        switch (question.type) {
+            case 'single option answer':
+                return String(studentAnswer).trim() !== String(question.answerKey).trim();
+            case 'multiple option answer': {
+                const correctArr = Array.isArray(question.answerKey) ? [...question.answerKey].sort() : [];
+                const studentArr = Array.isArray(studentAnswer) ? [...studentAnswer].sort() : [];
+                return JSON.stringify(correctArr) !== JSON.stringify(studentArr);
+            }
+            case 'value enter answer':
+                return String(studentAnswer).trim().toLowerCase() !== String(question.answerKey).trim().toLowerCase();
+            default:
+                return false;
+        }
+    };
+
+    const logWrongAttempt = async (questionIndex, question, studentAnswer, codeResult) => {
+        if (phase !== 'testing' || !question?._id) return;
+        if (!isWrongAttempt(question, studentAnswer, codeResult)) return;
+
+        const token = getAuthToken();
+        if (!token) return;
+
+        try {
+            await fetch(`${backendUrl}/api/test/wrong-answer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    testId,
+                    questionId: question._id,
+                    questionNo: question.questionNo || questionIndex + 1,
+                    ques: question.ques,
+                    type: question.type,
+                    correctAnswer: question.answerKey,
+                    studentAnswer,
+                    marks: question.marks || 0
+                })
+            });
+        } catch (err) {
+            console.warn('Failed to log wrong attempt:', err);
+        }
+    };
+
+    const goToQuestion = (nextIndex) => {
+        const currentQuestion = testData?.questions?.[currentQ];
+        void logWrongAttempt(currentQ, currentQuestion, answers[currentQ], codeResults[currentQ]);
+        setCurrentQ(nextIndex);
+    };
+
     // Start test
     const startTest = () => {
         setPhase('testing');
@@ -575,6 +638,7 @@ const Test = () => {
     const totalQuestions = testData?.questions?.length || 0;
     const answeredCount = Object.keys(answers).filter(k => isAnswered(parseInt(k))).length;
     const pageTitle = testData?.examName ? `Zest - ${testData.examName}` : 'Zest - Test';
+    const questionNumber = question?.questionNo || currentQ + 1;
 
     return (
         <div className="min-h-screen bg-[#fffef2] text-navy flex flex-col">
@@ -695,10 +759,10 @@ const Test = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
                                     <span className="bg-navy text-white w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm">
-                                        {currentQ + 1}
+                                        {questionNumber}
                                     </span>
                                     <div>
-                                        <p className="font-extrabold text-navy">Question {currentQ + 1} of {totalQuestions}</p>
+                                        <p className="font-extrabold text-navy">Question {questionNumber} of {totalQuestions}</p>
                                         <p className="text-xs text-slate-400 font-bold capitalize">{question?.type}</p>
                                     </div>
                                 </div>
@@ -882,7 +946,7 @@ const Test = () => {
                     {/* Navigation Buttons */}
                     <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
                         <button
-                            onClick={() => setCurrentQ(Math.max(0, currentQ - 1))}
+                            onClick={() => goToQuestion(Math.max(0, currentQ - 1))}
                             disabled={currentQ === 0}
                             className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
@@ -892,7 +956,7 @@ const Test = () => {
                             {currentQ + 1} / {totalQuestions}
                         </span>
                         <button
-                            onClick={() => setCurrentQ(Math.min(totalQuestions - 1, currentQ + 1))}
+                            onClick={() => goToQuestion(Math.min(totalQuestions - 1, currentQ + 1))}
                             disabled={currentQ === totalQuestions - 1}
                             className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-navy bg-slate-50 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
@@ -921,7 +985,7 @@ const Test = () => {
                             {testData?.questions?.map((_, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => setCurrentQ(i)}
+                                            onClick={() => goToQuestion(i)}
                                     className={`w-full aspect-square rounded-xl font-bold text-sm flex items-center justify-center transition-all duration-200 border-2 ${i === currentQ
                                             ? 'bg-navy text-white border-navy shadow-lg scale-110'
                                             : isAnswered(i)

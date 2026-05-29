@@ -190,6 +190,20 @@ const Navbar = () => {
                         </NavLink>
 
                         <NavLink
+                            to="/answer-reports"
+                            className={({ isActive }) =>
+                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isActive
+                                        ? 'bg-navy text-white shadow-lg'
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`
+                            }
+                        >
+                            <ClipboardCheck size={16} />
+                            <span>Answer Reports</span>
+                        </NavLink>
+
+                        <NavLink
                             to="/attendance"
                             className={({ isActive }) =>
                                 `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
