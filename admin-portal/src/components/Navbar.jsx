@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck, Layers3 } from 'lucide-react';
+import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck, Layers3, ShieldCheck, FileText } from 'lucide-react';
 import { setActiveAdminBatch, useActiveAdminBatch } from '../batch';
 
 const Navbar = () => {
@@ -68,6 +68,7 @@ const Navbar = () => {
     };
 
     const isExamsActive = ['/', '/create', '/create-content'].includes(location.pathname);
+    const isManageActive = ['/reports', '/answer-reports', '/attendance', '/notifications'].includes(location.pathname);
 
     return (
         <nav className={`fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${
@@ -108,7 +109,7 @@ const Navbar = () => {
                                         }
                                     >
                                         <LayoutDashboard size={16} />
-                                        <span>Manage</span>
+                                        <span>Exams Manage</span>
                                     </NavLink>
                                     
                                     <NavLink 
@@ -141,6 +142,86 @@ const Navbar = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Manage Dropdown */}
+                        <div className="relative group">
+                            <button
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                    isManageActive
+                                        ? 'bg-navy text-white shadow-lg'
+                                        : 'text-white/80 hover:bg-white/15'
+                                }`}
+                            >
+                                <ShieldCheck size={16} />
+                                <span>Manage</span>
+                                <ChevronDown size={14} className="opacity-50 group-hover:rotate-180 transition-transform duration-300" />
+                            </button>
+
+                            <div className="absolute top-full left-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top translate-y-2 group-hover:translate-y-0">
+                                <div className="bg-navy/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1.5 overflow-hidden">
+                                    <NavLink
+                                        to="/reports"
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                                isActive
+                                                    ? 'bg-lime/20 text-lime'
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                            }`
+                                        }
+                                    >
+                                        <Table size={16} />
+                                        <span>Reports</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        to="/answer-reports"
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                                isActive
+                                                    ? 'bg-lime/20 text-lime'
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                            }`
+                                        }
+                                    >
+                                        <FileText size={16} />
+                                        <span>Answer Reports</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        to="/attendance"
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                                isActive
+                                                    ? 'bg-lime/20 text-lime'
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                            }`
+                                        }
+                                    >
+                                        <ClipboardCheck size={16} />
+                                        <span>Attendance</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        to="/notifications"
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                                isActive
+                                                    ? 'bg-lime/20 text-lime'
+                                                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                                            }`
+                                        }
+                                    >
+                                        <Bell size={16} />
+                                        <span>Notification</span>
+                                        {pendingNotifications > 0 && (
+                                            <span className="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center ml-auto">
+                                                {pendingNotifications > 99 ? '99+' : pendingNotifications}
+                                            </span>
+                                        )}
+                                    </NavLink>
+                                </div>
+                            </div>
+                        </div>
                         
                         <NavLink 
                             to="/storage" 
@@ -154,53 +235,6 @@ const Navbar = () => {
                         >
                             <Database size={16} />
                             <span>Storage</span>
-                        </NavLink>
-
-                        <NavLink
-                            to="/notifications"
-                            className={({ isActive }) =>
-                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                    isActive
-                                        ? 'bg-navy text-white shadow-lg'
-                                        : 'text-white/80 hover:bg-white/15'
-                                }`
-                            }
-                        >
-                            <Bell size={16} />
-                            <span>Notification</span>
-                            {pendingNotifications > 0 && (
-                                <span className="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">
-                                    {pendingNotifications > 99 ? '99+' : pendingNotifications}
-                                </span>
-                            )}
-                        </NavLink>
-
-                        <NavLink
-                            to="/reports"
-                            className={({ isActive }) =>
-                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                    isActive
-                                        ? 'bg-navy text-white shadow-lg'
-                                        : 'text-white/80 hover:bg-white/15'
-                                }`
-                            }
-                        >
-                            <Table size={16} />
-                            <span>Reports</span>
-                        </NavLink>
-
-                        <NavLink
-                            to="/answer-reports"
-                            className={({ isActive }) =>
-                                `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                    isActive
-                                        ? 'bg-navy text-white shadow-lg'
-                                        : 'text-white/80 hover:bg-white/15'
-                                }`
-                            }
-                        >
-                            <ClipboardCheck size={16} />
-                            <span>Answer Reports</span>
                         </NavLink>
 
                         <NavLink
