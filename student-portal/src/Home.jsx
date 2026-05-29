@@ -21,7 +21,13 @@ const Home = () => {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = React.useState(false);
   const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-  const selectedBatchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
+  const normalizeBatchId = (value) => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') return value.$oid || value._id || value.id || '';
+    return '';
+  };
+  const selectedBatchId = normalizeBatchId(user.batchId || (user.batch && user.batch._id) || user.batch?.id);
   const selectedBatchName = user.batch?.name || 'your batch';
 
   React.useEffect(() => {
@@ -155,12 +161,15 @@ const Home = () => {
           .filter(e => e.status === 'scheduled' || e.status === 'ongoing')
           .filter(e => !submittedSet.has(String(e.testId))) // Show first test not yet attempted
           .map(e => ({ ...e, startAt: parseDateTime(e.examDate, e.examTime) }))
-          .sort((a, b) => a.startAt - b.startAt);
+          .sort((a, b) => {
+            const createdDiff = new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+            return createdDiff !== 0 ? createdDiff : a.startAt - b.startAt;
+          });
 
         console.log('[Home] Active exams (excluding submitted):', activeExams);
 
-        // Student should always see the earliest pending test (not present in student testIds)
-        const bestTest = activeExams.find(e => e.status === 'ongoing') || activeExams[0] || null;
+        // Prefer the most recently scheduled eligible test so newly added exams surface immediately.
+        const bestTest = activeExams[0] || null;
 
         if (bestTest) {
           console.log('[Home] Best test selected:', bestTest.examName, '| Status:', bestTest.status);
@@ -336,12 +345,12 @@ const Home = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-4">
-                    {upcomingTest.topics.slice(0, 10).map((topic, i) => (
+                    {(upcomingTest.topics || []).slice(0, 10).map((topic, i) => (
                       <span key={i} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-bold border border-white/10">
                         {topic}
                       </span>
                     ))}
-                    {upcomingTest.topics.length > 10 && <span className="text-xs text-slate-400">+{upcomingTest.topics.length - 10} more</span>}
+                    {(upcomingTest.topics || []).length > 10 && <span className="text-xs text-slate-400">+{(upcomingTest.topics || []).length - 10} more</span>}
                   </div>
                 </div>
               ) : (
