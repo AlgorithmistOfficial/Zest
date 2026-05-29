@@ -74,14 +74,6 @@ const Navbar = () => {
         fetchBatches();
     }, [activeBatchId]);
 
-    const handleBatchChange = (event) => {
-        const nextBatchId = event.target.value;
-        const nextBatch = batches.find((batch) => batch._id === nextBatchId) || null;
-        setActiveBatchId(nextBatchId);
-        setActiveAdminBatch(nextBatch);
-        setIsBatchMenuOpen(false);
-    };
-
     const handleBatchSelect = (batch) => {
         setActiveBatchId(batch._id);
         setActiveAdminBatch(batch);
