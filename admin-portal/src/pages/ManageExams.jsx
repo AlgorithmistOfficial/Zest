@@ -53,7 +53,7 @@ const ManageExams = () => {
         return (
             <>
                 <Helmet>
-                    <title>ABCD - Manage Exams</title>
+                    <title>Admin - Manage Exams</title>
                 </Helmet>
                 <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading exams…</div>
             </>
@@ -63,7 +63,7 @@ const ManageExams = () => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
             <Helmet>
-                <title>ABCD - Manage Exams</title>
+                <title>Admin - Manage Exams</title>
             </Helmet>
 
             <PageHeader title="Manage Your Exams" description="Overview and manage all scheduled evaluations for the Algorithmist DSA platform." />

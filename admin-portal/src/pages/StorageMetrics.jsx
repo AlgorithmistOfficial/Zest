@@ -52,7 +52,7 @@ const StorageMetrics = () => {
         return (
             <>
                 <Helmet>
-                    <title>ABCD - Storage Metrics</title>
+                    <title>Admin - Storage Metrics</title>
                 </Helmet>
                 <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading storage metrics...</div>
             </>
@@ -62,7 +62,7 @@ const StorageMetrics = () => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16 max-w-5xl mx-auto">
             <Helmet>
-                <title>ABCD - Storage Metrics</title>
+                <title>Admin - Storage Metrics</title>
             </Helmet>
 
             <div className="flex justify-between items-start mb-2">

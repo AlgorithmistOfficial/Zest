@@ -19,7 +19,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-off-white flex flex-col selection:bg-lime/30">
         <Helmet>
-          <title>ABCD - Manage Exams</title>
+          <title>Admin - Manage Exams</title>
         </Helmet>
 
         <Navbar />

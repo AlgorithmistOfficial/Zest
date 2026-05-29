@@ -32,7 +32,7 @@ const Attendance = () => {
     return (
         <section className="space-y-6">
             <Helmet>
-                <title>ABCD - Attendance</title>
+                <title>Admin - Attendance</title>
             </Helmet>
 
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">

@@ -32,7 +32,7 @@ const Reports = () => {
     return (
         <section className="space-y-6">
             <Helmet>
-                <title>ABCD - Reports</title>
+                <title>Admin - Reports</title>
             </Helmet>
 
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">

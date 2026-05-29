@@ -77,7 +77,7 @@ const EditExam = () => {
         return (
             <>
                 <Helmet>
-                    <title>ABCD - Edit Exam</title>
+                    <title>Admin - Edit Exam</title>
                 </Helmet>
                 <div className="text-center py-24 text-slate-400 font-bold text-lg">Loading exam data…</div>
             </>
@@ -87,7 +87,7 @@ const EditExam = () => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
             <Helmet>
-                <title>ABCD - Edit Exam</title>
+                <title>Admin - Edit Exam</title>
             </Helmet>
 
             <PageHeader title="Edit Exam" description={`Modify the details for: ${formData.examName}`} />

@@ -116,7 +116,7 @@ const Batches = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16 space-y-6">
       <Helmet>
-        <title>ABCD - Batches</title>
+        <title>Admin - Batches</title>
       </Helmet>
 
       <PageHeader

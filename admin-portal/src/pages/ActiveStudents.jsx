@@ -78,7 +78,7 @@ const ActiveStudents = () => {
     return (
         <div className="space-y-6">
             <Helmet>
-                <title>ABCD - Active Students</title>
+                <title>Admin - Active Students</title>
             </Helmet>
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

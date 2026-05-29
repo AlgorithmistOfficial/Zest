@@ -55,7 +55,7 @@ const ScheduleExam = () => {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-16">
             <Helmet>
-                <title>ABCD - Schedule Exam</title>
+                <title>Admin - Schedule Exam</title>
             </Helmet>
 
             <PageHeader title="Schedule New Exam" description="Configure and launch a new DSA evaluation for your students." />
