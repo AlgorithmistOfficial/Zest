@@ -412,7 +412,7 @@ const Home = () => {
                     
                     <p className="text-slate-600 font-medium leading-relaxed mb-8">
                       {entryAlert.type === 'early' 
-                        ? `This test is scheduled to begin at ${fmtTime(upcomingTest.examTime)}. Please wait for the start signal.`
+                        ? `This test is scheduled to begin on ${fmtDate(upcomingTest.examDate)} at ${fmtTime(upcomingTest.examTime)}. Please wait for the start signal.`
                         : "The 5-minute entry window has expired. A late-entry request has been sent to admin. You can join only if admin allows it."
                       }
                     </p>
