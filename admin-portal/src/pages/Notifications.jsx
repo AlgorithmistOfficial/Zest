@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Bell, Check, X } from 'lucide-react';
+import { Bell, Check, X, Trash2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useActiveAdminBatch } from '../batch';
 
@@ -52,6 +52,29 @@ const Notifications = () => {
         }
     };
 
+    const handleClearNotifications = async () => {
+        if (!window.confirm('Delete all previous notifications for the selected batch? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setActionLoadingId('clear-all');
+            const url = new URL(`${API_URL}/api/admin/notifications`);
+            if (activeBatch?._id) {
+                url.searchParams.set('batchId', activeBatch._id);
+            }
+
+            const res = await fetch(url.toString(), { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to clear notifications');
+            await fetchNotifications();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to clear notifications.');
+        } finally {
+            setActionLoadingId(null);
+        }
+    };
+
     return (
         <section className="space-y-6">
             <Helmet>
@@ -59,15 +82,29 @@ const Notifications = () => {
             </Helmet>
 
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                <h1 className="text-3xl font-black text-navy mb-2 flex items-center gap-3">
-                    <Bell className="text-lime" /> Notifications
-                </h1>
-                <p className="text-slate-500 font-medium">
-                    Late-entry requests raised by students appear here for approval.
-                </p>
-                {!activeBatch?._id && (
-                    <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view notifications.</p>
-                )}
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black text-navy mb-2 flex items-center gap-3">
+                            <Bell className="text-lime" /> Notifications
+                        </h1>
+                        <p className="text-slate-500 font-medium">
+                            Late-entry requests raised by students appear here for approval.
+                        </p>
+                        {!activeBatch?._id && (
+                            <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view notifications.</p>
+                        )}
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={handleClearNotifications}
+                        disabled={actionLoadingId === 'clear-all' || loading}
+                        className="inline-flex h-12 items-center gap-2 rounded-2xl bg-red-50 px-4 text-sm font-black text-red-600 transition-all hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <Trash2 size={16} />
+                        {actionLoadingId === 'clear-all' ? 'Clearing...' : 'Clear All'}
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm overflow-x-auto">
