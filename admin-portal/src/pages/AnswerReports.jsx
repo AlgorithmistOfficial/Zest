@@ -16,6 +16,7 @@ const AnswerReports = () => {
     const [testMenuOpen, setTestMenuOpen] = useState(false);
     const [studentInput, setStudentInput] = useState('');
     const [submittedStudentQuery, setSubmittedStudentQuery] = useState('');
+    const [selectedStudentName, setSelectedStudentName] = useState('');
     const activeBatch = useActiveAdminBatch();
     const menuRef = useRef(null);
 
@@ -38,6 +39,7 @@ const AnswerReports = () => {
                 setSelectedTestId('');
                 setSubmittedStudentQuery('');
                 setStudentInput('');
+                setSelectedStudentName('');
 
                 if (!activeBatch?._id) {
                     setTests([]);
@@ -98,6 +100,9 @@ const AnswerReports = () => {
         const query = studentInput.trim();
         const timer = window.setTimeout(() => {
             setSubmittedStudentQuery(query);
+            if (selectedStudentName && query !== selectedStudentName) {
+                setSelectedStudentName('');
+            }
             fetchReport(selectedTestId, query);
         }, 300);
 
@@ -121,6 +126,18 @@ const AnswerReports = () => {
         }
     };
 
+    const handleStudentSelect = async (studentName) => {
+        const trimmedName = String(studentName || '').trim();
+        if (!trimmedName || !selectedTestId) {
+            return;
+        }
+
+        setStudentInput(trimmedName);
+        setSubmittedStudentQuery(trimmedName);
+        setSelectedStudentName(trimmedName);
+        await fetchReport(selectedTestId, trimmedName);
+    };
+
     const selectedTest = tests.find((test) => String(test.testId) === String(selectedTestId));
 
     const groupedRows = useMemo(() => {
@@ -142,7 +159,32 @@ const AnswerReports = () => {
         return Array.from(map.values());
     }, [rows]);
 
-    const renderedRows = groupedRows;
+    const studentSuggestions = useMemo(() => {
+        const search = studentInput.trim().toLowerCase();
+        if (!search) {
+            return [];
+        }
+
+        const seen = new Set();
+        return groupedRows.filter((group) => {
+            const name = String(group.studentName || '').trim();
+            const normalizedName = name.toLowerCase();
+            if (!normalizedName.includes(search) || seen.has(normalizedName)) {
+                return false;
+            }
+            seen.add(normalizedName);
+            return true;
+        });
+    }, [groupedRows, studentInput]);
+
+    const renderedRows = useMemo(() => {
+        if (!selectedStudentName) {
+            return [];
+        }
+
+        const selected = selectedStudentName.trim().toLowerCase();
+        return groupedRows.filter((group) => String(group.studentName || '').trim().toLowerCase() === selected);
+    }, [groupedRows, selectedStudentName]);
 
     return (
         <section className="space-y-6">
@@ -248,27 +290,64 @@ const AnswerReports = () => {
                         </div>
                     </div>
 
-                    <form onSubmit={handleStudentSearch} className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                    <form onSubmit={handleStudentSearch} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                         <div>
                             <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Step 2</p>
-                            <div className="flex h-14 items-center rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 transition-all focus-within:border-lime focus-within:bg-white">
-                                <Search size={16} className="mr-3 shrink-0 text-slate-400" />
-                                <input
-                                    type="text"
-                                    value={studentInput}
-                                    onChange={(e) => setStudentInput(e.target.value)}
-                                    placeholder="Search student by name or email"
-                                    className="w-full border-none bg-transparent text-sm font-semibold text-navy outline-none placeholder:text-slate-400"
-                                />
-                                {studentInput && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setStudentInput('')}
-                                        className="ml-2 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                )}
+                            <div className="relative">
+                                <div className="flex h-14 items-center rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 transition-all focus-within:border-lime focus-within:bg-white">
+                                    <Search size={16} className="mr-3 shrink-0 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        value={studentInput}
+                                        onChange={(e) => {
+                                            setStudentInput(e.target.value);
+                                            setSelectedStudentName('');
+                                        }}
+                                        placeholder="Search student by name or email"
+                                        className="w-full border-none bg-transparent text-sm font-semibold text-navy outline-none placeholder:text-slate-400"
+                                    />
+                                    {studentInput && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setStudentInput('');
+                                                setSubmittedStudentQuery('');
+                                                setSelectedStudentName('');
+                                                setRows([]);
+                                            }}
+                                            className="ml-2 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <AnimatePresence>
+                                    {studentInput.trim() && studentSuggestions.length > 0 && !selectedStudentName && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 8 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 8 }}
+                                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                                            className="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-[1.4rem] border border-slate-100 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
+                                        >
+                                            <div className="border-b border-slate-100 px-4 py-3 text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">
+                                                Matching students
+                                            </div>
+                                            {studentSuggestions.map((group) => (
+                                                <button
+                                                    key={`${group.studentName}-${group.studentEmail}`}
+                                                    type="button"
+                                                    onClick={() => handleStudentSelect(group.studentName)}
+                                                    className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-slate-50"
+                                                >
+                                                    <span className="text-sm font-bold text-navy">{group.studentName}</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">Select</span>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                         <button
@@ -293,6 +372,10 @@ const AnswerReports = () => {
                     </div>
                 ) : loadingReport ? (
                     <p className="text-slate-500 font-medium">Loading report...</p>
+                ) : !selectedStudentName ? (
+                    <p className="text-slate-500 font-medium">
+                        Type a student name to see matching suggestions, then click one to load the full wrong-answer report.
+                    </p>
                 ) : renderedRows.length === 0 ? (
                     <p className="text-slate-500 font-medium">
                         {submittedStudentQuery
