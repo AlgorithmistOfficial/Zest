@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, Search, BookOpen, X, Sparkles } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -42,7 +42,7 @@ const AnswerReports = () => {
         }, 300);
 
         return () => window.clearTimeout(timer);
-    }, [selectedTestId, studentInput]);
+    }, [fetchReport, selectedTestId, studentInput]);
 
     useEffect(() => {
         const fetchTests = async () => {
@@ -73,7 +73,7 @@ const AnswerReports = () => {
         fetchTests();
     }, [activeBatch?._id]);
 
-    const fetchReport = async (testId, studentQuery = '') => {
+    const fetchReport = useCallback(async (testId, studentQuery = '') => {
         const trimmedTestId = String(testId || '').trim();
         if (!trimmedTestId) {
             setRows([]);
@@ -102,7 +102,7 @@ const AnswerReports = () => {
         } finally {
             setLoadingReport(false);
         }
-    };
+    }, [activeBatch?._id]);
 
     const handleSelectTest = async (test) => {
         setSelectedTestId(test.testId);
