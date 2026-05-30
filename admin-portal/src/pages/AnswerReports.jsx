@@ -31,20 +31,6 @@ const AnswerReports = () => {
     }, []);
 
     useEffect(() => {
-        if (!selectedTestId) {
-            return undefined;
-        }
-
-        const query = studentInput.trim();
-        const timer = window.setTimeout(() => {
-            setSubmittedStudentQuery(query);
-            fetchReport(selectedTestId, query);
-        }, 300);
-
-        return () => window.clearTimeout(timer);
-    }, [fetchReport, selectedTestId, studentInput]);
-
-    useEffect(() => {
         const fetchTests = async () => {
             try {
                 setLoadingTests(true);
@@ -103,6 +89,20 @@ const AnswerReports = () => {
             setLoadingReport(false);
         }
     }, [activeBatch?._id]);
+
+    useEffect(() => {
+        if (!selectedTestId) {
+            return undefined;
+        }
+
+        const query = studentInput.trim();
+        const timer = window.setTimeout(() => {
+            setSubmittedStudentQuery(query);
+            fetchReport(selectedTestId, query);
+        }, 300);
+
+        return () => window.clearTimeout(timer);
+    }, [fetchReport, selectedTestId, studentInput]);
 
     const handleSelectTest = async (test) => {
         setSelectedTestId(test.testId);
