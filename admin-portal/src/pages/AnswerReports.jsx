@@ -107,7 +107,7 @@ const AnswerReports = () => {
         }, 300);
 
         return () => window.clearTimeout(timer);
-    }, [fetchReport, selectedTestId, studentInput]);
+    }, [fetchReport, selectedStudentName, selectedTestId, studentInput]);
 
     const handleSelectTest = async (test) => {
         setSelectedTestId(test.testId);
