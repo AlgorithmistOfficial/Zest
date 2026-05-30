@@ -31,6 +31,20 @@ const AnswerReports = () => {
     }, []);
 
     useEffect(() => {
+        if (!selectedTestId) {
+            return undefined;
+        }
+
+        const query = studentInput.trim();
+        const timer = window.setTimeout(() => {
+            setSubmittedStudentQuery(query);
+            fetchReport(selectedTestId, query);
+        }, 300);
+
+        return () => window.clearTimeout(timer);
+    }, [selectedTestId, studentInput]);
+
+    useEffect(() => {
         const fetchTests = async () => {
             try {
                 setLoadingTests(true);
@@ -59,7 +73,7 @@ const AnswerReports = () => {
         fetchTests();
     }, [activeBatch?._id]);
 
-    const fetchReport = async (testId) => {
+    const fetchReport = async (testId, studentQuery = '') => {
         const trimmedTestId = String(testId || '').trim();
         if (!trimmedTestId) {
             setRows([]);
@@ -73,8 +87,9 @@ const AnswerReports = () => {
                 url.searchParams.set('batchId', activeBatch._id);
             }
             url.searchParams.set('testId', trimmedTestId);
-            if (submittedStudentQuery.trim()) {
-                url.searchParams.set('student', submittedStudentQuery.trim());
+            const trimmedStudentQuery = String(studentQuery || '').trim();
+            if (trimmedStudentQuery) {
+                url.searchParams.set('student', trimmedStudentQuery);
             }
 
             const res = await fetch(url.toString());
@@ -94,14 +109,15 @@ const AnswerReports = () => {
         setTestMenuOpen(false);
         setSubmittedStudentQuery('');
         setStudentInput('');
-        await fetchReport(test.testId);
+        await fetchReport(test.testId, '');
     };
 
     const handleStudentSearch = async (event) => {
         event.preventDefault();
-        setSubmittedStudentQuery(studentInput.trim());
+        const query = studentInput.trim();
+        setSubmittedStudentQuery(query);
         if (selectedTestId) {
-            await fetchReport(selectedTestId);
+            await fetchReport(selectedTestId, query);
         }
     };
 
@@ -126,11 +142,7 @@ const AnswerReports = () => {
         return Array.from(map.values());
     }, [rows]);
 
-    const renderedRows = useMemo(() => groupedRows.filter((group) => {
-        const search = submittedStudentQuery.trim().toLowerCase();
-        if (!search) return true;
-        return group.studentName.toLowerCase().includes(search) || group.studentEmail.toLowerCase().includes(search);
-    }), [groupedRows, submittedStudentQuery]);
+    const renderedRows = groupedRows;
 
     return (
         <section className="space-y-6">
@@ -282,7 +294,11 @@ const AnswerReports = () => {
                 ) : loadingReport ? (
                     <p className="text-slate-500 font-medium">Loading report...</p>
                 ) : renderedRows.length === 0 ? (
-                    <p className="text-slate-500 font-medium">No wrong-answer data available for the selected test and student.</p>
+                    <p className="text-slate-500 font-medium">
+                        {submittedStudentQuery
+                            ? `No student matches "${submittedStudentQuery}" for the selected test.`
+                            : 'No wrong-answer data available for the selected test.'}
+                    </p>
                 ) : (
                     <div className="space-y-5">
                         <div className="rounded-[1.6rem] border border-slate-100 bg-slate-50 p-5">
