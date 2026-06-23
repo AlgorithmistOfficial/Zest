@@ -59,29 +59,12 @@ const io = new Server(server, {
     }
 });
 
-const allowedOrigins = new Set([
-    process.env.FRONTEND_URL || "https://zest-kohl-xi.vercel.app",
-    "https://zest-kohl-xi.vercel.app",
-    "https://Zest-kohl-xi.vercel.app",
-    "https://zest-admin-five.vercel.app"
-]);
-
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.has(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
+    origin: true,
     credentials: true
 }));
 app.options(/.*/, cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.has(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
+    origin: true,
     credentials: true
 }));
 
