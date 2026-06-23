@@ -59,8 +59,26 @@ const io = new Server(server, {
     }
 });
 
+const allowedOrigins = new Set([
+    process.env.FRONTEND_URL
+]);
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "https://zest-kohl-xi.vercel.app",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.has(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true
+}));
+app.options('*', cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.has(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true
 }));
 
@@ -479,7 +497,7 @@ app.get('/api/auth/google',
         const { remember, returnTo } = req.query;
         if (req.session) {
             req.session.remember = remember === 'true';
-            req.session.returnTo = returnTo || process.env.FRONTEND_URL || 'https://zest-kohl-xi.vercel.app';
+            req.session.returnTo = returnTo || process.env.FRONTEND_URL;
         }
         passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
     }
@@ -516,7 +534,7 @@ app.get('/api/auth/google/callback',
                     batchId: user.batchId || null,
                     batch: formatBatchForClient(batch)
                 }));
-                const frontendUrl = (req.session && req.session.returnTo) || process.env.FRONTEND_URL || 'https://zest-kohl-xi.vercel.app';
+                const frontendUrl = (req.session && req.session.returnTo) || process.env.FRONTEND_URL;
                 const nextPath = user.batchId ? '/home' : '/select-batch';
                 const redirectUrl = `${frontendUrl}${nextPath}?token=${token}&user=${userStr}&remember=${!!remember}`;
 

@@ -126,7 +126,6 @@ const Home = () => {
           try {
             const studentRes = await fetch(`${backendUrl}/api/student/submitted-tests`, {
               headers: { 'Authorization': `Bearer ${token}` },
-              credentials: 'include'
             });
             console.log('[Home] submitted-tests response status:', studentRes.status);
             if (studentRes.ok) {
