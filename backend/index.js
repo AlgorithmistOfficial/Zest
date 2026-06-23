@@ -1257,13 +1257,22 @@ app.post('/api/test/submit', async (req, res) => {
 
         // Authenticate student via JWT
         const authHeader = req.headers.authorization;
-        if (!authHeader) return res.status(401).json({ message: 'Authentication required' });
-        const token = authHeader.split(' ')[1];
+        if (!authHeader) {
+            console.warn('[Test] Submit blocked: missing Authorization header');
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        const [scheme, token] = authHeader.split(' ');
+        if (scheme !== 'Bearer' || !token) {
+            console.warn('[Test] Submit blocked: malformed Authorization header', authHeader);
+            return res.status(401).json({ message: 'Malformed authorization header' });
+        }
 
         let decoded;
         try {
             decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
         } catch (e) {
+            console.warn('[Test] Submit blocked: invalid JWT', { name: e.name, message: e.message });
             return res.status(401).json({ message: 'Invalid or expired token' });
         }
 
@@ -1388,7 +1397,10 @@ app.get('/api/student/submitted-tests', async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader) return res.status(401).json({ message: 'Auth required' });
-        const token = authHeader.split(' ')[1];
+        const [scheme, token] = authHeader.split(' ');
+        if (scheme !== 'Bearer' || !token) {
+            return res.status(401).json({ message: 'Malformed authorization header' });
+        }
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
         const student = await Student.findById(decoded.id, 'testId batchId');
         if (!student) return res.status(404).json({ message: 'Student not found' });
@@ -1408,7 +1420,10 @@ app.post('/api/test/alarm', async (req, res) => {
 
         const authHeader = req.headers.authorization;
         if (!authHeader) return res.status(401).json({ message: 'Authentication required' });
-        const token = authHeader.split(' ')[1];
+        const [scheme, token] = authHeader.split(' ');
+        if (scheme !== 'Bearer' || !token) {
+            return res.status(401).json({ message: 'Malformed authorization header' });
+        }
 
         let decoded;
         try {
