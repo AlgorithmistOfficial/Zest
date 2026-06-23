@@ -72,7 +72,7 @@ app.use(cors({
     },
     credentials: true
 }));
-app.options('*', cors({
+app.options(/.*/, cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.has(origin)) {
             return callback(null, true);
