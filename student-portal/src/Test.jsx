@@ -54,7 +54,62 @@ const Test = () => {
     useEffect(() => {
         const fetchTest = async () => {
             try {
+                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+
+                // Enforce the same 5-minute late-entry rule here so direct navigation cannot bypass Home.jsx
+                const examRes = await fetch(`${backendUrl}/api/exams/by-testid/${testId}${user.batchId ? `?batchId=${user.batchId}` : ''}`);
+                if (examRes.ok) {
+                    const exam = await examRes.json();
+                    const parseDateTime = (d, t) => {
+                        const ds = d.toString().padStart(8, '0');
+                        const ts = t.toString().padStart(6, '0');
+                        return new Date(
+                            parseInt(ds.slice(4)),
+                            parseInt(ds.slice(2, 4)) - 1,
+                            parseInt(ds.slice(0, 2)),
+                            parseInt(ts.slice(0, 2)),
+                            parseInt(ts.slice(2, 4)),
+                            parseInt(ts.slice(4))
+                        );
+                    };
+
+                    const startTime = parseDateTime(exam.examDate, exam.examTime);
+                    const entryDeadline = new Date(startTime.getTime() + 5 * 60 * 1000);
+                    const now = new Date();
+
+                    if (now > entryDeadline) {
+                        if (!token) {
+                            navigate('/home');
+                            return;
+                        }
+
+                        const statusRes = await fetch(`${backendUrl}/api/test/late-entry-status/${testId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+
+                        if (!statusRes.ok) {
+                            navigate('/home');
+                            return;
+                        }
+
+                        const statusData = await statusRes.json();
+                        if (statusData.status !== 'allowed') {
+                            await fetch(`${backendUrl}/api/test/late-entry-request`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ testId })
+                            }).catch(() => { });
+                            navigate('/home');
+                            return;
+                        }
+                    }
+                }
+
                 const batchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
                 const res = await fetch(`${backendUrl}/api/test-contents/${testId}${batchId ? `?batchId=${batchId}` : ''}`);
                 if (!res.ok) throw new Error('Test not found');
