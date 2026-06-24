@@ -5,7 +5,7 @@ import {
     LogOut, Info, ShieldCheck, PlayCircle, Clock, Send,
     ChevronLeft, ChevronRight, Code, CheckCircle2, XCircle,
     Award, AlertTriangle, Trophy, Home, Loader2, Play,
-    Circle, Square, Type
+    Circle, Square, Type, Camera
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
@@ -29,6 +29,15 @@ const Test = () => {
     const [warningsCount, setWarningsCount] = useState(0);
     const [warningPrompt, setWarningPrompt] = useState(null);
     const [warningLimitExceeded, setWarningLimitExceeded] = useState(false);
+    const [yellowWarningsCount, setYellowWarningsCount] = useState(0);
+    const [cameraReady, setCameraReady] = useState(false);
+    const [cameraError, setCameraError] = useState('');
+    const [faceWarningVisible, setFaceWarningVisible] = useState(false);
+    const [warningCorner, setWarningCorner] = useState('top-right');
+    const [cameraWidgetPos, setCameraWidgetPos] = useState({ right: 16, bottom: 16 });
+    const [isDraggingCamera, setIsDraggingCamera] = useState(false);
+    const [cameraDevices, setCameraDevices] = useState([]);
+    const [selectedCameraDeviceId, setSelectedCameraDeviceId] = useState('');
 
     // Exit fullscreen on test end
     useEffect(() => {
@@ -49,6 +58,70 @@ const Test = () => {
     const submitFnRef = useRef(null);
     const warningPromptOpenRef = useRef(false);
     const audioContextRef = useRef(null);
+    const videoRef = useRef(null);
+    const overlayCanvasRef = useRef(null);
+    const streamRef = useRef(null);
+    const detectorRef = useRef(null);
+    const detectorLoopRef = useRef(null);
+    const detectorLoopRunnerRef = useRef(null);
+    const overlayLoopRef = useRef(null);
+    const prevFaceCenterRef = useRef(null);
+    const lastFaceBoxRef = useRef(null);
+    const faceMotionStreakRef = useRef({ direction: 0, count: 0 });
+    const faceWarningCooldownRef = useRef(0);
+    const mediaPipeReadyRef = useRef(false);
+    const yellowWarningsRef = useRef(0);
+    const dragStateRef = useRef({ startX: 0, startY: 0, startRight: 16, startBottom: 16 });
+    const faceOverlayNoiseRef = useRef(0);
+
+    const drawFaceOverlay = useCallback((faceBox, video) => {
+        const canvas = overlayCanvasRef.current;
+        if (!canvas || !video) return;
+
+        const rect = video.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(1, Math.round(rect.width * dpr));
+        canvas.height = Math.max(1, Math.round(rect.height * dpr));
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        if (!faceBox) return;
+
+        const scaleX = rect.width / video.videoWidth;
+        const scaleY = rect.height / video.videoHeight;
+        const wobble = Math.sin(faceOverlayNoiseRef.current * 0.18) * 1.5;
+        const wobbleY = Math.cos(faceOverlayNoiseRef.current * 0.14) * 1.1;
+        const x = (faceBox.originX * scaleX) + wobble;
+        const y = (faceBox.originY * scaleY) + wobbleY;
+        const w = faceBox.width * scaleX;
+        const h = faceBox.height * scaleY;
+        const pad = Math.min(w, h) * 0.08;
+        const frameX = x - pad;
+        const frameY = y - pad;
+        const frameW = w + pad * 2;
+        const frameH = h + pad * 2;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 242, 254, 0.55)';
+        ctx.shadowBlur = 14;
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(frameX, frameY, frameW, frameH);
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 3;
+        const cornerSize = Math.min(22, Math.max(12, frameW * 0.12));
+        ctx.beginPath(); ctx.moveTo(frameX, frameY + cornerSize); ctx.lineTo(frameX, frameY); ctx.lineTo(frameX + cornerSize, frameY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(frameX + frameW - cornerSize, frameY); ctx.lineTo(frameX + frameW, frameY); ctx.lineTo(frameX + frameW, frameY + cornerSize); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(frameX, frameY + frameH - cornerSize); ctx.lineTo(frameX, frameY + frameH); ctx.lineTo(frameX + cornerSize, frameY + frameH); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(frameX + frameW - cornerSize, frameY + frameH); ctx.lineTo(frameX + frameW, frameY + frameH); ctx.lineTo(frameX + frameW, frameY + frameH - cornerSize); ctx.stroke();
+        ctx.restore();
+    }, []);
 
     // Fetch test data
     useEffect(() => {
@@ -165,7 +238,12 @@ const Test = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ testId, answers: payloadAnswers, alarmCount: warningsCount })
+                body: JSON.stringify({
+                    testId,
+                    answers: payloadAnswers,
+                    alarmCount: warningsCount,
+                    yellowWarningCount: yellowWarningsRef.current
+                })
             });
             const data = await res.json();
             if (res.ok) {
@@ -182,7 +260,7 @@ const Test = () => {
         } finally {
             setSubmitting(false);
         }
-    }, [testId, answers, testData, warningsCount, submitting]);
+    }, [testId, answers, warningsCount, submitting]);
 
     // Keep ref updated for timer callback
     submitFnRef.current = handleSubmit;
@@ -207,6 +285,167 @@ const Test = () => {
 
         return () => clearInterval(timerRef.current);
     }, [phase]);
+
+    useEffect(() => {
+        yellowWarningsRef.current = yellowWarningsCount;
+    }, [yellowWarningsCount]);
+
+    useEffect(() => {
+        if (!isDraggingCamera) return;
+
+        const handleMove = (event) => {
+            event.preventDefault();
+            const dx = event.clientX - dragStateRef.current.startX;
+            const dy = event.clientY - dragStateRef.current.startY;
+            const nextRight = Math.max(12, dragStateRef.current.startRight - dx);
+            const nextBottom = Math.max(12, dragStateRef.current.startBottom - dy);
+            setCameraWidgetPos({ right: nextRight, bottom: nextBottom });
+        };
+
+        const handleUp = () => setIsDraggingCamera(false);
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleUp);
+        return () => {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleUp);
+        };
+    }, [isDraggingCamera]);
+
+    useEffect(() => {
+        if (phase !== 'testing') return;
+
+        let cancelled = false;
+        const startCamera = async () => {
+            try {
+                const videoConstraints = selectedCameraDeviceId
+                    ? { deviceId: { exact: selectedCameraDeviceId } }
+                    : { facingMode: 'user' };
+                const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                if (cancelled) {
+                    stream.getTracks().forEach((track) => track.stop());
+                    return;
+                }
+
+                streamRef.current = stream;
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoInputs = devices.filter((device) => device.kind === 'videoinput');
+                setCameraDevices(videoInputs);
+                if (!selectedCameraDeviceId && videoInputs.length > 0) {
+                    const activeTrack = stream.getVideoTracks()[0];
+                    const activeSettings = activeTrack?.getSettings?.() || {};
+                    const matchedDevice = videoInputs.find((device) => device.deviceId === activeSettings.deviceId);
+                    setSelectedCameraDeviceId(matchedDevice?.deviceId || videoInputs[0].deviceId);
+                }
+
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play().catch(() => { });
+                }
+                setCameraReady(true);
+
+                const { FaceDetector, FilesetResolver } = await import('@mediapipe/tasks-vision');
+                if (cancelled) return;
+                if (!mediaPipeReadyRef.current) {
+                    const vision = await FilesetResolver.forVisionTasks(
+                        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+                    );
+                    detectorRef.current = await FaceDetector.createFromModelPath(
+                        vision,
+                        'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite'
+                    );
+                    detectorRef.current.setOptions({
+                        runningMode: 'VIDEO',
+                        minDetectionConfidence: 0.6
+                    });
+                    mediaPipeReadyRef.current = true;
+                }
+
+                const loop = async () => {
+                    if (cancelled || phase !== 'testing') return;
+                    const detector = detectorRef.current;
+                    const video = videoRef.current;
+                    if (detector && video && video.readyState >= 2) {
+                        try {
+                            const now = performance.now();
+                            const res = detector.detectForVideo(video, now);
+                            const detections = res.detections || [];
+                            faceOverlayNoiseRef.current += 1;
+                            lastFaceBoxRef.current = detections[0]?.boundingBox || null;
+
+                            if (detections.length > 0) {
+                                const box = detections[0].boundingBox;
+                                const centerX = box.originX + (box.width / 2);
+                                const prev = prevFaceCenterRef.current;
+                                if (prev !== null) {
+                                    const delta = centerX - prev;
+                                    const threshold = Math.max(28, box.width * 0.22);
+                                    const direction = delta === 0 ? 0 : (delta > 0 ? 1 : -1);
+                                    const streak = faceMotionStreakRef.current;
+
+                                    if (Math.abs(delta) > threshold) {
+                                        if (streak.direction === direction) {
+                                            streak.count += 1;
+                                        } else {
+                                            streak.direction = direction;
+                                            streak.count = 1;
+                                        }
+                                    } else {
+                                        streak.direction = 0;
+                                        streak.count = 0;
+                                    }
+
+                                    if (streak.count >= 2 && Date.now() > faceWarningCooldownRef.current) {
+                                        faceWarningCooldownRef.current = Date.now() + 5000;
+                                        streak.direction = 0;
+                                        streak.count = 0;
+                                        setYellowWarningsCount((prevCount) => prevCount + 1);
+                                        setFaceWarningVisible(true);
+                                        setWarningCorner(delta > 0 ? 'top-right' : 'top-left');
+                                        window.setTimeout(() => setFaceWarningVisible(false), 1800);
+                                    }
+                                }
+                                prevFaceCenterRef.current = centerX;
+                            } else {
+                                prevFaceCenterRef.current = null;
+                                faceMotionStreakRef.current = { direction: 0, count: 0 };
+                            }
+                        } catch (err) {
+                            console.warn('Face detection failed:', err);
+                            lastFaceBoxRef.current = null;
+                        }
+                    }
+                    detectorLoopRef.current = window.setTimeout(loop, 250);
+                };
+
+                detectorLoopRunnerRef.current = loop;
+                loop();
+
+                const animateOverlay = () => {
+                    if (!cancelled && phase === 'testing') {
+                        drawFaceOverlay(lastFaceBoxRef.current, videoRef.current);
+                        overlayLoopRef.current = window.requestAnimationFrame(animateOverlay);
+                    }
+                };
+                animateOverlay();
+            } catch (err) {
+                console.warn('Camera monitoring failed:', err);
+                setCameraError('Camera monitoring could not start');
+            }
+        };
+
+        startCamera();
+
+        return () => {
+            cancelled = true;
+            if (detectorLoopRef.current) window.clearTimeout(detectorLoopRef.current);
+            if (overlayLoopRef.current) window.cancelAnimationFrame(overlayLoopRef.current);
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
+            }
+        };
+    }, [phase, selectedCameraDeviceId, drawFaceOverlay]);
 
     // Prevent accidental navigation during test
     useEffect(() => {
@@ -783,6 +1022,19 @@ const Test = () => {
                 )}
             </AnimatePresence>
 
+            <AnimatePresence>
+                {faceWarningVisible && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className={`fixed ${warningCorner === 'top-left' ? 'left-4' : 'right-4'} top-4 z-[95] rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700 shadow-lg`}
+                    >
+                        Face movement detected
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Top Header Bar */}
             <div className="bg-white/80 backdrop-blur-xl border-b border-slate-100 px-6 py-3 flex items-center justify-between sticky top-0 z-40">
                 <div className="flex items-center gap-3">
@@ -1084,6 +1336,85 @@ const Test = () => {
                     >
                         <Send size={18} /> Submit Test
                     </button>
+                </div>
+            </div>
+
+            <div className="pointer-events-none fixed bottom-4 right-4 z-[90] flex flex-col items-end gap-2">
+                {cameraError ? (
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-bold text-red-700 shadow-lg">
+                        {cameraError}
+                    </div>
+                ) : (
+                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 shadow-lg">
+                        {cameraReady ? 'Camera monitoring active' : 'Starting camera monitoring...'}
+                    </div>
+                )}
+            </div>
+
+            <div
+                className="fixed z-[85] overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-2xl shadow-navy/20"
+                style={{ right: `${cameraWidgetPos.right}px`, bottom: `${cameraWidgetPos.bottom}px` }}
+            >
+                <div
+                    className="flex cursor-move select-none items-center justify-between gap-3 border-b border-white/10 bg-slate-950/90 px-4 py-2"
+                    onMouseDown={(event) => {
+                        setIsDraggingCamera(true);
+                        dragStateRef.current = {
+                            startX: event.clientX,
+                            startY: event.clientY,
+                            startRight: cameraWidgetPos.right,
+                            startBottom: cameraWidgetPos.bottom
+                        };
+                    }}
+                >
+                    <div className="flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
+                        <Camera size={12} />
+                        <span className="truncate">Live Self View</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] ${cameraReady ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}`}>
+                            <span className={`h-2 w-2 rounded-full ${cameraReady ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
+                            {cameraReady ? 'Active' : 'Loading'}
+                        </div>
+                        <select
+                            value={selectedCameraDeviceId}
+                            onChange={(e) => setSelectedCameraDeviceId(e.target.value)}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            className="max-w-[9rem] rounded-xl border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-bold text-white outline-none backdrop-blur"
+                            title="Choose camera"
+                        >
+                            {cameraDevices.length === 0 ? (
+                                <option value="">Default camera</option>
+                            ) : (
+                                cameraDevices.map((device, idx) => (
+                                    <option key={device.deviceId} value={device.deviceId} className="text-navy">
+                                        {device.label || `Camera ${idx + 1}`}
+                                    </option>
+                                ))
+                            )}
+                        </select>
+                    </div>
+                </div>
+                <div className="relative h-44 w-56 bg-black">
+                    <video
+                        ref={videoRef}
+                        className="h-full w-full object-cover scale-x-[-1]"
+                        playsInline
+                        muted
+                        autoPlay
+                    />
+                    <canvas
+                        ref={overlayCanvasRef}
+                        className="pointer-events-none absolute inset-0 h-full w-full scale-x-[-1]"
+                    />
+                    {!cameraReady && !cameraError && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 text-center">
+                            <div className="space-y-1">
+                                <Camera size={28} className="mx-auto text-white/60" />
+                                <p className="text-xs font-bold text-white/70">Starting camera...</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

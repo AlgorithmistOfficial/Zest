@@ -31,9 +31,9 @@ const Reports = () => {
             const res = await fetch(url.toString());
             if (!res.ok) throw new Error('Failed to fetch report');
             const data = await res.json();
-            setRows(data);
-            setSubmittedTestId(trimmedTestId);
-        } catch (err) {
+                setRows(data);
+                setSubmittedTestId(trimmedTestId);
+            } catch (err) {
             console.error(err);
             setRows([]);
             setSubmittedTestId(trimmedTestId);
@@ -52,12 +52,18 @@ const Reports = () => {
                     studentEmail: row.studentEmail,
                     testId: row.testId,
                     score: row.score,
-                    alarmCount: row.alarmCount
+                    alarmCount: row.alarmCount,
+                    yellowWarningCount: row.yellowWarningCount ?? row.yellowWarningsCount ?? 0
                 });
             }
         });
         return Array.from(map.values());
     }, [rows]);
+
+    const yellowWarningTotal = useMemo(
+        () => groupedRows.reduce((sum, row) => sum + (Number(row.yellowWarningCount) || 0), 0),
+        [groupedRows]
+    );
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -108,33 +114,56 @@ const Reports = () => {
                 ) : groupedRows.length === 0 ? (
                     <p className="text-slate-500 font-medium">No report data available.</p>
                 ) : (
-                    <div className="grid gap-4 lg:grid-cols-2">
-                        {groupedRows.map((row) => (
-                            <div key={`${row.studentEmail}-${row.testId}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5 shadow-sm">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p className="text-xs font-black uppercase tracking-[0.28em] text-slate-400">Student</p>
-                                        <h2 className="mt-1 text-xl font-black text-navy">{row.studentName}</h2>
-                                        <p className="text-sm text-slate-500">{row.studentEmail}</p>
-                                    </div>
-                                    <div className="rounded-2xl bg-navy px-4 py-2 text-right text-white">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/60">Test ID</p>
-                                        <p className="font-mono text-lg font-black">{row.testId}</p>
-                                    </div>
-                                </div>
-
-                                <div className="mt-5 grid grid-cols-2 gap-3">
-                                    <div className="rounded-2xl bg-white p-4 border border-slate-100">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Score</p>
-                                        <p className="mt-1 text-2xl font-black text-navy">{row.score}</p>
-                                    </div>
-                                    <div className="rounded-2xl bg-white p-4 border border-slate-100">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Alarms Buzzed</p>
-                                        <p className="mt-1 text-2xl font-black text-red-500">{row.alarmCount}</p>
-                                    </div>
-                                </div>
+                    <div className="space-y-5">
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-3xl bg-slate-50 p-4 border border-slate-100">
+                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Students</p>
+                                <p className="mt-1 text-2xl font-black text-navy">{groupedRows.length}</p>
                             </div>
-                        ))}
+                            <div className="rounded-3xl bg-red-50 p-4 border border-red-100">
+                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-400">Alarms Buzzed</p>
+                                <p className="mt-1 text-2xl font-black text-red-500">
+                                    {groupedRows.reduce((sum, row) => sum + (Number(row.alarmCount) || 0), 0)}
+                                </p>
+                            </div>
+                            <div className="rounded-3xl bg-yellow-50 p-4 border border-yellow-100">
+                                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-yellow-700">Yellow Warnings</p>
+                                <p className="mt-1 text-2xl font-black text-yellow-600">{yellowWarningTotal}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 lg:grid-cols-2">
+                            {groupedRows.map((row) => (
+                                <div key={`${row.studentEmail}-${row.testId}`} className="rounded-3xl border border-slate-100 bg-slate-50 p-5 shadow-sm">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-xs font-black uppercase tracking-[0.28em] text-slate-400">Student</p>
+                                            <h2 className="mt-1 text-xl font-black text-navy">{row.studentName}</h2>
+                                            <p className="text-sm text-slate-500">{row.studentEmail}</p>
+                                        </div>
+                                        <div className="rounded-2xl bg-navy px-4 py-2 text-right text-white">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/60">Test ID</p>
+                                            <p className="font-mono text-lg font-black">{row.testId}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-5 grid grid-cols-2 gap-3">
+                                        <div className="rounded-2xl bg-white p-4 border border-slate-100">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Score</p>
+                                            <p className="mt-1 text-2xl font-black text-navy">{row.score}</p>
+                                        </div>
+                                        <div className="rounded-2xl bg-white p-4 border border-slate-100">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Alarms Buzzed</p>
+                                            <p className="mt-1 text-2xl font-black text-red-500">{row.alarmCount}</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-3 rounded-2xl bg-yellow-50 p-4 border border-yellow-100">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-yellow-700">Yellow Warnings</p>
+                                        <p className="mt-1 text-2xl font-black text-yellow-600">{row.yellowWarningCount}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

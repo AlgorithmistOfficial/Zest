@@ -315,6 +315,18 @@ const upsertUnattemptedQuestionsRecord = async ({ student, testId, unattemptedQu
     return existing.save();
 };
 
+
+const storeYellowWarningCount = async ({ student, testId, yellowWarningCount }) => {
+    if (!student || !testId || !Number.isFinite(Number(yellowWarningCount))) return null;
+
+    const count = Math.max(0, Number(yellowWarningCount));
+    student.yellowWarning = Array.isArray(student.yellowWarning) ? student.yellowWarning : [];
+    student.activeYellowWarningByTest = student.activeYellowWarningByTest || new Map();
+    student.yellowWarning.push(count);
+    student.activeYellowWarningByTest.delete(testId);
+    return student.save();
+};
+
 // Helper: Run Java code against test cases and return results
 const runJavaTestCases = (code, testCases) => {
     return new Promise((resolve) => {
@@ -1253,7 +1265,7 @@ app.post('/api/test/run-java-testcases', async (req, res) => {
 // POST /api/test/submit — Submit entire test, evaluate all answers, save score to student
 app.post('/api/test/submit', async (req, res) => {
     try {
-        const { testId, answers, alarmCount } = req.body;
+        const { testId, answers, alarmCount, yellowWarningCount } = req.body;
 
         // Authenticate student via JWT
         const authHeader = req.headers.authorization;
@@ -1371,6 +1383,15 @@ app.post('/api/test/submit', async (req, res) => {
         if (student.activeAlarmByTest) {
             student.activeAlarmByTest.delete(testId);
         }
+
+        await storeYellowWarningCount({
+            student,
+            testId,
+            yellowWarningCount: Number.isFinite(Number(yellowWarningCount))
+                ? Number(yellowWarningCount)
+                : Number(student.activeYellowWarningByTest?.get(testId) || 0)
+        });
+
         await student.save();
 
         console.log(`[Test] Student ${student.emailID} submitted test ${testId} — Score: ${totalScore}`);
@@ -1580,10 +1601,10 @@ app.delete('/api/admin/notifications', async (req, res) => {
 app.get('/api/admin/reports/alarms', async (req, res) => {
     try {
         const { batchId, testId } = req.query;
-        const students = await Student.find(batchId ? { batchId } : {}, 'name emailID testId scores alarm batchId');
+        const students = await Student.find(batchId ? { batchId } : {}, 'name emailID testId scores alarm yellowWarning batchId');
         const rows = [];
         students.forEach((student) => {
-            const maxLen = Math.max(student.testId?.length || 0, student.scores?.length || 0, student.alarm?.length || 0);
+            const maxLen = Math.max(student.testId?.length || 0, student.scores?.length || 0, student.alarm?.length || 0, student.yellowWarning?.length || 0);
             for (let i = 0; i < maxLen; i++) {
                 const currentTestId = student.testId?.[i] || '-';
                 if (testId && String(currentTestId) !== String(testId)) {
@@ -1594,7 +1615,8 @@ app.get('/api/admin/reports/alarms', async (req, res) => {
                     studentEmail: student.emailID,
                     testId: currentTestId,
                     score: Number.isFinite(student.scores?.[i]) ? student.scores[i] : '-',
-                    alarmCount: Number.isFinite(student.alarm?.[i]) ? student.alarm[i] : 0
+                    alarmCount: Number.isFinite(student.alarm?.[i]) ? student.alarm[i] : 0,
+                    yellowWarningCount: Number.isFinite(student.yellowWarning?.[i]) ? student.yellowWarning[i] : 0
                 });
             }
         });
