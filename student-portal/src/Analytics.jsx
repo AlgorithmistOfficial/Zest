@@ -52,7 +52,7 @@ const Analytics = () => {
         fetchAnalytics();
     }, [navigate]);
 
-    const attempts = data?.attempts || [];
+    const attempts = useMemo(() => data?.attempts || [], [data?.attempts]);
     const chartMax = useMemo(() => {
         const maxScore = attempts.reduce((m, a) => Math.max(m, a.score > 0 ? a.score : 0), 0);
         return Math.max(100, maxScore);

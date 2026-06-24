@@ -344,7 +344,10 @@ const Test = () => {
                 }
                 setCameraReady(true);
 
-                const { FaceDetector, FilesetResolver } = await import('@mediapipe/tasks-vision');
+                const { FaceDetector, FilesetResolver } = await import(
+                    /* webpackIgnore: true */
+                    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs'
+                );
                 if (cancelled) return;
                 if (!mediaPipeReadyRef.current) {
                     const vision = await FilesetResolver.forVisionTasks(
