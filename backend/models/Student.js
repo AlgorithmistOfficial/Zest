@@ -64,6 +64,32 @@ const studentSchema = new mongoose.Schema({
         default: {}
     },
 
+    wrongAnswers: {
+        type: [{
+            testId: {
+                type: String,
+                required: true
+            },
+            questionId: {
+                type: mongoose.Schema.Types.ObjectId,
+                required: true
+            },
+            questionNo: {
+                type: Number,
+                default: null
+            },
+            answer: {
+                type: String,
+                default: ''
+            },
+            recordedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }],
+        default: []
+    },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Student', studentSchema);

@@ -18,7 +18,6 @@ const Exam = require('./models/Exam');
 const TestContent = require('./models/TestContent');
 const Notification = require('./models/Notification');
 const Batch = require('./models/Batch');
-const WrongAnswer = require('./models/WrongAnswer');
 const nodeSchedule = require('node-schedule');
 
 const app = express();
@@ -245,76 +244,30 @@ const upsertWrongAnswerRecord = async ({ student, testId, question, studentAnswe
     const isCorrect = compareAnswers(question, studentAnswer, codeResult);
     if (isCorrect) return null;
 
+    student.wrongAnswers = Array.isArray(student.wrongAnswers) ? student.wrongAnswers : [];
     const wrongAttempt = {
+        testId,
         questionId: question._id,
-        questionNo: Number(question.questionNo) || 0,
-        ques: question.ques,
-        type: question.type,
-        correctAnswer: question.answerKey,
-        studentAnswer: serializeStudentAnswer(studentAnswer),
-        marks: Number(question.marks) || 0,
+        questionNo: Number(question.questionNo) || null,
+        answer: serializeStudentAnswer(studentAnswer) ?? '',
         recordedAt: new Date()
     };
 
-    const batchId = student.batchId || null;
-    const existing = await WrongAnswer.findOne({ testId, studentId: student._id, ...(batchId ? { batchId } : {}) });
+    const attemptIndex = student.wrongAnswers.findIndex(
+        (attempt) => String(attempt.testId) === String(testId) && String(attempt.questionId) === String(question._id)
+    );
 
-    if (!existing) {
-        return WrongAnswer.create({
-            testId,
-            studentId: student._id,
-            studentName: student.name,
-            studentEmail: student.emailID,
-            batchId,
-            wrongAttempts: [wrongAttempt]
-        });
-    }
-
-    const attemptIndex = existing.wrongAttempts.findIndex((attempt) => String(attempt.questionId) === String(question._id));
     if (attemptIndex >= 0) {
-        existing.wrongAttempts[attemptIndex] = {
-            ...existing.wrongAttempts[attemptIndex].toObject?.(),
+        student.wrongAnswers[attemptIndex] = {
+            ...student.wrongAnswers[attemptIndex].toObject?.(),
             ...wrongAttempt
         };
     } else {
-        existing.wrongAttempts.push(wrongAttempt);
+        student.wrongAnswers.push(wrongAttempt);
     }
 
-    return existing.save();
+    return student.save();
 };
-
-const upsertUnattemptedQuestionsRecord = async ({ student, testId, unattemptedQuestionNos }) => {
-    if (!student || !testId || !Array.isArray(unattemptedQuestionNos) || unattemptedQuestionNos.length === 0) return null;
-
-    const uniqueNos = Array.from(new Set(
-        unattemptedQuestionNos
-            .map((num) => Number(num))
-            .filter((num) => Number.isFinite(num) && num > 0)
-    )).sort((a, b) => a - b);
-
-    if (uniqueNos.length === 0) return null;
-
-    const batchId = student.batchId || null;
-    const existing = await WrongAnswer.findOne({ testId, studentId: student._id, ...(batchId ? { batchId } : {}) });
-
-    if (!existing) {
-        return WrongAnswer.create({
-            testId,
-            studentId: student._id,
-            studentName: student.name,
-            studentEmail: student.emailID,
-            batchId,
-            unattemptedCount: uniqueNos.length,
-            unattemptedQuestionNos: uniqueNos,
-            wrongAttempts: []
-        });
-    }
-
-    existing.unattemptedCount = uniqueNos.length;
-    existing.unattemptedQuestionNos = uniqueNos;
-    return existing.save();
-};
-
 
 const storeYellowWarningCount = async ({ student, testId, yellowWarningCount }) => {
     if (!student || !testId || !Number.isFinite(Number(yellowWarningCount))) return null;
@@ -1220,8 +1173,8 @@ app.post('/api/test-contents', async (req, res) => {
 // POST /api/test/wrong-answer — record a wrong attempt during an in-progress test
 app.post('/api/test/wrong-answer', async (req, res) => {
     try {
-        const { testId, questionId, questionNo, ques, type, correctAnswer, studentAnswer, marks } = req.body;
-        if (!testId || !questionId || !questionNo || !ques || !type) {
+        const { testId, questionId, questionNo, studentAnswer } = req.body;
+        if (!testId || !questionId) {
             return res.status(400).json({ message: 'Missing required wrong-answer fields' });
         }
 
@@ -1239,8 +1192,26 @@ app.post('/api/test/wrong-answer', async (req, res) => {
         const student = await Student.findById(decoded.id);
         if (!student) return res.status(404).json({ message: 'Student not found' });
 
-        const question = { _id: questionId, questionNo, ques, type, answerKey: correctAnswer, marks };
-        const saved = await upsertWrongAnswerRecord({ student, testId, question, studentAnswer });
+        student.wrongAnswers = Array.isArray(student.wrongAnswers) ? student.wrongAnswers : [];
+        const wrongAttempt = {
+            testId,
+            questionId,
+            questionNo: Number(questionNo) || null,
+            answer: serializeStudentAnswer(studentAnswer) ?? '',
+            recordedAt: new Date()
+        };
+        const attemptIndex = student.wrongAnswers.findIndex(
+            (attempt) => String(attempt.testId) === String(testId) && String(attempt.questionId) === String(questionId)
+        );
+        if (attemptIndex >= 0) {
+            student.wrongAnswers[attemptIndex] = {
+                ...student.wrongAnswers[attemptIndex].toObject?.(),
+                ...wrongAttempt
+            };
+        } else {
+            student.wrongAnswers.push(wrongAttempt);
+        }
+        const saved = await student.save();
 
         return res.json({ message: 'Wrong attempt recorded', saved: Boolean(saved) });
     } catch (err) {
@@ -1303,7 +1274,6 @@ app.post('/api/test/submit', async (req, res) => {
 
         let totalScore = 0;
         const questionResults = [];
-        const unattemptedQuestionNos = [];
 
         for (let i = 0; i < testContent.questions.length; i++) {
             const question = testContent.questions[i];
@@ -1316,7 +1286,6 @@ app.post('/api/test/submit', async (req, res) => {
                 (Array.isArray(studentAnswer) && studentAnswer.length === 0);
 
             if (isUnattempted) {
-                unattemptedQuestionNos.push(Number(question.questionNo) || (i + 1));
                 questionResults.push({ qIndex: i, correct: false, marks: 0, maxMarks: question.marks || 0, status: 'unattempted' });
                 continue;
             }
@@ -1366,12 +1335,6 @@ app.post('/api/test/submit', async (req, res) => {
                 status: 'attempted'
             });
         }
-
-        await upsertUnattemptedQuestionsRecord({
-            student,
-            testId,
-            unattemptedQuestionNos
-        });
 
         // Save score to student record
         student.scores.push(totalScore);
@@ -1632,35 +1595,30 @@ app.get('/api/admin/reports/wrong-answers', async (req, res) => {
     try {
         const { batchId, testId, student } = req.query;
         const filter = {
-            ...(batchId ? { batchId } : {}),
-            ...(testId ? { testId } : {})
+            ...(batchId ? { batchId } : {})
         };
-        const docs = await WrongAnswer.find(filter).sort({ updatedAt: -1 }).lean();
+        const docs = await Student.find(filter, 'name emailID batchId wrongAnswers').sort({ updatedAt: -1 }).lean();
         const rows = [];
         const studentQuery = String(student || '').trim().toLowerCase();
 
         docs.forEach((doc) => {
             if (studentQuery) {
-                const studentName = String(doc.studentName || '').toLowerCase();
-                const studentEmail = String(doc.studentEmail || '').toLowerCase();
-                if (!studentName.includes(studentQuery) && !studentEmail.includes(studentQuery)) {
+                if (!String(doc.name || '').toLowerCase().includes(studentQuery) && !String(doc.emailID || '').toLowerCase().includes(studentQuery)) {
                     return;
                 }
             }
 
-            (doc.wrongAttempts || []).forEach((attempt) => {
+            (doc.wrongAnswers || []).forEach((attempt) => {
+                if (testId && String(attempt.testId) !== String(testId)) {
+                    return;
+                }
                 rows.push({
-                    studentName: doc.studentName,
-                    studentEmail: doc.studentEmail,
-                    testId: doc.testId,
+                    studentName: doc.name,
+                    studentEmail: doc.emailID,
+                    testId: attempt.testId,
+                    questionId: attempt.questionId,
                     questionNo: attempt.questionNo,
-                    questionText: attempt.ques,
-                    questionType: attempt.type,
-                    correctAnswer: attempt.correctAnswer,
-                    studentAnswer: attempt.studentAnswer,
-                    marks: attempt.marks,
-                    unattemptedCount: doc.unattemptedCount || 0,
-                    unattemptedQuestionNos: doc.unattemptedQuestionNos || [],
+                    studentAnswer: attempt.answer,
                     batchId: doc.batchId || null
                 });
             });
