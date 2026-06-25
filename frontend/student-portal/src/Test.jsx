@@ -36,6 +36,9 @@ const Test = () => {
     const [cameraReady, setCameraReady] = useState(false);
     const [cameraError, setCameraError] = useState('');
     const [faceWarningVisible, setFaceWarningVisible] = useState(false);
+    const [faceMissingVisible, setFaceMissingVisible] = useState(false);
+    const [faceDetectedVisible, setFaceDetectedVisible] = useState(false);
+    const [faceMissingSecondsLeft, setFaceMissingSecondsLeft] = useState(120);
     const [warningCorner, setWarningCorner] = useState('top-right');
     const [cameraWidgetPos, setCameraWidgetPos] = useState({ right: 16, bottom: 16 });
     const [isDraggingCamera, setIsDraggingCamera] = useState(false);
@@ -72,6 +75,9 @@ const Test = () => {
     const lastFaceBoxRef = useRef(null);
     const faceMotionStreakRef = useRef({ direction: 0, count: 0 });
     const faceWarningCooldownRef = useRef(0);
+    const faceMissingTimerRef = useRef(null);
+    const faceMissingDeadlineRef = useRef(null);
+    const faceMissingActiveRef = useRef(false);
     const mediaPipeReadyRef = useRef(false);
     const yellowWarningsRef = useRef(0);
     const dragStateRef = useRef({ startX: 0, startY: 0, startRight: 16, startBottom: 16 });
@@ -316,6 +322,46 @@ const Test = () => {
         };
     }, [isDraggingCamera]);
 
+    const clearFaceMissingTimer = useCallback((showDetectedToast = false) => {
+        if (faceMissingTimerRef.current) {
+            window.clearInterval(faceMissingTimerRef.current);
+            faceMissingTimerRef.current = null;
+        }
+        faceMissingDeadlineRef.current = null;
+        faceMissingActiveRef.current = false;
+        setFaceMissingVisible(false);
+        setFaceMissingSecondsLeft(120);
+
+        if (showDetectedToast) {
+            setFaceDetectedVisible(true);
+            window.setTimeout(() => setFaceDetectedVisible(false), 1800);
+        }
+    }, []);
+
+    const startFaceMissingTimer = useCallback(() => {
+        if (faceMissingActiveRef.current) return;
+
+        faceMissingActiveRef.current = true;
+        const deadline = Date.now() + 120000;
+        faceMissingDeadlineRef.current = deadline;
+        setFaceMissingVisible(true);
+
+        const tick = () => {
+            const remainingMs = Math.max(0, (faceMissingDeadlineRef.current || deadline) - Date.now());
+            const remainingSeconds = Math.ceil(remainingMs / 1000);
+            setFaceMissingSecondsLeft(remainingSeconds);
+
+            if (remainingMs <= 0) {
+                clearFaceMissingTimer();
+                setWarningPrompt('Face is not visible. The test will be terminated unless your face is detected again.');
+                submitFnRef.current?.(false, true);
+            }
+        };
+
+        tick();
+        faceMissingTimerRef.current = window.setInterval(tick, 1000);
+    }, [clearFaceMissingTimer]);
+
     useEffect(() => {
         if (phase !== 'testing') return;
 
@@ -381,6 +427,7 @@ const Test = () => {
                             lastFaceBoxRef.current = detections[0]?.boundingBox || null;
 
                             if (detections.length > 0) {
+                                clearFaceMissingTimer(true);
                                 const box = detections[0].boundingBox;
                                 const centerX = box.originX + (box.width / 2);
                                 const prev = prevFaceCenterRef.current;
@@ -414,6 +461,9 @@ const Test = () => {
                                 }
                                 prevFaceCenterRef.current = centerX;
                             } else {
+                                if (!faceMissingActiveRef.current) {
+                                    startFaceMissingTimer();
+                                }
                                 prevFaceCenterRef.current = null;
                                 faceMotionStreakRef.current = { direction: 0, count: 0 };
                             }
@@ -448,12 +498,13 @@ const Test = () => {
             cancelled = true;
             if (detectorLoopRef.current) window.clearTimeout(detectorLoopRef.current);
             if (overlayLoopRef.current) window.cancelAnimationFrame(overlayLoopRef.current);
+            clearFaceMissingTimer();
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach((track) => track.stop());
                 streamRef.current = null;
             }
         };
-    }, [phase, selectedCameraDeviceId, drawFaceOverlay]);
+    }, [phase, selectedCameraDeviceId, drawFaceOverlay, clearFaceMissingTimer, startFaceMissingTimer]);
 
     // Prevent accidental navigation during test
     useEffect(() => {
@@ -1051,6 +1102,37 @@ const Test = () => {
                         className={`fixed ${warningCorner === 'top-left' ? 'left-4' : 'right-4'} top-4 z-[95] rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700 shadow-lg`}
                     >
                         Face movement detected
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {faceMissingVisible && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="fixed left-1/2 top-4 z-[96] -translate-x-1/2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center shadow-lg"
+                    >
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-red-700">
+                            Face not visible
+                        </p>
+                        <p className="mt-1 max-w-md text-sm font-bold text-red-700">
+                            Face is not visible. This may lead to termination of the test in {faceMissingSecondsLeft} seconds.
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {faceDetectedVisible && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="fixed left-1/2 top-4 z-[96] -translate-x-1/2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-center shadow-lg"
+                    >
+                        <p className="text-sm font-black text-emerald-700">Face detected</p>
                     </motion.div>
                 )}
             </AnimatePresence>
