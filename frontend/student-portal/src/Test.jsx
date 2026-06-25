@@ -342,16 +342,11 @@ const Test = () => {
                     videoRef.current.srcObject = stream;
                     await videoRef.current.play().catch(() => { });
                 }
-                setCameraReady(true);
-
-                const { FaceDetector, FilesetResolver } = await import(
-                    /* webpackIgnore: true */
-                    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs'
-                );
+                const { FaceDetector, FilesetResolver } = await import('@mediapipe/tasks-vision');
                 if (cancelled) return;
                 if (!mediaPipeReadyRef.current) {
                     const vision = await FilesetResolver.forVisionTasks(
-                        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+                        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm'
                     );
                     detectorRef.current = await FaceDetector.createFromModelPath(
                         vision,
@@ -363,6 +358,8 @@ const Test = () => {
                     });
                     mediaPipeReadyRef.current = true;
                 }
+
+                setCameraReady(true);
 
                 const loop = async () => {
                     if (cancelled || phase !== 'testing') return;
@@ -433,7 +430,8 @@ const Test = () => {
                 animateOverlay();
             } catch (err) {
                 console.warn('Camera monitoring failed:', err);
-                setCameraError('Camera monitoring could not start');
+                setCameraReady(false);
+                setCameraError(`Camera monitoring could not start: ${err?.message || 'unknown error'}`);
             }
         };
 
