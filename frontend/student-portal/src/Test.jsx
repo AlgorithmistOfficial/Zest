@@ -557,9 +557,7 @@ const Test = () => {
             return;
         }
 
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => { });
-        }
+        void ensureFullscreen();
     };
 
     const handleTerminateWithZero = () => {
@@ -592,6 +590,19 @@ const Test = () => {
     };
 
     const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    const ensureFullscreen = async () => {
+        if (document.fullscreenElement) return true;
+        if (!document.documentElement.requestFullscreen) return false;
+
+        try {
+            await document.documentElement.requestFullscreen();
+            return true;
+        } catch (err) {
+            console.log('Could not enter fullscreen:', err);
+            return false;
+        }
+    };
 
     const isWrongAttempt = (question, studentAnswer, codeResult) => {
         if (!question) return false;
@@ -655,7 +666,8 @@ const Test = () => {
     };
 
     // Start test
-    const startTest = () => {
+    const startTest = async () => {
+        await ensureFullscreen();
         setPhase('testing');
         setCurrentQ(0);
         setAnswers({});
