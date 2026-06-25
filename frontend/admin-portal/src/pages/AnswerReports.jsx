@@ -142,19 +142,17 @@ const AnswerReports = () => {
 
     const groupedRows = useMemo(() => {
         const map = new Map();
-        rows.forEach((row) => {
-            const key = `${row.studentEmail}-${row.testId}`;
-            if (!map.has(key)) {
-                map.set(key, {
-                    studentName: row.studentName,
-                    studentEmail: row.studentEmail,
-                    testId: row.testId,
-                    unattemptedCount: row.unattemptedCount || 0,
-                    unattemptedQuestionNos: row.unattemptedQuestionNos || [],
-                    attempts: []
-                });
-            }
-            map.get(key).attempts.push(row);
+            rows.forEach((row) => {
+                const key = `${row.studentEmail}-${row.testId}`;
+                if (!map.has(key)) {
+                    map.set(key, {
+                        studentName: row.studentName,
+                        studentEmail: row.studentEmail,
+                        testId: row.testId,
+                        attempts: []
+                    });
+                }
+                map.get(key).attempts.push(row);
         });
         return Array.from(map.values());
     }, [rows]);
@@ -192,7 +190,7 @@ const AnswerReports = () => {
                 <title>Admin - Answer Reports</title>
             </Helmet>
 
-            <PageHeader
+                <PageHeader
                 title="Answer Reports"
                 description="Pick a test first, then search for a student to inspect the wrong answers recorded during that test."
             />
@@ -411,11 +409,6 @@ const AnswerReports = () => {
                                         <span className="rounded-full bg-navy px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-white">
                                             {group.attempts.length} wrong answers
                                         </span>
-                                        {Number(group.unattemptedCount) > 0 && (
-                                            <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-amber-700">
-                                                {group.unattemptedCount} unattempted
-                                            </span>
-                                        )}
                                     </div>
                                 </div>
 
@@ -429,28 +422,16 @@ const AnswerReports = () => {
                                                             Q {attempt.questionNo}
                                                         </span>
                                                         <span className="rounded-full bg-slate-200 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-slate-600">
-                                                            {attempt.questionType}
-                                                        </span>
-                                                        <span className="rounded-full bg-lime/15 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-lime">
-                                                            {attempt.marks} marks
+                                                            ID {String(attempt.questionId || '-').slice(-8)}
                                                         </span>
                                                     </div>
-                                                    <p className="whitespace-pre-wrap text-sm font-semibold leading-relaxed text-navy">
-                                                        {attempt.questionText}
-                                                    </p>
                                                 </div>
 
-                                                <div className="grid min-w-[260px] gap-3 rounded-[1.2rem] bg-white p-4 border border-slate-100">
-                                                    <div>
-                                                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Correct Answer</p>
-                                                        <p className="mt-1 whitespace-pre-wrap text-sm font-bold text-emerald-700">
-                                                            {Array.isArray(attempt.correctAnswer) ? attempt.correctAnswer.join(', ') : String(attempt.correctAnswer ?? '-')}
-                                                        </p>
-                                                    </div>
+                                                <div className="grid min-w-[260px] gap-3 rounded-[1.2rem] border border-slate-100 bg-white p-4">
                                                     <div>
                                                         <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Student Answer</p>
                                                         <p className="mt-1 whitespace-pre-wrap text-sm font-bold text-rose-600">
-                                                            {Array.isArray(attempt.studentAnswer) ? attempt.studentAnswer.join(', ') : String(attempt.studentAnswer ?? '-')}
+                                                            {String(attempt.studentAnswer ?? '-') || '-'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -460,21 +441,6 @@ const AnswerReports = () => {
                                 </div>
                             </div>
                         ))}
-
-                        {renderedRows.some((group) => Number(group.unattemptedCount) > 0) && (
-                            <div className="rounded-[1.6rem] border border-amber-100 bg-amber-50 p-5 text-amber-800">
-                                <p className="text-sm font-black uppercase tracking-[0.24em]">Unattempted Summary</p>
-                                <p className="mt-2 text-sm font-semibold">
-                                    The selected test also has unattempted questions recorded in the wrong-answer store. Question numbers: {
-                                        renderedRows
-                                            .flatMap((group) => group.unattemptedQuestionNos || [])
-                                            .filter((value, index, self) => self.indexOf(value) === index)
-                                            .sort((a, b) => a - b)
-                                            .join(', ') || '-'
-                                    }.
-                                </p>
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
