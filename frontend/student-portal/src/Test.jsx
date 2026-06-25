@@ -78,6 +78,7 @@ const Test = () => {
     const faceMissingTimerRef = useRef(null);
     const faceMissingDeadlineRef = useRef(null);
     const faceMissingActiveRef = useRef(false);
+    const faceDetectedAnnouncedRef = useRef(false);
     const mediaPipeReadyRef = useRef(false);
     const yellowWarningsRef = useRef(0);
     const dragStateRef = useRef({ startX: 0, startY: 0, startRight: 16, startBottom: 16 });
@@ -333,8 +334,11 @@ const Test = () => {
         setFaceMissingSecondsLeft(120);
 
         if (showDetectedToast) {
-            setFaceDetectedVisible(true);
-            window.setTimeout(() => setFaceDetectedVisible(false), 1800);
+            if (!faceDetectedAnnouncedRef.current) {
+                faceDetectedAnnouncedRef.current = true;
+                setFaceDetectedVisible(true);
+                window.setTimeout(() => setFaceDetectedVisible(false), 1800);
+            }
         }
     }, []);
 
@@ -353,6 +357,7 @@ const Test = () => {
 
             if (remainingMs <= 0) {
                 clearFaceMissingTimer();
+                faceDetectedAnnouncedRef.current = false;
                 setWarningPrompt('Face is not visible. The test will be terminated unless your face is detected again.');
                 submitFnRef.current?.(false, true);
             }
@@ -428,6 +433,7 @@ const Test = () => {
 
                             if (detections.length > 0) {
                                 clearFaceMissingTimer(true);
+                                faceDetectedAnnouncedRef.current = true;
                                 const box = detections[0].boundingBox;
                                 const centerX = box.originX + (box.width / 2);
                                 const prev = prevFaceCenterRef.current;
@@ -462,6 +468,7 @@ const Test = () => {
                                 prevFaceCenterRef.current = centerX;
                             } else {
                                 if (!faceMissingActiveRef.current) {
+                                    faceDetectedAnnouncedRef.current = false;
                                     startFaceMissingTimer();
                                 }
                                 prevFaceCenterRef.current = null;
@@ -1149,6 +1156,10 @@ const Test = () => {
                 <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 font-bold text-sm">
                     <AlertTriangle size={18} />
                     {warningsCount} / 3 Warnings
+                </div>
+                <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-xl border border-amber-100 font-bold text-sm">
+                    <AlertTriangle size={18} />
+                    {yellowWarningsCount} Yellow Warnings
                 </div>
             </div>
 
