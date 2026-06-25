@@ -10,6 +10,9 @@ import {
 import { Helmet } from 'react-helmet-async';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const mediapipeVisionUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs';
+const mediapipeWasmRoot = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm';
+const mediapipeModelUrl = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
 
 const Test = () => {
     const { testId } = useParams();
@@ -73,6 +76,7 @@ const Test = () => {
     const yellowWarningsRef = useRef(0);
     const dragStateRef = useRef({ startX: 0, startY: 0, startRight: 16, startBottom: 16 });
     const faceOverlayNoiseRef = useRef(0);
+    const visionTasksModuleRef = useRef(null);
 
     const drawFaceOverlay = useCallback((faceBox, video) => {
         const canvas = overlayCanvasRef.current;
@@ -342,15 +346,18 @@ const Test = () => {
                     videoRef.current.srcObject = stream;
                     await videoRef.current.play().catch(() => { });
                 }
-                const { FaceDetector, FilesetResolver } = await import('@mediapipe/tasks-vision');
                 if (cancelled) return;
+                if (!visionTasksModuleRef.current) {
+                    visionTasksModuleRef.current = await import(/* webpackIgnore: true */ mediapipeVisionUrl);
+                }
+                const { FaceDetector, FilesetResolver } = visionTasksModuleRef.current;
                 if (!mediaPipeReadyRef.current) {
                     const vision = await FilesetResolver.forVisionTasks(
-                        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm'
+                        mediapipeWasmRoot
                     );
                     detectorRef.current = await FaceDetector.createFromModelPath(
                         vision,
-                        'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite'
+                        mediapipeModelUrl
                     );
                     detectorRef.current.setOptions({
                         runningMode: 'VIDEO',
