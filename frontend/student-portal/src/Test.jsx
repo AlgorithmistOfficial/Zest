@@ -41,6 +41,8 @@ const Test = () => {
     const [faceMissingVisible, setFaceMissingVisible] = useState(false);
     const [faceDetectedVisible, setFaceDetectedVisible] = useState(false);
     const [faceMissingSecondsLeft, setFaceMissingSecondsLeft] = useState(120);
+    const [breaksUsed, setBreaksUsed] = useState(0);
+    const [breakSecondsLeft, setBreakSecondsLeft] = useState(0);
     const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
 
     // Exit fullscreen on test end
@@ -77,6 +79,8 @@ const Test = () => {
     const faceMissingDeadlineRef = useRef(null);
     const faceMissingActiveRef = useRef(false);
     const faceDetectedAnnouncedRef = useRef(false);
+    const breakTimerRef = useRef(null);
+    const breakActiveRef = useRef(false);
     const mediaPipeReadyRef = useRef(false);
     const yellowWarningsRef = useRef(0);
     const faceOverlayNoiseRef = useRef(0);
@@ -329,6 +333,7 @@ const Test = () => {
     }, [yellowWarningsCount]);
 
     const clearFaceMissingTimer = useCallback((showDetectedToast = false) => {
+        if (breakActiveRef.current) return;
         if (faceMissingTimerRef.current) {
             window.clearInterval(faceMissingTimerRef.current);
             faceMissingTimerRef.current = null;
@@ -348,6 +353,7 @@ const Test = () => {
     }, []);
 
     const startFaceMissingTimer = useCallback(() => {
+        if (breakActiveRef.current) return;
         if (faceMissingActiveRef.current) return;
 
         faceMissingActiveRef.current = true;
@@ -356,6 +362,7 @@ const Test = () => {
         setFaceMissingVisible(true);
 
         const tick = () => {
+            if (breakActiveRef.current) return;
             const remainingMs = Math.max(0, (faceMissingDeadlineRef.current || deadline) - Date.now());
             const remainingSeconds = Math.ceil(remainingMs / 1000);
             setFaceMissingSecondsLeft(remainingSeconds);
@@ -371,6 +378,45 @@ const Test = () => {
         tick();
         faceMissingTimerRef.current = window.setInterval(tick, 1000);
     }, [clearFaceMissingTimer]);
+
+    const handleTakeBreak = useCallback(() => {
+        if (breakActiveRef.current || breaksUsed >= 2) return;
+
+        breakActiveRef.current = true;
+        setBreaksUsed((prev) => prev + 1);
+        setBreakSecondsLeft(30);
+        setFaceMissingVisible(false);
+        setFaceDetectedVisible(false);
+
+        if (faceMissingTimerRef.current) {
+            window.clearInterval(faceMissingTimerRef.current);
+            faceMissingTimerRef.current = null;
+        }
+        faceMissingDeadlineRef.current = null;
+        faceMissingActiveRef.current = false;
+        faceDetectedAnnouncedRef.current = false;
+
+        if (breakTimerRef.current) {
+            window.clearInterval(breakTimerRef.current);
+            breakTimerRef.current = null;
+        }
+
+        breakTimerRef.current = window.setInterval(() => {
+            setBreakSecondsLeft((prev) => {
+                if (prev <= 1) {
+                    if (breakTimerRef.current) {
+                        window.clearInterval(breakTimerRef.current);
+                        breakTimerRef.current = null;
+                    }
+                    breakActiveRef.current = false;
+                    faceDetectedAnnouncedRef.current = false;
+                    setBreakSecondsLeft(0);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    }, [breaksUsed]);
 
     useEffect(() => {
         if (phase !== 'testing') return;
@@ -413,6 +459,10 @@ const Test = () => {
 
                 const loop = async () => {
                     if (cancelled || phase !== 'testing') return;
+                    if (breakActiveRef.current) {
+                        detectorLoopRef.current = window.setTimeout(loop, 250);
+                        return;
+                    }
                     const detector = detectorRef.current;
                     const video = videoRef.current;
                     if (detector && video && video.readyState >= 2) {
@@ -497,6 +547,7 @@ const Test = () => {
             if (detectorLoopRef.current) window.clearTimeout(detectorLoopRef.current);
             if (overlayLoopRef.current) window.cancelAnimationFrame(overlayLoopRef.current);
             clearFaceMissingTimer();
+            if (breakTimerRef.current) window.clearInterval(breakTimerRef.current);
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach((track) => track.stop());
                 streamRef.current = null;
@@ -553,6 +604,7 @@ const Test = () => {
         };
 
         const triggerWarningPrompt = () => {
+            if (breakActiveRef.current) return;
             if (warningPromptOpenRef.current) return;
             playAlarmTone();
             setWarningPrompt('Attempt of unfair means observed, giving you a warning!');
@@ -1252,8 +1304,20 @@ const Test = () => {
                                     <span className="bg-navy text-white w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm">
                                         {questionNumber}
                                     </span>
-                                    <div>
-                                        <p className="font-extrabold text-navy">Question {questionNumber} of {totalQuestions}</p>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-3">
+                                            <p className="font-extrabold text-navy">Question {questionNumber} of {totalQuestions}</p>
+                                            {breaksUsed < 2 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleTakeBreak}
+                                                    disabled={breakActiveRef.current}
+                                                    className="min-w-[9rem] rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-sky-700 shadow-sm transition-all hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-70"
+                                                >
+                                                    {breakActiveRef.current ? `${String(Math.floor(breakSecondsLeft / 60)).padStart(2, '0')}:${String(breakSecondsLeft % 60).padStart(2, '0')}` : 'Take a break'}
+                                                </button>
+                                            )}
+                                        </div>
                                         <p className="text-xs text-slate-400 font-bold capitalize">{question?.type}</p>
                                     </div>
                                 </div>
