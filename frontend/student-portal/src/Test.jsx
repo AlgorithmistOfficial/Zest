@@ -35,10 +35,12 @@ const Test = () => {
     const [yellowWarningsCount, setYellowWarningsCount] = useState(0);
     const [cameraReady, setCameraReady] = useState(false);
     const [cameraError, setCameraError] = useState('');
+    const [cameraPermissionRequested, setCameraPermissionRequested] = useState(false);
     const [faceWarningVisible, setFaceWarningVisible] = useState(false);
     const [faceMissingVisible, setFaceMissingVisible] = useState(false);
     const [faceDetectedVisible, setFaceDetectedVisible] = useState(false);
     const [faceMissingSecondsLeft, setFaceMissingSecondsLeft] = useState(120);
+    const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
     const [warningCorner, setWarningCorner] = useState('top-right');
     const [cameraWidgetPos, setCameraWidgetPos] = useState({ right: 16, bottom: 16 });
     const [isDraggingCamera, setIsDraggingCamera] = useState(false);
@@ -231,6 +233,36 @@ const Test = () => {
             return () => document.removeEventListener('click', handleFirstClick);
         }
     }, [loading, phase]);
+
+    useEffect(() => {
+        if (phase !== 'lobby' || cameraPermissionRequested) return;
+
+        let cancelled = false;
+        const requestCameraPermission = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                if (cancelled) {
+                    stream.getTracks().forEach((track) => track.stop());
+                    return;
+                }
+
+                stream.getTracks().forEach((track) => track.stop());
+                setCameraReady(true);
+                setCameraError('');
+                setCameraPermissionRequested(true);
+            } catch (err) {
+                if (cancelled) return;
+                setCameraReady(false);
+                setCameraError('Camera permission is required to start the test.');
+                setCameraPermissionRequested(true);
+            }
+        };
+
+        requestCameraPermission();
+        return () => {
+            cancelled = true;
+        };
+    }, [phase, cameraPermissionRequested]);
 
     // Submit handler
     const handleSubmit = useCallback(async (autoSubmit = false, forceZeroMarks = false) => {
@@ -732,6 +764,15 @@ const Test = () => {
         hasSubmitted.current = false;
     };
 
+    const requestSubmitConfirmation = () => {
+        setSubmitConfirmOpen(true);
+    };
+
+    const confirmSubmit = () => {
+        setSubmitConfirmOpen(false);
+        handleSubmit(false);
+    };
+
     // Exit handler
     const handleExit = () => {
         if (phase === 'testing') {
@@ -1114,6 +1155,44 @@ const Test = () => {
             </AnimatePresence>
 
             <AnimatePresence>
+                {submitConfirmOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[105] flex items-center justify-center bg-navy/80 backdrop-blur-md p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.94, y: 12 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.94, y: 12 }}
+                            className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-2xl"
+                        >
+                            <AlertTriangle size={56} className="mx-auto mb-5 text-amber-500" />
+                            <h2 className="mb-2 text-2xl font-black text-navy">You are about to submit the test</h2>
+                            <p className="mb-8 text-sm font-medium text-slate-600">
+                                Are you sure you want to submit now? You can return to the test if you need to review anything.
+                            </p>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <button
+                                    onClick={() => setSubmitConfirmOpen(false)}
+                                    className="rounded-2xl border-2 border-slate-200 bg-white px-4 py-4 font-extrabold text-navy transition-colors hover:bg-slate-50"
+                                >
+                                    Back to Test
+                                </button>
+                                <button
+                                    onClick={confirmSubmit}
+                                    className="rounded-2xl bg-navy px-4 py-4 font-extrabold text-white shadow-lg shadow-navy/10 transition-colors hover:bg-navy/90"
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
                 {faceMissingVisible && (
                     <motion.div
                         initial={{ opacity: 0, y: -8 }}
@@ -1443,7 +1522,7 @@ const Test = () => {
 
                     {/* Submit Button */}
                     <button
-                        onClick={() => handleSubmit(false)}
+                        onClick={requestSubmitConfirmation}
                         disabled={submitting}
                         className="mt-6 w-full py-4 bg-navy text-white rounded-2xl font-extrabold flex items-center justify-center gap-2 shadow-xl hover:bg-navy/90 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50"
                     >
