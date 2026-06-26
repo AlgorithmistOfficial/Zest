@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
+import MonacoEditor from '@monaco-editor/react';
 import {
     LogOut, Info, ShieldCheck, PlayCircle, Clock, Send,
     ChevronLeft, ChevronRight, Code, CheckCircle2, XCircle,
@@ -630,6 +631,8 @@ const Test = () => {
 
     const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
+    const getJavaStarterCode = () => `public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}`;
+
     const timerParts = {
         hours: String(Math.floor(Math.max(0, timeLeft) / 3600)).padStart(2, '0'),
         minutes: String(Math.floor((Math.max(0, timeLeft) % 3600) / 60)).padStart(2, '0'),
@@ -757,7 +760,7 @@ const Test = () => {
     // Run Java code against test cases
     const runCode = async (qIndex) => {
         const question = testData.questions[qIndex];
-        const code = answers[qIndex];
+        const code = answers[qIndex] ?? (question?.type === 'write code answer' ? getJavaStarterCode() : answers[qIndex]);
         if (!code) return;
 
         setCodeRunning(true);
@@ -1204,7 +1207,7 @@ const Test = () => {
                     initial={{ opacity: 0, y: -8, scale: 0.985 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.985 }}
-                    className={`fixed left-6 top-4 z-[96] rounded-3xl border px-6 py-3 text-center shadow-xl backdrop-blur-sm ${timeLeft <= 60 ? 'bg-red-50/95 border-red-100' :
+                    className={`fixed left-[25%] top-4 z-[96] rounded-3xl border px-6 py-3 text-center shadow-xl backdrop-blur-sm ${timeLeft <= 60 ? 'bg-red-50/95 border-red-100' :
                             timeLeft <= 300 ? 'bg-amber-50/95 border-amber-100' :
                                 'bg-lime/5/95 border-lime/10'
                         }`}
@@ -1364,7 +1367,7 @@ const Test = () => {
                                         </p>
                                         <button
                                             onClick={() => runCode(currentQ)}
-                                            disabled={codeRunning || !answers[currentQ]}
+                                            disabled={codeRunning || !(answers[currentQ] ?? getJavaStarterCode())}
                                             className="flex items-center gap-2 px-5 py-2.5 bg-lime text-white rounded-xl font-bold text-sm hover:bg-lime/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg active:scale-95"
                                         >
                                             {codeRunning ? (
@@ -1374,16 +1377,35 @@ const Test = () => {
                                             )}
                                         </button>
                                     </div>
-                                    <textarea
-                                        value={answers[currentQ] || ''}
-                                        onCopy={(e) => e.preventDefault()}
-                                        onPaste={(e) => e.preventDefault()}
-                                        onCut={(e) => e.preventDefault()}
-                                        onChange={(e) => setAnswer(currentQ, e.target.value)}
-                                        placeholder={`public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}`}
-                                        className="w-full h-72 p-5 rounded-2xl bg-[#1e1e2e] text-[#cdd6f4] font-mono text-sm border-2 border-[#313244] focus:border-lime/50 focus:outline-none resize-none leading-relaxed shadow-inner"
-                                        spellCheck={false}
-                                    />
+                                    <div className="overflow-hidden rounded-2xl border-2 border-[#313244] shadow-inner">
+                                        <MonacoEditor
+                                            height="18rem"
+                                            defaultLanguage="java"
+                                            language="java"
+                                            theme="vs-dark"
+                                            value={answers[currentQ] ?? getJavaStarterCode()}
+                                            onChange={(value) => setAnswer(currentQ, value ?? '')}
+                                            options={{
+                                                minimap: { enabled: false },
+                                                fontSize: 14,
+                                                lineNumbers: 'on',
+                                                renderLineHighlight: 'all',
+                                                scrollBeyondLastLine: false,
+                                                automaticLayout: true,
+                                                tabSize: 4,
+                                                insertSpaces: true,
+                                                detectIndentation: true,
+                                                bracketPairColorization: { enabled: true },
+                                                cursorSmoothCaretAnimation: 'on',
+                                                smoothScrolling: true,
+                                                folding: true,
+                                                overviewRulerBorder: false,
+                                                glyphMargin: false,
+                                                padding: { top: 16, bottom: 16 },
+                                                fontLigatures: true
+                                            }}
+                                        />
+                                    </div>
 
                                     {/* Test case results */}
                                     {codeResults[currentQ] && (
