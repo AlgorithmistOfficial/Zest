@@ -622,15 +622,6 @@ const Test = () => {
         return () => clearTimeout(timeoutId);
     }, [warningLimitExceeded, handleSubmit]);
 
-    // Format time
-    const formatTime = (seconds) => {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    };
-
     const getTimerColor = () => {
         if (timeLeft <= 60) return 'text-red-500';
         if (timeLeft <= 300) return 'text-amber-500';
@@ -638,6 +629,12 @@ const Test = () => {
     };
 
     const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    const timerParts = {
+        hours: String(Math.floor(Math.max(0, timeLeft) / 3600)).padStart(2, '0'),
+        minutes: String(Math.floor((Math.max(0, timeLeft) % 3600) / 60)).padStart(2, '0'),
+        seconds: String(Math.max(0, timeLeft) % 60).padStart(2, '0')
+    };
 
     const ensureFullscreen = async () => {
         if (document.fullscreenElement) return true;
@@ -1204,19 +1201,33 @@ const Test = () => {
 
             <AnimatePresence>
                 <motion.div
-                    key={`timer-${timeLeft}`}
-                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    initial={{ opacity: 0, y: -8, scale: 0.985 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                    className={`fixed left-1/2 top-4 z-[96] -translate-x-1/2 text-center rounded-3xl px-6 py-3 shadow-xl ${timeLeft <= 60 ? 'bg-red-50 border border-red-100' :
-                            timeLeft <= 300 ? 'bg-amber-50 border border-amber-100' :
-                                'bg-lime/5 border border-lime/10'
+                    exit={{ opacity: 0, y: -8, scale: 0.985 }}
+                    className={`fixed left-1/2 top-4 z-[96] -translate-x-1/2 rounded-3xl border px-6 py-3 text-center shadow-xl backdrop-blur-sm ${timeLeft <= 60 ? 'bg-red-50/95 border-red-100' :
+                            timeLeft <= 300 ? 'bg-amber-50/95 border-amber-100' :
+                                'bg-lime/5/95 border-lime/10'
                         }`}
                 >
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Time Remaining</p>
-                    <p className={`text-4xl font-black font-mono tracking-wider ${getTimerColor()} ${timeLeft <= 60 ? 'animate-pulse' : ''}`}>
-                        {formatTime(timeLeft)}
-                    </p>
+                    <div className={`flex items-center justify-center gap-2 text-4xl font-black font-mono tracking-wider tabular-nums ${getTimerColor()}`}>
+                        <span className="min-w-[2.3ch] text-right">{timerParts.hours}</span>
+                        <span className="text-slate-300">:</span>
+                        <span className="min-w-[2.3ch] text-right">{timerParts.minutes}</span>
+                        <span className="text-slate-300">:</span>
+                        <AnimatePresence mode="popLayout">
+                            <motion.span
+                                key={timerParts.seconds}
+                                initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                                transition={{ duration: 0.18, ease: 'easeOut' }}
+                                className="min-w-[2.3ch] text-right"
+                            >
+                                {timerParts.seconds}
+                            </motion.span>
+                        </AnimatePresence>
+                    </div>
                 </motion.div>
             </AnimatePresence>
 
