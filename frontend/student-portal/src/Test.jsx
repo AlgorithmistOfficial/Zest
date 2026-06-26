@@ -41,11 +41,6 @@ const Test = () => {
     const [faceDetectedVisible, setFaceDetectedVisible] = useState(false);
     const [faceMissingSecondsLeft, setFaceMissingSecondsLeft] = useState(120);
     const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
-    const [warningCorner, setWarningCorner] = useState('top-right');
-    const [cameraWidgetPos, setCameraWidgetPos] = useState({ right: 16, bottom: 16 });
-    const [isDraggingCamera, setIsDraggingCamera] = useState(false);
-    const [cameraDevices, setCameraDevices] = useState([]);
-    const [selectedCameraDeviceId, setSelectedCameraDeviceId] = useState('');
 
     // Exit fullscreen on test end
     useEffect(() => {
@@ -83,7 +78,6 @@ const Test = () => {
     const faceDetectedAnnouncedRef = useRef(false);
     const mediaPipeReadyRef = useRef(false);
     const yellowWarningsRef = useRef(0);
-    const dragStateRef = useRef({ startX: 0, startY: 0, startRight: 16, startBottom: 16 });
     const faceOverlayNoiseRef = useRef(0);
     const visionTasksModuleRef = useRef(null);
 
@@ -333,28 +327,6 @@ const Test = () => {
         yellowWarningsRef.current = yellowWarningsCount;
     }, [yellowWarningsCount]);
 
-    useEffect(() => {
-        if (!isDraggingCamera) return;
-
-        const handleMove = (event) => {
-            event.preventDefault();
-            const dx = event.clientX - dragStateRef.current.startX;
-            const dy = event.clientY - dragStateRef.current.startY;
-            const nextRight = Math.max(12, dragStateRef.current.startRight - dx);
-            const nextBottom = Math.max(12, dragStateRef.current.startBottom - dy);
-            setCameraWidgetPos({ right: nextRight, bottom: nextBottom });
-        };
-
-        const handleUp = () => setIsDraggingCamera(false);
-
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleUp);
-        return () => {
-            window.removeEventListener('mousemove', handleMove);
-            window.removeEventListener('mouseup', handleUp);
-        };
-    }, [isDraggingCamera]);
-
     const clearFaceMissingTimer = useCallback((showDetectedToast = false) => {
         if (faceMissingTimerRef.current) {
             window.clearInterval(faceMissingTimerRef.current);
@@ -405,26 +377,13 @@ const Test = () => {
         let cancelled = false;
         const startCamera = async () => {
             try {
-                const videoConstraints = selectedCameraDeviceId
-                    ? { deviceId: { exact: selectedCameraDeviceId } }
-                    : { facingMode: 'user' };
-                const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
                 if (cancelled) {
                     stream.getTracks().forEach((track) => track.stop());
                     return;
                 }
 
                 streamRef.current = stream;
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoInputs = devices.filter((device) => device.kind === 'videoinput');
-                setCameraDevices(videoInputs);
-                if (!selectedCameraDeviceId && videoInputs.length > 0) {
-                    const activeTrack = stream.getVideoTracks()[0];
-                    const activeSettings = activeTrack?.getSettings?.() || {};
-                    const matchedDevice = videoInputs.find((device) => device.deviceId === activeSettings.deviceId);
-                    setSelectedCameraDeviceId(matchedDevice?.deviceId || videoInputs[0].deviceId);
-                }
-
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                     await videoRef.current.play().catch(() => { });
@@ -493,7 +452,6 @@ const Test = () => {
                                         streak.count = 0;
                                         setYellowWarningsCount((prevCount) => prevCount + 1);
                                         setFaceWarningVisible(true);
-                                        setWarningCorner(delta > 0 ? 'top-right' : 'top-left');
                                         window.setTimeout(() => setFaceWarningVisible(false), 1800);
                                     }
                                 }
@@ -543,7 +501,7 @@ const Test = () => {
                 streamRef.current = null;
             }
         };
-    }, [phase, selectedCameraDeviceId, drawFaceOverlay, clearFaceMissingTimer, startFaceMissingTimer]);
+    }, [phase, drawFaceOverlay, clearFaceMissingTimer, startFaceMissingTimer]);
 
     // Prevent accidental navigation during test
     useEffect(() => {
@@ -1147,7 +1105,7 @@ const Test = () => {
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
-                        className={`fixed ${warningCorner === 'top-left' ? 'left-4' : 'right-4'} top-4 z-[95] rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700 shadow-lg`}
+                        className="fixed right-4 top-4 z-[95] rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700 shadow-lg"
                     >
                         Face movement detected
                     </motion.div>
@@ -1232,15 +1190,35 @@ const Test = () => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Test ID: {testId}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 font-bold text-sm">
-                    <AlertTriangle size={18} />
-                    {warningsCount} / 3 Warnings
-                </div>
-                <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-xl border border-amber-100 font-bold text-sm">
-                    <AlertTriangle size={18} />
-                    {yellowWarningsCount} Yellow Warnings
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 font-bold text-sm">
+                        <AlertTriangle size={18} />
+                        {warningsCount} / 3 Warnings
+                    </div>
+                    <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-xl border border-amber-100 font-bold text-sm">
+                        <AlertTriangle size={18} />
+                        {yellowWarningsCount} Yellow Warnings
+                    </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                <motion.div
+                    key={`timer-${timeLeft}`}
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                    className={`fixed left-1/2 top-4 z-[96] -translate-x-1/2 text-center rounded-3xl px-6 py-3 shadow-xl ${timeLeft <= 60 ? 'bg-red-50 border border-red-100' :
+                            timeLeft <= 300 ? 'bg-amber-50 border border-amber-100' :
+                                'bg-lime/5 border border-lime/10'
+                        }`}
+                >
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Time Remaining</p>
+                    <p className={`text-4xl font-black font-mono tracking-wider ${getTimerColor()} ${timeLeft <= 60 ? 'animate-pulse' : ''}`}>
+                        {formatTime(timeLeft)}
+                    </p>
+                </motion.div>
+            </AnimatePresence>
 
             {/* Main Content Area */}
             <div className="flex-1 flex">
@@ -1465,27 +1443,16 @@ const Test = () => {
                 </div>
 
                 {/* RIGHT: Question Panel + Timer (38%) */}
-                <div className="w-[38%] bg-white border-l border-slate-100 p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 60px)' }}>
-                    {/* Timer Display */}
-                    <div className={`text-center p-6 rounded-3xl mb-6 transition-colors ${timeLeft <= 60 ? 'bg-red-50 border border-red-100' :
-                            timeLeft <= 300 ? 'bg-amber-50 border border-amber-100' :
-                                'bg-lime/5 border border-lime/10'
-                        }`}>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Time Remaining</p>
-                        <p className={`text-4xl font-black font-mono tracking-wider ${getTimerColor()} ${timeLeft <= 60 ? 'animate-pulse' : ''}`}>
-                            {formatTime(timeLeft)}
-                        </p>
-                    </div>
-
+                <div className="w-[38%] bg-white border-l border-slate-100 p-6 flex flex-col gap-4" style={{ maxHeight: 'calc(100vh - 60px)' }}>
                     {/* Question Grid */}
                     <div className="flex-1 overflow-y-auto">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Question Navigator</p>
-                        <div className="grid grid-cols-5 gap-2">
+                        <div className="grid grid-cols-5 gap-1.5">
                             {testData?.questions?.map((_, i) => (
                                 <button
                                     key={i}
-                                            onClick={() => goToQuestion(i)}
-                                    className={`w-full aspect-square rounded-xl font-bold text-sm flex items-center justify-center transition-all duration-200 border-2 ${i === currentQ
+                                    onClick={() => goToQuestion(i)}
+                                    className={`w-full aspect-square rounded-lg font-bold text-[11px] flex items-center justify-center transition-all duration-200 border-2 ${i === currentQ
                                             ? 'bg-navy text-white border-navy shadow-lg scale-110'
                                             : isAnswered(i)
                                                 ? 'bg-lime/10 text-lime border-lime/30 hover:bg-lime/20'
@@ -1498,8 +1465,48 @@ const Test = () => {
                         </div>
                     </div>
 
+                    {/* Camera Panel */}
+                    <div className="rounded-3xl border border-slate-200 bg-slate-900 shadow-2xl shadow-navy/10 overflow-hidden">
+                        <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-slate-950/90 px-4 py-2">
+                            <div className="flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
+                                <Camera size={12} />
+                                <span className="truncate">Live Self View</span>
+                            </div>
+                            <div className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] ${cameraReady ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}`}>
+                                <span className={`h-2 w-2 rounded-full ${cameraReady ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
+                                {cameraReady ? 'Active' : 'Loading'}
+                            </div>
+                        </div>
+                        <div className="relative h-48 w-full bg-black">
+                            <video
+                                ref={videoRef}
+                                className="h-full w-full object-cover scale-x-[-1]"
+                                playsInline
+                                muted
+                                autoPlay
+                            />
+                            <canvas
+                                ref={overlayCanvasRef}
+                                className="pointer-events-none absolute inset-0 h-full w-full scale-x-[-1]"
+                            />
+                            {!cameraReady && !cameraError && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 text-center">
+                                    <div className="space-y-1">
+                                        <Camera size={28} className="mx-auto text-white/60" />
+                                        <p className="text-xs font-bold text-white/70">Starting camera...</p>
+                                    </div>
+                                </div>
+                            )}
+                            {cameraError && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/85 text-center px-4">
+                                    <p className="text-xs font-bold text-red-200">{cameraError}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Legend + Stats */}
-                    <div className="mt-6 pt-4 border-t border-slate-100 space-y-3">
+                    <div className="pt-2 border-t border-slate-100 space-y-3">
                         <div className="flex items-center justify-between text-sm">
                             <span className="flex items-center gap-2 text-slate-400 font-bold">
                                 <div className="w-3 h-3 rounded bg-lime/30 border border-lime/50"></div> Answered
@@ -1525,88 +1532,9 @@ const Test = () => {
                         onClick={requestSubmitConfirmation}
                         disabled={submitting}
                         className="mt-6 w-full py-4 bg-navy text-white rounded-2xl font-extrabold flex items-center justify-center gap-2 shadow-xl hover:bg-navy/90 transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50"
-                    >
-                        <Send size={18} /> Submit Test
-                    </button>
-                </div>
-            </div>
-
-            <div className="pointer-events-none fixed bottom-4 right-4 z-[90] flex flex-col items-end gap-2">
-                {cameraError ? (
-                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-bold text-red-700 shadow-lg">
-                        {cameraError}
-                    </div>
-                ) : (
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 shadow-lg">
-                        {cameraReady ? 'Camera monitoring active' : 'Starting camera monitoring...'}
-                    </div>
-                )}
-            </div>
-
-            <div
-                className="fixed z-[85] overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-2xl shadow-navy/20"
-                style={{ right: `${cameraWidgetPos.right}px`, bottom: `${cameraWidgetPos.bottom}px` }}
-            >
-                <div
-                    className="flex cursor-move select-none items-center justify-between gap-3 border-b border-white/10 bg-slate-950/90 px-4 py-2"
-                    onMouseDown={(event) => {
-                        setIsDraggingCamera(true);
-                        dragStateRef.current = {
-                            startX: event.clientX,
-                            startY: event.clientY,
-                            startRight: cameraWidgetPos.right,
-                            startBottom: cameraWidgetPos.bottom
-                        };
-                    }}
-                >
-                    <div className="flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
-                        <Camera size={12} />
-                        <span className="truncate">Live Self View</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] ${cameraReady ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}`}>
-                            <span className={`h-2 w-2 rounded-full ${cameraReady ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
-                            {cameraReady ? 'Active' : 'Loading'}
-                        </div>
-                        <select
-                            value={selectedCameraDeviceId}
-                            onChange={(e) => setSelectedCameraDeviceId(e.target.value)}
-                            onMouseDown={(e) => e.stopPropagation()}
-                            className="max-w-[9rem] rounded-xl border border-white/10 bg-white/10 px-2 py-1 text-[10px] font-bold text-white outline-none backdrop-blur"
-                            title="Choose camera"
                         >
-                            {cameraDevices.length === 0 ? (
-                                <option value="">Default camera</option>
-                            ) : (
-                                cameraDevices.map((device, idx) => (
-                                    <option key={device.deviceId} value={device.deviceId} className="text-navy">
-                                        {device.label || `Camera ${idx + 1}`}
-                                    </option>
-                                ))
-                            )}
-                        </select>
-                    </div>
-                </div>
-                <div className="relative h-44 w-56 bg-black">
-                    <video
-                        ref={videoRef}
-                        className="h-full w-full object-cover scale-x-[-1]"
-                        playsInline
-                        muted
-                        autoPlay
-                    />
-                    <canvas
-                        ref={overlayCanvasRef}
-                        className="pointer-events-none absolute inset-0 h-full w-full scale-x-[-1]"
-                    />
-                    {!cameraReady && !cameraError && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 text-center">
-                            <div className="space-y-1">
-                                <Camera size={28} className="mx-auto text-white/60" />
-                                <p className="text-xs font-bold text-white/70">Starting camera...</p>
-                            </div>
-                        </div>
-                    )}
+                            <Send size={18} /> Submit Test
+                        </button>
                 </div>
             </div>
         </div>
