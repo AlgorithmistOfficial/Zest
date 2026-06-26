@@ -1153,7 +1153,7 @@ const Test = () => {
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
-                        className="fixed left-1/2 top-4 z-[96] -translate-x-1/2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center shadow-lg"
+                        className="fixed left-1/2 top-4 z-[97] -translate-x-1/2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center shadow-lg"
                     >
                         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-red-700">
                             Face not visible
@@ -1201,9 +1201,9 @@ const Test = () => {
 
             <AnimatePresence>
                 <motion.div
-                    initial={{ opacity: 0, y: -8, scale: 0.985 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.985 }}
+                    initial={{ opacity: 0, y: -8, x: -48, scale: 0.985 }}
+                    animate={{ opacity: 1, y: 0, x: -48, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, x: -48, scale: 0.985 }}
                     className={`fixed left-1/2 top-4 z-[96] -translate-x-1/2 rounded-3xl border px-6 py-3 text-center shadow-xl backdrop-blur-sm ${timeLeft <= 60 ? 'bg-red-50/95 border-red-100' :
                             timeLeft <= 300 ? 'bg-amber-50/95 border-amber-100' :
                                 'bg-lime/5/95 border-lime/10'
