@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useActiveAdminBatch } from '../batch';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
 const Reports = () => {
     const [rows, setRows] = useState([]);

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const backendUrl = process.env.REACT_APP_BACKEND_URL ;
 const mediapipeVisionUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs';
 const mediapipeWasmRoot = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm';
 const mediapipeModelUrl = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
@@ -139,7 +139,7 @@ const Test = () => {
     useEffect(() => {
         const fetchTest = async () => {
             try {
-                const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+                const backendUrl = process.env.REACT_APP_BACKEND_URL ;
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 

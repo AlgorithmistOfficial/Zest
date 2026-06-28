@@ -40,7 +40,7 @@ const UserPresence = ({ children }) => {
 
     if (token && user.email) {
       // Connect to the backend socket server
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+      const backendUrl = process.env.REACT_APP_BACKEND_URL ;
       const socket = io(backendUrl, {
         auth: { token }
       });

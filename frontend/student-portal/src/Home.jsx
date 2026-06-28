@@ -65,7 +65,7 @@ const Home = () => {
     if (now < startTime) {
       setEntryAlert({ type: 'early' });
     } else if (now > entryDeadline) {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+      const backendUrl = process.env.REACT_APP_BACKEND_URL ;
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       if (!token) {
         setEntryAlert({ type: 'late' });
@@ -113,7 +113,7 @@ const Home = () => {
   React.useEffect(() => {
     const fetchNearestTest = async () => {
       try {
-        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const backendUrl = process.env.REACT_APP_BACKEND_URL ;
         const res = await fetch(`${backendUrl}/api/exams${selectedBatchId ? `?batchId=${selectedBatchId}` : ''}`);
         if (!res.ok) return;
         const exams = await res.json();

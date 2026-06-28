@@ -4,7 +4,7 @@ import { ArrowLeft, BarChart3, LogOut, TrendingUp, TrendingDown } from 'lucide-r
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const backendUrl = process.env.REACT_APP_BACKEND_URL ;
 
 const Analytics = () => {
     const navigate = useNavigate();

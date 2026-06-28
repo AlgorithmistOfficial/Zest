@@ -3,7 +3,7 @@ import { Bell, Check, X, Trash2 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useActiveAdminBatch } from '../batch';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);

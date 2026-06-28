@@ -4,7 +4,7 @@ import { ArrowLeft, Trophy, Medal, Crown, Star, User, Target, AlertCircle, LogOu
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
 const Leaderboard = () => {
     const navigate = useNavigate();

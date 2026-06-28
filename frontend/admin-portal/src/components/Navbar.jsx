@@ -36,7 +36,7 @@ const Navbar = () => {
     }, []);
 
     useEffect(() => {
-        const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const apiUrl = process.env.REACT_APP_BACKEND_URL ;
         const fetchPendingCount = async () => {
             try {
                 const res = await fetch(`${apiUrl}/api/admin/notifications`);
@@ -55,7 +55,7 @@ const Navbar = () => {
     }, []);
 
     useEffect(() => {
-        const apiUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const apiUrl = process.env.REACT_APP_BACKEND_URL ;
         const fetchBatches = async () => {
             try {
                 const res = await fetch(`${apiUrl}/api/batches`);

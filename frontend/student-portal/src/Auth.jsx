@@ -34,7 +34,7 @@ const Auth = () => {
     setForgotModal({ isOpen: false, step: 0, email: '', otp: '', newPassword: '', confirmPassword: '', loading: false, error: '' });
   };
 
-  const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space'; // Base URL for backend
+  const API_URL = process.env.REACT_APP_BACKEND_URL ; // Base URL for backend
 
   const passwordRules = {
     length: formData.password.length >= 8 && formData.password.length <= 25,

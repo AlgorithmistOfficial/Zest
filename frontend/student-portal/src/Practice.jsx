@@ -30,7 +30,7 @@ const Practice = () => {
         window.addEventListener('scroll', handleScroll);
 
         // Initialize WebSocket
-        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+        const backendUrl = process.env.REACT_APP_BACKEND_URL ;
         socketRef.current = io(backendUrl);
 
         socketRef.current.on('output', (data) => {

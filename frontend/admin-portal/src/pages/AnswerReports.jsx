@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { useActiveAdminBatch } from '../batch';
 import PageHeader from '../components/PageHeader';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'https://Shreyansh6726-zest.hf.space';
+const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
 const AnswerReports = () => {
     const [tests, setTests] = useState([]);
