@@ -9,6 +9,7 @@ import {
     Circle, Square, Type, Camera
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { getAuthToken, getAuthUser } from './authStorage';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL ;
 const mediapipeVisionUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs';
@@ -140,8 +141,8 @@ const Test = () => {
         const fetchTest = async () => {
             try {
                 const backendUrl = process.env.REACT_APP_BACKEND_URL ;
-                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+                const token = getAuthToken();
+                const user = getAuthUser() || {};
 
                 // Enforce the same 5-minute late-entry rule here so direct navigation cannot bypass Home.jsx
                 const examRes = await fetch(`${backendUrl}/api/exams/by-testid/${testId}${user.batchId ? `?batchId=${user.batchId}` : ''}`);
@@ -272,7 +273,7 @@ const Test = () => {
         clearInterval(timerRef.current);
 
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const token = getAuthToken();
             const payloadAnswers = forceZeroMarks ? {} : answers;
             const res = await fetch(`${backendUrl}/api/test/submit`, {
                 method: 'POST',
@@ -641,7 +642,7 @@ const Test = () => {
         const nextWarnings = warningsCount + 1;
         setWarningsCount(nextWarnings);
         setWarningPrompt(null);
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getAuthToken();
         if (token) {
             fetch(`${backendUrl}/api/test/alarm`, {
                 method: 'POST',
@@ -680,8 +681,6 @@ const Test = () => {
         if (timeLeft <= 300) return 'text-amber-500';
         return 'text-lime';
     };
-
-    const getAuthToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
 
     const getJavaStarterCode = () => `public class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}`;
 

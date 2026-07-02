@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Layers3, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession, getAuthStorage, getAuthToken, getAuthUser } from './authStorage';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
@@ -14,10 +15,10 @@ const SelectBatch = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const user = useMemo(() => JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}'), []);
+  const user = useMemo(() => getAuthUser() || {}, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = getAuthToken();
     if (!token) {
       navigate('/auth');
       return;
@@ -43,15 +44,12 @@ const SelectBatch = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
+    clearAuthSession();
     navigate('/auth');
   };
 
   const handleSubmit = async () => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = getAuthToken();
     if (!token || !selectedBatchId) return;
 
     setSaving(true);
@@ -68,7 +66,7 @@ const SelectBatch = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to save batch');
 
-      const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+      const storage = getAuthStorage();
       storage.setItem('user', JSON.stringify(data.user));
       navigate('/home', { replace: true });
     } catch (err) {

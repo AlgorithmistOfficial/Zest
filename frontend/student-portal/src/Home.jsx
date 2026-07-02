@@ -16,11 +16,12 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession, getAuthToken, getAuthUser } from './authStorage';
 
 const Home = () => {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const user = getAuthUser() || {};
   const normalizeBatchId = (value) => {
     if (!value) return '';
     if (typeof value === 'string') return value;
@@ -32,7 +33,7 @@ const Home = () => {
 
   React.useEffect(() => {
     // Redirect if not logged in
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = getAuthToken();
     if (!token) {
       navigate('/auth');
     }
@@ -46,10 +47,7 @@ const Home = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
+    clearAuthSession();
     navigate('/auth');
   };
 
@@ -66,7 +64,7 @@ const Home = () => {
       setEntryAlert({ type: 'early' });
     } else if (now > entryDeadline) {
       const backendUrl = process.env.REACT_APP_BACKEND_URL ;
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getAuthToken();
       if (!token) {
         setEntryAlert({ type: 'late' });
         return;
@@ -120,7 +118,7 @@ const Home = () => {
         console.log('[Home] Fetched exams:', exams);
 
         // Fetch student's already-submitted test IDs
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getAuthToken();
         let submittedTestIds = [];
         if (token) {
           try {

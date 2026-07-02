@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession } from './authStorage';
 
 const SyllabusCard = ({ title, icon: Icon, topics, delay }) => (
   <motion.div
@@ -54,10 +55,7 @@ const Syllabus = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
+    clearAuthSession();
     navigate('/auth');
   };
 

@@ -475,7 +475,7 @@ app.get('/api/auth/google/callback',
                 const token = jwt.sign(
                     { id: user._id.toString() }, 
                     process.env.JWT_SECRET || 'fallback_secret', 
-                    { expiresIn: remember ? '30d' : '1h' }
+                    { expiresIn: remember ? '30d' : '5h' }
                 );
                 const batch = user.batchId ? await Batch.findById(user.batchId) : null;
                 const userStr = encodeURIComponent(JSON.stringify({
@@ -697,7 +697,7 @@ app.post('/api/auth/login', async (req, res) => {
 
         console.log(`[Auth] Login successful for: ${email}`);
 
-        const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '1h' });
+        const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '5h' });
         res.json({ token, user: await getStudentBatchResponse(student) });
 
 
@@ -812,7 +812,7 @@ app.put('/api/auth/change-password', async (req, res) => {
         // Clean up OTP
         await OTP.deleteMany({ email });
 
-        const token = jwt.sign({ id: updated._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '1h' });
+        const token = jwt.sign({ id: updated._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '5h' });
         console.log(`[Auth] Password changed for ${email}`);
         res.json({ message: 'Password updated successfully', token, user: { name: updated.name, email: updated.emailID } });
 
@@ -847,7 +847,7 @@ app.post('/api/auth/login-with-otp', async (req, res) => {
 
         console.log(`[Auth] OTP Login successful for: ${email}`);
 
-        const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '1h' });
+        const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '5h' });
         res.json({ token, user: await getStudentBatchResponse(student) });
 
     } catch (err) {

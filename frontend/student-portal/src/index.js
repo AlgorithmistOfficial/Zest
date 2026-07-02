@@ -16,10 +16,11 @@ import Home from './Home';
 import Profile from './Profile';
 import Analytics from './Analytics';
 import Test from './Test';
+import { getAuthToken, getAuthUser, isPersistentSession } from './authStorage';
 
 // Helper to check for token
 const isAuthenticated = () => {
-  return localStorage.getItem('token') || sessionStorage.getItem('token');
+  return getAuthToken();
 };
 
 // Redirects to /home if already logged in
@@ -32,11 +33,11 @@ const PublicRoute = ({ children }) => {
 const UserPresence = ({ children }) => {
   const location = useLocation();
   const socketRef = React.useRef(null);
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const token = getAuthToken();
 
   React.useEffect(() => {
-    const isPersistent = !!localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const isPersistent = isPersistentSession();
+    const user = getAuthUser() || {};
 
     if (token && user.email) {
       // Connect to the backend socket server
@@ -114,7 +115,7 @@ const ProtectedRoute = ({ children }) => {
   if (!paramsHandled) return null;
 
   const token = isAuthenticated();
-  const storedUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const storedUser = getAuthUser() || {};
   const hasBatch = !!storedUser.batchId || !!(storedUser.batch && storedUser.batch._id) || !!storedUser.batch?.id;
 
   if (token && !hasBatch && location.pathname !== '/select-batch') {

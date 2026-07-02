@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, User, LogOut, Edit3, Save, X, Mail, Info, Lock, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession, getAuthUser } from './authStorage';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
@@ -13,7 +14,7 @@ const Profile = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Load user from storage
-    const initialUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const initialUser = getAuthUser() || {};
     const [userData, setUserData] = useState({
         name: initialUser.name || 'Anonymous User',
         email: initialUser.email || 'guest@zest.com',
@@ -58,10 +59,7 @@ const Profile = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        clearAuthSession();
         navigate('/auth');
     };
 

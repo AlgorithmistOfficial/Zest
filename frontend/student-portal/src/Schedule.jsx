@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Clock, Award, Timer, AlertCircle, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession, getAuthUser } from './authStorage';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
@@ -13,7 +14,7 @@ const Schedule = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const user = getAuthUser() || {};
   const selectedBatchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
 
   useEffect(() => {
@@ -23,10 +24,7 @@ const Schedule = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
+    clearAuthSession();
     navigate('/auth');
   };
 

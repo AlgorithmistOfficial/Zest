@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, BarChart3, LogOut, TrendingUp, TrendingDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession, getAuthToken } from './authStorage';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL ;
 
@@ -20,15 +21,12 @@ const Analytics = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        clearAuthSession();
         navigate('/auth');
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getAuthToken();
         if (!token) {
             navigate('/auth');
             return;

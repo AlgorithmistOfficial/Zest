@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Trophy, Medal, Crown, Star, User, Target, AlertCircle, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession, getAuthUser } from './authStorage';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL ;
 
@@ -13,7 +14,7 @@ const Leaderboard = () => {
     const [rankings, setRankings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const user = getAuthUser() || {};
     const selectedBatchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
     const selectedBatchName = user.batch?.name || 'your batch';
 
@@ -24,10 +25,7 @@ const Leaderboard = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        clearAuthSession();
         navigate('/auth');
     };
 

@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import Editor from '@monaco-editor/react';
 import { Helmet } from 'react-helmet-async';
+import { clearAuthSession } from './authStorage';
 
 const Practice = () => {
     const navigate = useNavigate();
@@ -53,10 +54,7 @@ const Practice = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        clearAuthSession();
         navigate('/auth');
     };
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Mail, Lock, User, ArrowRight, CheckCircle2, X, AlertCircle, KeyRound, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { setAuthSession } from './authStorage';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -104,18 +105,7 @@ const Auth = () => {
       }
 
       if (isLogin) {
-        // Clear both first to avoid conflicts
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
-
-        const storage = persistent ? localStorage : sessionStorage;
-        if (persistent) localStorage.setItem('rememberMe', 'true');
-        else localStorage.removeItem('rememberMe');
-        
-        storage.setItem('token', data.token);
-        storage.setItem('user', JSON.stringify(data.user));
+        setAuthSession(data.token, data.user, persistent);
         setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
         setTimeout(() => window.location.href = '/home', 2000);
       } else {
@@ -179,12 +169,7 @@ const Auth = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       
-      const storage = persistent ? localStorage : sessionStorage;
-      if (persistent) localStorage.setItem('rememberMe', 'true');
-      else localStorage.removeItem('rememberMe');
-      
-      storage.setItem('token', data.token);
-      storage.setItem('user', JSON.stringify(data.user));
+      setAuthSession(data.token, data.user, persistent);
       
       setForgotModal(prev => ({ ...prev, step: 4, loading: false }));
       setTimeout(() => window.location.href = '/home', 1500);
@@ -210,12 +195,7 @@ const Auth = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
       
-      const storage = persistent ? localStorage : sessionStorage;
-      if (persistent) localStorage.setItem('rememberMe', 'true');
-      else localStorage.removeItem('rememberMe');
-      
-      storage.setItem('token', data.token);
-      storage.setItem('user', JSON.stringify(data.user));
+      setAuthSession(data.token, data.user, persistent);
       
       setForgotModal(prev => ({ ...prev, step: 4, loading: false }));
       setTimeout(() => window.location.href = '/home', 1500);
