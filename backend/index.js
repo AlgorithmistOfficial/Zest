@@ -762,7 +762,7 @@ app.put('/api/auth/change-email', async (req, res) => {
         const updated = await Student.findOneAndUpdate(
             { emailID: currentEmail },
             { emailID: newEmail },
-            { new: true }
+            { returnDocument: 'after' }
         );
         if (!updated) return res.status(404).json({ message: 'User not found' });
 
@@ -805,7 +805,7 @@ app.put('/api/auth/change-password', async (req, res) => {
         const updated = await Student.findOneAndUpdate(
             { emailID: email },
             { password: hashedPassword },
-            { new: true }
+            { returnDocument: 'after' }
         );
         if (!updated) return res.status(404).json({ message: 'User not found' });
 
@@ -877,7 +877,7 @@ app.post('/api/auth/select-batch', async (req, res) => {
         const student = await Student.findByIdAndUpdate(
             decoded.id,
             { batchId: batch._id },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!student) return res.status(404).json({ message: 'Student not found' });
@@ -987,10 +987,25 @@ app.post('/api/exams', async (req, res) => {
         if (!examData.batchId) {
             return res.status(400).json({ message: 'batchId is required when scheduling an exam' });
         }
-        const newExam = new Exam(examData);
-        await newExam.save();
-        scheduleExamStatus(newExam);
-        res.status(201).json({ message: 'Exam scheduled successfully!', exam: newExam });
+        const existingExam = await Exam.findOne({ testId: examData.testId });
+        const upsertedExam = await Exam.findOneAndUpdate(
+            { testId: examData.testId },
+            {
+                ...examData,
+                status: existingExam?.status || examData.status || 'scheduled'
+            },
+            {
+                upsert: true,
+                runValidators: true,
+                returnDocument: 'after',
+                setDefaultsOnInsert: true
+            }
+        );
+        scheduleExamStatus(upsertedExam);
+        res.status(existingExam ? 200 : 201).json({
+            message: existingExam ? 'Exam updated successfully!' : 'Exam scheduled successfully!',
+            exam: upsertedExam
+        });
     } catch (err) {
         console.error('Error scheduling exam:', err);
         res.status(500).json({ message: 'Failed to schedule exam', error: err.message });
@@ -1021,7 +1036,7 @@ app.put('/api/exams/:id', async (req, res) => {
             return res.status(400).json({ message: 'Exam batch cannot be changed after creation' });
         }
 
-        const updatedExam = await Exam.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedExam = await Exam.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' });
         
         // Cascade testId update to TestContent (buildcontent) if it changed
         if (newTestId && newTestId !== oldTestId) {
@@ -1156,7 +1171,7 @@ app.post('/api/test-contents', async (req, res) => {
             testContent = await TestContent.findOneAndUpdate(
                 { testId, ...(exam.batchId ? { batchId: exam.batchId } : {}) },
                 { questions: normalizedQuestions, batchId: exam.batchId || null },
-                { new: true }
+                { returnDocument: 'after' }
             );
             return res.status(200).json({ message: 'Test content updated successfully!', testContent });
         } else {
@@ -1263,7 +1278,7 @@ app.post('/api/test/submit', async (req, res) => {
         if (!student) return res.status(404).json({ message: 'Student not found' });
 
         // Prevent duplicate submission
-        if (student.testId && student.testId.includes(testId)) {
+        if ((student.testId || []).some((submittedTestId) => String(submittedTestId) === String(testId))) {
             return res.status(400).json({ message: 'You have already submitted this test' });
         }
 
@@ -1533,7 +1548,7 @@ app.post('/api/admin/notifications/:id/decision', async (req, res) => {
         const updated = await Notification.findByIdAndUpdate(
             req.params.id,
             { status: mappedStatus },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!updated) return res.status(404).json({ message: 'Notification not found' });
