@@ -220,6 +220,16 @@ const serializeStudentAnswer = (studentAnswer) => {
     return String(studentAnswer);
 };
 
+const formatStudentAnswerForStorage = (studentAnswer) => {
+    if (Array.isArray(studentAnswer)) {
+        return studentAnswer.map((item) => String(item)).join(', ');
+    }
+    if (studentAnswer === undefined || studentAnswer === null) {
+        return '';
+    }
+    return String(studentAnswer);
+};
+
 const compareAnswers = (question, studentAnswer, codeResult) => {
     switch (question.type) {
         case 'single option answer':
@@ -249,7 +259,7 @@ const upsertWrongAnswerRecord = async ({ student, testId, question, studentAnswe
         testId,
         questionId: question._id,
         questionNo: Number(question.questionNo) || null,
-        answer: serializeStudentAnswer(studentAnswer) ?? '',
+        answer: formatStudentAnswerForStorage(studentAnswer),
         recordedAt: new Date()
     };
 
@@ -1212,7 +1222,7 @@ app.post('/api/test/wrong-answer', async (req, res) => {
             testId,
             questionId,
             questionNo: Number(questionNo) || null,
-            answer: serializeStudentAnswer(studentAnswer) ?? '',
+            answer: formatStudentAnswerForStorage(studentAnswer),
             recordedAt: new Date()
         };
         const attemptIndex = student.wrongAnswers.findIndex(
