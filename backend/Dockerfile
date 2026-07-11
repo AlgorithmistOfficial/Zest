@@ -30,12 +30,12 @@ COPY . .
 # Create the temp directory for compilation storage inside the backend folder
 RUN mkdir -p temp && chmod 777 temp
 
-# Set environmental variables for Hugging Face
-ENV PORT=7860
+# Set a Cloud Run friendly default port while still honoring runtime overrides
+ENV PORT=8080
 ENV NODE_ENV=production
 
-# Expose the Hugging Face default port
-EXPOSE 7860
+# Expose the Cloud Run default port
+EXPOSE 8080
 
 # Start the application from the backend directory
 CMD ["node", "index.js"]

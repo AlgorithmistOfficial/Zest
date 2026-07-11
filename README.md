@@ -64,7 +64,7 @@ The project is organized as a monorepo with three main applications.
 - Docker multi-stage build
 - Base Node image: `node:20-slim`
 - Java runtime source: `eclipse-temurin:21-jdk`
-- Exposed backend port: `7860`
+- Exposed backend port: `8080`
 
 ## Implemented Work
 
@@ -202,7 +202,7 @@ The exact values are intentionally not published in this repository.
 - `GOOGLE_CALLBACK_URL`
 - `BREVO_API_KEY`
 - `BREVO_FROM_EMAIL`
-- `PORT` (optional; defaults to `7860`)
+- `PORT` (optional; defaults to `8080`)
 
 ## Deployment Notes
 
