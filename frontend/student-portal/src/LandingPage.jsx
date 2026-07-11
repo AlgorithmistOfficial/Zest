@@ -13,9 +13,10 @@ import {
   SiNodedotjs, SiReact, SiExpress, SiAngular, SiTypescript, SiJavascript,
   SiHtml5, SiNextdotjs, SiPython, SiOpenjdk, SiGithub,
   SiGitlab, SiTensorflow, SiGoogle,
-  SiOpenai, SiGithubcopilot, SiRedis, SiVercel, SiDocker, SiKotlin,
+  SiGithubcopilot, SiRedis, SiVercel, SiDocker, SiKotlin,
   SiMongodb, SiGooglegemini
 } from 'react-icons/si';
+import { PiOpenAiLogo } from 'react-icons/pi';
 import { FaLinkedin, FaMicrosoft as FaMs } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -370,7 +371,7 @@ export default function LandingPage() {
             { node: <FaMs />, title: "Microsoft" },
             { node: <SiGoogle />, title: "Google" },
             { node: <SiGooglegemini />, title: "Gemini" },
-            { node: <SiOpenai />, title: "OpenAI" },
+            { node: <PiOpenAiLogo />, title: "OpenAI" },
             { node: <SiGithubcopilot />, title: "GitHub Copilot" },
             { node: <SiRedis />, title: "Redis" },
             { node: <SiMongodb />, title: "MongoDB" },
