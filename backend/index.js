@@ -42,13 +42,14 @@ mongoose.connect(MONGO_URI)
 // --- Brevo Config ---
 console.log('[Auth] Brevo Config Check:', {
     hasApiKey: !!process.env.BREVO_API_KEY,
-    fromEmail: process.env.BREVO_FROM_EMAIL
+    fromEmail: process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER
 });
 
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKey = defaultClient.authentications['api-key'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+const brevoSenderEmail = (process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER || '').trim();
 
 
 const io = new Server(server, {
@@ -527,6 +528,16 @@ app.post('/api/auth/send-otp', async (req, res) => {
         // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+        if (!process.env.BREVO_API_KEY) {
+            console.error('[Auth] Missing BREVO_API_KEY');
+            return res.status(500).json({ message: 'Email service is not configured.' });
+        }
+
+        if (!brevoSenderEmail) {
+            console.error('[Auth] Missing BREVO_FROM_EMAIL/EMAIL_USER sender address');
+            return res.status(500).json({ message: 'Email sender is not configured.' });
+        }
+
         // Save OTP to DB (replaces existing if any for that email)
         await OTP.findOneAndUpdate(
             { email },
@@ -628,16 +639,20 @@ app.post('/api/auth/send-otp', async (req, res) => {
                 </body>
                 </html>
             `;
-        sendSmtpEmail.sender = { "name": "Zest", "email": process.env.BREVO_FROM_EMAIL };
-        sendSmtpEmail.to = [{ "email": email }];
+        sendSmtpEmail.sender = { name: 'Zest', email: brevoSenderEmail };
+        sendSmtpEmail.to = [{ email }];
 
         await apiInstance.sendTransacEmail(sendSmtpEmail);
         console.log(`[Auth] OTP email sent successfully via Brevo to ${email}`);
         res.json({ message: 'OTP sent to your email' });
 
     } catch (err) {
-        console.error('Brevo error:', err.response ? err.response.body : err);
-        res.status(500).json({ message: 'Failed to send OTP. Check email settings.' });
+        const brevoError = err?.response?.body || err?.message || err;
+        console.error('[Auth] Failed to send OTP email:', brevoError);
+        res.status(500).json({
+            message: 'Failed to send OTP. Check email settings.',
+            error: typeof brevoError === 'string' ? brevoError : undefined
+        });
     }
 });
 
