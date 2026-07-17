@@ -718,6 +718,11 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        if (!student.password) {
+            console.log(`[Auth] Login failed: No password set for ${email}`);
+            return res.status(401).json({ message: 'This account uses Google sign-in. Please log in with Google.' });
+        }
+
         const isMatch = await bcrypt.compare(password, student.password);
         if (!isMatch) {
             console.log(`[Auth] Login failed: Password mismatch for ${email}`);
