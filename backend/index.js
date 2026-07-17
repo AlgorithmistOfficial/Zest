@@ -704,8 +704,12 @@ app.post('/api/auth/signup', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
     try {
-        let { email, password } = req.body;
-        email = email.trim().toLowerCase();
+        let { email, password } = req.body || {};
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+
+        email = String(email).trim().toLowerCase();
         console.log(`[Auth] Login attempt for: ${email}`);
 
         const student = await Student.findOne({ emailID: email });
