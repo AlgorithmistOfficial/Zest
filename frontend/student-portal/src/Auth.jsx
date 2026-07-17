@@ -43,6 +43,7 @@ const Auth = () => {
     hasNumber: /[0-9]/.test(formData.password),
     match: formData.password === formData.confirmPassword && formData.password !== ''
   };
+  const isPasswordOptional = !formData.password && !formData.confirmPassword;
 
   const forgotPasswordRules = {
     length: forgotModal.newPassword.length >= 8 && forgotModal.newPassword.length <= 25,
@@ -55,7 +56,7 @@ const Auth = () => {
   const isForgotPassValid = forgotPasswordRules.length && forgotPasswordRules.hasLetter && forgotPasswordRules.hasNumber;
 
   const canSubmit = isLogin ? (formData.email && formData.password) : (
-    step === 'info' ? (formData.name && formData.email && isPasswordValid && passwordRules.match) : formData.otp
+    step === 'info' ? (formData.name && formData.email && (isPasswordOptional || (isPasswordValid && passwordRules.match))) : formData.otp
   );
 
   React.useEffect(() => {
@@ -371,13 +372,13 @@ const Auth = () => {
                     <div className="space-y-4">
                       {/* Password Field */}
                       <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password <span className="normal-case font-semibold">(optional)</span></label>
                         <div className="relative">
                           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                           <input
                             type="password"
                             name="password"
-                            required
+                            required={false}
                             value={formData.password}
                             onChange={handleInputChange}
                             className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-medium ${
@@ -389,8 +390,8 @@ const Auth = () => {
                           />
                         </div>
 
-                        {/* Password Rules Indicators (only for signup) */}
-                        {!isLogin && (
+                        {/* Password Rules Indicators (only for signup and when password is provided) */}
+                        {!isLogin && formData.password && (
                           <div className="grid grid-cols-2 gap-2 mt-2 px-1">
                             <div className={`flex items-center gap-1.5 text-[10px] font-bold ${passwordRules.length ? 'text-green-600' : 'text-slate-400'}`}>
                               <CheckCircle2 size={10} className={passwordRules.length ? 'text-green-600' : 'text-slate-300'} />
@@ -415,13 +416,13 @@ const Auth = () => {
                       {/* Confirm Password Field (only for signup) */}
                       {!isLogin && (
                         <div className="space-y-2">
-                          <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Password</label>
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Confirm Password <span className="normal-case font-semibold">(optional)</span></label>
                           <div className="relative">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                               type="password"
                               name="confirmPassword"
-                              required
+                              required={false}
                               value={formData.confirmPassword}
                               onChange={handleInputChange}
                               className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl outline-none transition-all font-medium ${

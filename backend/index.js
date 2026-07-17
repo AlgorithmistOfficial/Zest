@@ -659,7 +659,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
 app.post('/api/auth/signup', async (req, res) => {
     try {
         let { name, email, password, otp } = req.body;
-        if (!name || !email || !password || !otp) return res.status(400).json({ message: 'Missing fields' });
+        if (!name || !email || !otp) return res.status(400).json({ message: 'Missing fields' });
 
         email = email.trim().toLowerCase();
         console.log(`[Auth] Signup attempt for: ${email}`);
@@ -684,7 +684,20 @@ app.post('/api/auth/signup', async (req, res) => {
         const existing = await Student.findOne({ emailID: email });
         if (existing) return res.status(400).json({ message: 'User already exists' });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const normalizedPassword = typeof password === 'string' ? password.trim() : '';
+        const hashedPassword = normalizedPassword
+            ? await bcrypt.hash(normalizedPassword, 10)
+            : null;
+
+        if (normalizedPassword) {
+            if (normalizedPassword.length < 8 || normalizedPassword.length > 25) {
+                return res.status(400).json({ message: 'Password must be between 8 and 25 characters' });
+            }
+            if (!/[a-zA-Z]/.test(normalizedPassword) || !/[0-9]/.test(normalizedPassword)) {
+                return res.status(400).json({ message: 'Password must contain both letters and numbers' });
+            }
+        }
+
         const newStudent = new Student({
             name,
             emailID: email,
