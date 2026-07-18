@@ -9,7 +9,7 @@ const Footer = () => (
             </span>
             <span className="hidden md:inline"> · </span>
             <span className="block md:inline uppercase tracking-wider text-xs md:text-sm md:normal-case font-bold md:font-medium">
-                For Algorithmist DSA Classes
+                For Algorithmist Academy
             </span>
         </p>
     </footer>

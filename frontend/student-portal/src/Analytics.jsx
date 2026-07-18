@@ -244,7 +244,7 @@ const Analytics = () => {
 
             <footer className="py-12 bg-navy text-white text-center px-4">
                 <p className="font-medium leading-relaxed opacity-80">
-                    &copy; {new Date().getFullYear()} <span className="font-bold">Shreyansh Srivastava</span> . For Algorithmist DSA Classes
+                    &copy; {new Date().getFullYear()} <span className="font-bold">Shreyansh Srivastava</span> . For Algorithmist Academy
                 </p>
             </footer>
         </div>

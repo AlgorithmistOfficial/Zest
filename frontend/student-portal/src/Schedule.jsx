@@ -149,7 +149,7 @@ const Schedule = () => {
           >
             <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-navy">Upcoming Exams</h1>
             <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              View all scheduled evaluations for the Algorithmist DSA classes. Prepare well and ace your tests!
+              View all scheduled evaluations for the Algorithmist Academy. Prepare well and ace your tests!
             </p>
             <div className="w-24 h-1.5 bg-lime mx-auto rounded-full mt-8"></div>
           </motion.div>
@@ -243,7 +243,7 @@ const Schedule = () => {
         <p className="font-medium leading-relaxed opacity-80">
           <span className="block md:inline">&copy; {new Date().getFullYear()} <span className="font-bold text-white">Shreyansh Srivastava</span></span>
           <span className="hidden md:inline"> . </span>
-          <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist DSA Classes</span>
+          <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist Academy</span>
         </p>
       </footer>
     </div>

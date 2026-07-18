@@ -70,7 +70,7 @@ const About = () => {
             >
               <h2 className="text-2xl font-bold text-navy mb-4">Humble Beginnings</h2>
               <p>
-                Algorithmist started as a typical, small-scale tuition center with a handful of dedicated students and a single white board. Our mission was simple yet profound: to bridge the gap between classroom theory and the complex world of Data Structures and Algorithms. We focused on the fundamentals, teaching students how to think logically and solve problems from scratch.
+                Algorithmist Academy started as a typical, small-scale tuition center with a handful of dedicated students and a single white board. Our mission was simple yet profound: to bridge the gap between classroom theory and the complex world of Data Structures and Algorithms. We focused on the fundamentals, teaching students how to think logically and solve problems from scratch.
               </p>
             </motion.section>
 
@@ -125,7 +125,7 @@ const About = () => {
               </div>
             </div>
             <h3 className="text-2xl font-bold text-navy">Shreyansh Srivastava</h3>
-            <p className="text-slate-500 font-medium">Founder of Algorithmist DSA Classes</p>
+            <p className="text-slate-500 font-medium">Founder of Algorithmist Academy</p>
           </motion.div>
 
           {/* Contact & Social Section */}
@@ -172,7 +172,7 @@ const About = () => {
         <p className="font-medium leading-relaxed opacity-80">
           <span className="block md:inline">&copy; {new Date().getFullYear()} <span className="font-bold text-white">Shreyansh Srivastava</span></span>
           <span className="hidden md:inline"> . </span>
-          <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist DSA Classes</span>
+          <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist Academy</span>
         </p>
       </footer>
     </div>

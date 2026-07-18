@@ -139,7 +139,7 @@ const Leaderboard = () => {
                         <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-navy">Global Rankings</h1>
                         <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{selectedBatchName}</p>
                         <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-                            The best of Algorithmist DSA classes. Keep practicing to climb the ranks!
+                            The best of Algorithmist Academy. Keep practicing to climb the ranks!
                         </p>
                         <div className="w-24 h-1.5 bg-lime mx-auto rounded-full mt-8"></div>
                     </motion.div>
@@ -265,7 +265,7 @@ const Leaderboard = () => {
                 <p className="font-medium leading-relaxed opacity-80">
                     <span className="block md:inline">&copy; {new Date().getFullYear()} <span className="font-bold text-white">Shreyansh Srivastava</span></span>
                     <span className="hidden md:inline"> . </span>
-                    <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist DSA Classes</span>
+                    <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist Academy</span>
                 </p>
             </footer>
         </div>

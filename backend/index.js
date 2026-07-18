@@ -633,7 +633,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
                             <p style="font-size: 14px; color: #64748b;">This code will expire in <strong>5 minutes</strong>. If you didn't request this code, you can safely ignore this email.</p>
                         </div>
                         <div class="footer">
-                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} Zest Team for Algorithmist DSA Classes</p>
+                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} Zest Team for Algorithmist Academy</p>
                         </div>
                     </div>
                 </body>

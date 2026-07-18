@@ -539,7 +539,7 @@ const Auth = () => {
         <p className="font-medium leading-relaxed opacity-80">
           <span className="block md:inline">&copy; {new Date().getFullYear()} <span className="font-bold text-white">Shreyansh Srivastava</span></span>
           <span className="hidden md:inline"> . </span>
-          <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist DSA Classes</span>
+          <span className="block md:inline uppercase tracking-wider text-[10px] md:text-sm md:normal-case font-bold md:font-medium">For Algorithmist Academy</span>
         </p>
       </footer>
 

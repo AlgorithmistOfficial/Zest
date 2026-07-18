@@ -66,7 +66,7 @@ const ManageExams = () => {
                 <title>Admin - Manage Exams</title>
             </Helmet>
 
-            <PageHeader title="Manage Your Exams" description="Overview and manage all scheduled evaluations for the Algorithmist DSA platform." />
+            <PageHeader title="Manage Your Exams" description="Overview and manage all scheduled evaluations for the Algorithmist Academy platform." />
 
             {!batchId && (
                 <div className="bg-amber-50 text-amber-700 p-4 rounded-2xl font-bold border border-amber-100 mb-6">
