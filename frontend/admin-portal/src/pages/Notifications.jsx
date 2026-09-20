@@ -88,7 +88,7 @@ const Notifications = () => {
                             <Bell className="text-lime" /> Notifications
                         </h1>
                         <p className="text-slate-500 font-medium">
-                            Late-entry requests raised by students appear here for approval.
+                            Late-entry requests and interrupted test submissions appear here for approval.
                         </p>
                         {!activeBatch?._id && (
                             <p className="mt-3 text-amber-600 font-bold">Select a batch from the navbar to view notifications.</p>
@@ -119,6 +119,7 @@ const Notifications = () => {
                                 <th className="py-3 px-2">Student</th>
                                 <th className="py-3 px-2">Email</th>
                                 <th className="py-3 px-2">Test ID</th>
+                                <th className="py-3 px-2">Request</th>
                                 <th className="py-3 px-2">Status</th>
                                 <th className="py-3 px-2">Action</th>
                             </tr>
@@ -129,6 +130,9 @@ const Notifications = () => {
                                     <td className="py-3 px-2 font-bold text-navy">{n.studentName}</td>
                                     <td className="py-3 px-2 text-slate-600">{n.studentEmail}</td>
                                     <td className="py-3 px-2 text-slate-600 font-mono">{n.testId}</td>
+                                    <td className="py-3 px-2 text-slate-600">
+                                        {n.type === 'interrupted_submission' ? 'Interrupted submission' : 'Late entry'}
+                                    </td>
                                     <td className="py-3 px-2 capitalize font-bold text-slate-700">{n.status}</td>
                                     <td className="py-3 px-2">
                                         {n.status === 'pending' ? (

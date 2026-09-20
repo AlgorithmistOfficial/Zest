@@ -177,6 +177,10 @@ const TestCreate = () => {
     const updateQuestion = (index, field, value) => {
         const newQs = [...questions];
         newQs[index][field] = value;
+        if (field === 'type' && value === 'write code answer') {
+            const existing = newQs[index].testCases || [];
+            newQs[index].testCases = [...existing, ...Array.from({ length: Math.max(0, 3 - existing.length) }, () => ({ input: '', output: '' }))];
+        }
         setQuestions(newQs);
     };
 
@@ -225,6 +229,10 @@ const TestCreate = () => {
 
     const removeTestCase = (qIndex, tcIndex) => {
         const newQs = [...questions];
+        if (newQs[qIndex].testCases.length <= 3) {
+            setError('A Java code question must contain at least 3 test cases.');
+            return;
+        }
         newQs[qIndex].testCases = newQs[qIndex].testCases.filter((_, i) => i !== tcIndex);
         setQuestions(newQs);
     };
@@ -258,6 +266,14 @@ const TestCreate = () => {
 
         if (questions.length === 0) {
             setError('Please add at least one question.');
+            setSaving(false);
+            return;
+        }
+
+        const invalidJavaQuestion = questions.find((q) => q.type === 'write code answer' &&
+            (q.testCases?.length < 3 || q.testCases.some((tc) => !tc.input?.trim() || !tc.output?.trim())));
+        if (invalidJavaQuestion) {
+            setError('Every Java code question needs at least 3 complete test cases.');
             setSaving(false);
             return;
         }

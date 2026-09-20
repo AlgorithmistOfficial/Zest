@@ -45,6 +45,8 @@ const Test = () => {
     const [breaksUsed, setBreaksUsed] = useState(0);
     const [breakSecondsLeft, setBreakSecondsLeft] = useState(0);
     const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
+    const [breakActive, setBreakActive] = useState(false);
+    const [submissionReview, setSubmissionReview] = useState(null);
 
     // Exit fullscreen on test end
     useEffect(() => {
@@ -197,7 +199,9 @@ const Test = () => {
                 }
 
                 const batchId = user.batchId || (user.batch && user.batch._id) || user.batch?.id || '';
-                const res = await fetch(`${backendUrl}/api/test-contents/${testId}${batchId ? `?batchId=${batchId}` : ''}`);
+                const query = new URLSearchParams({ studentView: 'true' });
+                if (batchId) query.set('batchId', batchId);
+                const res = await fetch(`${backendUrl}/api/test-contents/${testId}?${query.toString()}`);
                 if (!res.ok) throw new Error('Test not found');
                 const data = await res.json();
                 setTestData(data);
@@ -265,8 +269,8 @@ const Test = () => {
     }, [phase, cameraPermissionRequested]);
 
     // Submit handler
-    const handleSubmit = useCallback(async (autoSubmit = false, forceZeroMarks = false) => {
-        if (hasSubmitted.current || submitting) return;
+    const handleSubmit = useCallback(async (autoSubmit = false, forceZeroMarks = false, interruptionId = null) => {
+        if ((hasSubmitted.current && !interruptionId) || submitting) return;
 
         hasSubmitted.current = true;
         setSubmitting(true);
@@ -285,13 +289,18 @@ const Test = () => {
                     testId,
                     answers: payloadAnswers,
                     alarmCount: warningsCount,
-                    yellowWarningCount: yellowWarningsRef.current
+                    yellowWarningCount: yellowWarningsRef.current,
+                    interruptionId
                 })
             });
             const data = await res.json();
             if (res.ok) {
-                setResults(data);
-                setPhase('results');
+                if (res.status === 202 && data.interruptionId) {
+                    setSubmissionReview({ id: data.interruptionId, status: 'pending' });
+                } else {
+                    setResults(data);
+                    setPhase('results');
+                }
             } else {
                 alert(data.message || 'Failed to submit test');
                 hasSubmitted.current = false;
@@ -304,6 +313,30 @@ const Test = () => {
             setSubmitting(false);
         }
     }, [testId, answers, warningsCount, submitting]);
+
+    useEffect(() => {
+        if (!submissionReview?.id) return;
+        const poll = window.setInterval(async () => {
+            try {
+                const res = await fetch(`${backendUrl}/api/test/interrupted-submission-status/${submissionReview.id}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.status === 'allowed') {
+                    window.clearInterval(poll);
+                    setSubmissionReview(null);
+                    hasSubmitted.current = false;
+                    submitFnRef.current?.(false, false, submissionReview.id);
+                } else if (data.status === 'denied') {
+                    window.clearInterval(poll);
+                    setSubmissionReview({ id: submissionReview.id, status: 'denied' });
+                    hasSubmitted.current = false;
+                }
+            } catch (err) {
+                console.warn('Submission review status check failed:', err);
+            }
+        }, 3000);
+        return () => window.clearInterval(poll);
+    }, [submissionReview]);
 
     // Keep ref updated for timer callback
     submitFnRef.current = handleSubmit;
@@ -384,6 +417,7 @@ const Test = () => {
         if (breakActiveRef.current || breaksUsed >= 2) return;
 
         breakActiveRef.current = true;
+        setBreakActive(true);
         setBreaksUsed((prev) => prev + 1);
         setBreakSecondsLeft(30);
         setFaceMissingVisible(false);
@@ -410,6 +444,7 @@ const Test = () => {
                         breakTimerRef.current = null;
                     }
                     breakActiveRef.current = false;
+                    setBreakActive(false);
                     faceDetectedAnnouncedRef.current = false;
                     setBreakSecondsLeft(0);
                     return 0;
@@ -1084,6 +1119,48 @@ const Test = () => {
                             <p className="text-xl font-extrabold text-navy">Evaluating your answers...</p>
                             <p className="text-slate-500 font-medium mt-2">Please wait while we grade your test</p>
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {breakActive && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[90] flex items-center justify-center bg-navy/70 p-6 text-center backdrop-blur-md"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Test break in progress"
+                    >
+                        <div className="rounded-3xl bg-white px-10 py-8 shadow-2xl">
+                            <Clock size={42} className="mx-auto mb-4 text-sky-600" />
+                            <h2 className="text-2xl font-black text-navy">Break in progress</h2>
+                            <p className="mt-2 text-slate-500">Test controls are locked until the timer ends.</p>
+                            <p className="mt-5 text-4xl font-black text-sky-700">
+                                {String(Math.floor(breakSecondsLeft / 60)).padStart(2, '0')}:{String(breakSecondsLeft % 60).padStart(2, '0')}
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {submissionReview && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[95] flex items-center justify-center bg-navy/70 p-6 text-center backdrop-blur-md"
+                    >
+                        <div className="rounded-3xl bg-white px-10 py-8 shadow-2xl">
+                            <AlertTriangle size={42} className="mx-auto mb-4 text-amber-500" />
+                            <h2 className="text-2xl font-black text-navy">
+                                {submissionReview.status === 'denied' ? 'Submission denied' : 'Submission sent for review'}
+                            </h2>
+                            <p className="mt-2 text-slate-500">
+                                {submissionReview.status === 'denied'
+                                    ? 'An administrator denied this submission.'
+                                    : 'Your connection interrupted submission. An administrator must allow it before grading can continue.'}
+                            </p>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
