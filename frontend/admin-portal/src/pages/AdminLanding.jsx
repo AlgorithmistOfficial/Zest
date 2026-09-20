@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, BarChart3, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 const AdminLanding = () => {
     const navigate = useNavigate();
@@ -62,7 +63,7 @@ const AdminLanding = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.7, delay: 0.22 }}
                         >
-                            “The quality of an institution is reflected in the care with which it prepares, measures, and improves the journey of every learner.”
+                            "The quality of an institution is reflected in the care with which it prepares, measures, and improves the journey of every learner."
                         </motion.p>
                         <motion.div
                             initial={{ opacity: 0, y: 16 }}
@@ -103,6 +104,7 @@ const AdminLanding = () => {
                     </motion.div>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 };
