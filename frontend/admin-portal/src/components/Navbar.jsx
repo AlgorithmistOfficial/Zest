@@ -80,7 +80,7 @@ const Navbar = () => {
         setIsBatchMenuOpen(false);
     };
 
-    const isExamsActive = ['/', '/create', '/create-content'].includes(location.pathname);
+    const isExamsActive = ['/manage-exams', '/create', '/create-content'].includes(location.pathname);
     const isManageActive = ['/reports', '/answer-reports', '/attendance', '/notifications'].includes(location.pathname);
 
     return (
@@ -111,7 +111,7 @@ const Navbar = () => {
                             <div className="absolute top-full left-0 mt-2 w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top translate-y-2 group-hover:translate-y-0">
                                 <div className="bg-navy/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1.5 overflow-hidden">
                                     <NavLink 
-                                        to="/" 
+                                        to="/manage-exams"
                                         end
                                         className={({ isActive }) => 
                                             `flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
