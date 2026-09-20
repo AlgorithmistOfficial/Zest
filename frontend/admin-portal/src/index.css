@@ -33,7 +33,7 @@ body {
   place-items: center;
   border: 1px solid rgba(146, 194, 17, .7);
   color: var(--lime);
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 1.35rem;
 }
 .landing-grid {
@@ -75,7 +75,7 @@ body {
 .landing-title {
   max-width: 800px;
   margin-top: 1.25rem;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: inherit;
   font-size: clamp(3.2rem, 7vw, 6.8rem);
   font-weight: 400;
   line-height: .98;
