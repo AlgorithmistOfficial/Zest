@@ -18,13 +18,13 @@ const AdminLanding = () => {
             <header className="landing-header relative z-10 border-b border-white/10">
                 <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="landing-mark" aria-hidden="true">Z</div>
+                        <img className="landing-logo" src="/logo.png" alt="Zest logo" />
                         <div>
-                            <p className="text-white font-bold tracking-[0.28em] text-sm">ZEST</p>
-                            <p className="text-white/45 text-[10px] uppercase tracking-[0.18em] mt-0.5">Administration suite</p>
+                            <p className="landing-brand-name">ZEST</p>
+                            <p className="landing-brand-label">Administration suite</p>
                         </div>
                     </div>
-                    <span className="hidden sm:block text-white/45 text-xs uppercase tracking-[0.2em]">Algorithmist Academy</span>
+                    <span className="hidden sm:block landing-academy-label">Algorithmist Academy</span>
                 </div>
             </header>
 
@@ -54,7 +54,7 @@ const AdminLanding = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.75, delay: 0.1 }}
                         >
-                            Structure every assessment.
+                            <span className="landing-title-muted">Structure every assessment.</span>
                             <span> Elevate every outcome.</span>
                         </motion.h1>
                         <motion.p

@@ -22,25 +22,40 @@ body {
 
 /* ────────────────── Admin landing page ────────────────── */
 .landing-page {
-  background: #071b30;
-  color: var(--white);
+  background: var(--off-white);
+  color: var(--navy);
 }
-.landing-header { background: rgba(5, 35, 64, .55); }
-.landing-mark {
+.landing-header { background: var(--off-white); border-color: rgba(5, 35, 64, .12); }
+.landing-logo {
   width: 2.25rem;
   height: 2.25rem;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(146, 194, 17, .7);
-  color: var(--lime);
-  font-family: inherit;
-  font-size: 1.35rem;
+  object-fit: contain;
+}
+.landing-brand-name {
+  color: var(--navy);
+  font-size: .875rem;
+  font-weight: 700;
+  letter-spacing: .28em;
+}
+.landing-brand-label,
+.landing-academy-label {
+  color: rgba(5, 35, 64, .55);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.landing-brand-label { margin-top: .125rem; }
+.landing-academy-label { font-size: .75rem; letter-spacing: .2em; }
+.landing-title-muted { color: var(--navy); }
+.landing-title span:not(.landing-title-muted) { color: var(--lime); }
+.landing-title {
+  color: var(--off-white);
 }
 .landing-grid {
   position: absolute;
   inset: 0;
   opacity: .15;
-  background-image: linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(5,35,64,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(5,35,64,.12) 1px, transparent 1px);
   background-size: 76px 76px;
   mask-image: linear-gradient(to right, black, transparent 75%);
 }
@@ -81,11 +96,10 @@ body {
   line-height: .98;
   letter-spacing: -.04em;
 }
-.landing-title span { color: var(--lime); }
 .landing-quote {
   max-width: 590px;
   margin-top: 2rem;
-  color: rgba(255,255,255,.68);
+  color: rgba(5,35,64,.68);
   font-size: 1.08rem;
   line-height: 1.8;
 }
@@ -110,12 +124,12 @@ body {
   display: flex;
   gap: .9rem;
   padding-top: 1.2rem;
-  border-top: 1px solid rgba(255,255,255,.16);
-  color: rgba(255,255,255,.78);
+  border-top: 1px solid rgba(5,35,64,.16);
+  color: rgba(5,35,64,.78);
 }
 .landing-principle svg { color: var(--lime); flex: 0 0 auto; margin-top: .15rem; }
-.landing-principle h2 { color: var(--white); font-size: .78rem; letter-spacing: .13em; text-transform: uppercase; }
-.landing-principle p { color: rgba(255,255,255,.48); font-size: .82rem; line-height: 1.65; margin-top: .45rem; }
+.landing-principle h2 { color: var(--navy); font-size: .78rem; letter-spacing: .13em; text-transform: uppercase; }
+.landing-principle p { color: rgba(5,35,64,.58); font-size: .82rem; line-height: 1.65; margin-top: .45rem; }
 
 @media (max-width: 640px) {
   .landing-title { font-size: clamp(3rem, 15vw, 5rem); }
