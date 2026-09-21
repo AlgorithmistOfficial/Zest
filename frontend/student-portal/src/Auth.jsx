@@ -517,7 +517,7 @@ const Auth = () => {
                       style={{ color: '#EA4335' }}
                     />
                   </svg>
-                  Continue with Google
+                  {isLogin ? 'Login with Google' : 'Sign in with Google'}
                 </motion.button>
               </div>
             </div>

@@ -1063,8 +1063,8 @@ const Test = () => {
                                 <p className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Correct</p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-2xl">
-                                <p className="text-2xl font-black text-red-500">{results.totalQuestions - correct}</p>
-                                <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Wrong / Skipped</p>
+                                <p className="text-2xl font-black text-red-500">{attempted - correct}</p>
+                                <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Wrong Answers</p>
                             </div>
                         </div>
 
