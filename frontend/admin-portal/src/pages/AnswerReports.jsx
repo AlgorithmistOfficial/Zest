@@ -121,6 +121,7 @@ const AnswerReports = () => {
         event.preventDefault();
         const query = studentInput.trim();
         setSubmittedStudentQuery(query);
+        setSelectedStudentName(query);
         if (selectedTestId) {
             await fetchReport(selectedTestId, query);
         }
@@ -186,7 +187,11 @@ const AnswerReports = () => {
         }
 
         const selected = selectedStudentName.trim().toLowerCase();
-        return groupedRows.filter((group) => String(group.studentName || '').trim().toLowerCase() === selected);
+        return groupedRows.filter((group) => {
+            const name = String(group.studentName || '').trim().toLowerCase();
+            const email = String(group.studentEmail || '').trim().toLowerCase();
+            return name.includes(selected) || email.includes(selected);
+        });
     }, [groupedRows, selectedStudentName]);
 
     return (
