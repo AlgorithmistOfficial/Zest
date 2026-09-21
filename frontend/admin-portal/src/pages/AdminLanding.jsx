@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, BarChart3, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -7,6 +7,13 @@ import Footer from '../components/Footer';
 
 const AdminLanding = () => {
     const navigate = useNavigate();
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
         <div className="landing-page min-h-screen flex flex-col overflow-hidden">
@@ -15,20 +22,21 @@ const AdminLanding = () => {
                 <meta name="description" content="A focused administration suite for managing assessments at Algorithmist Academy." />
             </Helmet>
 
-            <header className="landing-header relative z-10 border-b border-white/10">
-                <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+            <nav className={`landing-header fixed w-full z-50 transition-all duration-300 backdrop-blur-md border-b border-white/20 ${isScrolled
+                ? 'bg-lime/60 py-1'
+                : 'bg-lime/90 py-0'
+                }`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16">
                     <div className="flex items-center gap-3">
-                        <img className="landing-logo" src="/logo.png" alt="Zest logo" />
-                        <div>
-                            <p className="landing-brand-name">ZEST</p>
-                            <p className="landing-brand-label">Administration suite</p>
-                        </div>
+                        <img src="/logo.png" alt="Zest Logo" className="w-8 h-8 object-contain" />
+                        <span className="text-white font-bold text-xl tracking-tight">Zest</span>
                     </div>
-                    <span className="hidden sm:block landing-academy-label">Algorithmist Academy</span>
+                    </div>
                 </div>
-            </header>
+            </nav>
 
-            <main className="relative flex-1 flex items-center">
+            <main className="relative flex-1 flex items-center pt-16">
                 <div className="landing-grid" aria-hidden="true" />
                 <div className="landing-glow" aria-hidden="true" />
                 <motion.div

@@ -25,27 +25,6 @@ body {
   background: var(--off-white);
   color: var(--navy);
 }
-.landing-header { background: var(--off-white); border-color: rgba(5, 35, 64, .12); }
-.landing-logo {
-  width: 2.25rem;
-  height: 2.25rem;
-  object-fit: contain;
-}
-.landing-brand-name {
-  color: var(--navy);
-  font-size: .875rem;
-  font-weight: 700;
-  letter-spacing: .28em;
-}
-.landing-brand-label,
-.landing-academy-label {
-  color: rgba(5, 35, 64, .55);
-  font-size: 10px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-}
-.landing-brand-label { margin-top: .125rem; }
-.landing-academy-label { font-size: .75rem; letter-spacing: .2em; }
 .landing-title-muted { color: var(--navy); }
 .landing-title span:not(.landing-title-muted) { color: var(--lime); }
 .landing-title {
