@@ -149,10 +149,15 @@ const AnswerReports = () => {
                         studentName: row.studentName,
                         studentEmail: row.studentEmail,
                         testId: row.testId,
-                        attempts: []
+                        attempts: [],
+                        leftQuestions: row.leftQuestions || []
                     });
                 }
-                map.get(key).attempts.push(row);
+                const group = map.get(key);
+                group.leftQuestions = row.leftQuestions || group.leftQuestions;
+                if (row.questionId || row.questionNo !== null) {
+                    group.attempts.push(row);
+                }
         });
         return Array.from(map.values());
     }, [rows]);
@@ -438,6 +443,13 @@ const AnswerReports = () => {
                                             </div>
                                         </div>
                                     ))}
+
+                                    <div className="rounded-[1.4rem] border border-amber-100 bg-amber-50 p-5">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-amber-700">Unattempted Questions</p>
+                                        <p className="mt-2 text-lg font-black text-amber-900">
+                                            {group.leftQuestions.length ? `{${group.leftQuestions.join(', ')}}` : '{}'}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         ))}
