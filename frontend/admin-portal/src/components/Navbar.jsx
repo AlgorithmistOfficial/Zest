@@ -320,7 +320,7 @@ const Navbar = () => {
                     </div>
 
                     {/* Right: brand */}
-                    <div className="flex items-center gap-3">
+                    <div className="ml-auto flex items-center justify-end gap-3">
                         <div ref={batchMenuRef} className="hidden xl:block relative">
                             <button
                                 type="button"

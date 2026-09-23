@@ -68,7 +68,7 @@ const EditExam = () => {
         try {
             await api.put(`/exams/${id}`, payload);
             setSuccess(true);
-            setTimeout(() => navigate('/'), 2000);
+            setTimeout(() => navigate('/manage-exams'), 2000);
         } catch { alert('Failed to update exam'); }
         finally { setSaving(false); }
     };
