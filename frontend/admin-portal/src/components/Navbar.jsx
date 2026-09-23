@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck, Layers3, ShieldCheck, FileText } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, CalendarPlus, Users, FileEdit, Database, GraduationCap, ChevronDown, Bell, Table, ClipboardCheck, Layers3, ShieldCheck, FileText } from 'lucide-react';
 import { setActiveAdminBatch, useActiveAdminBatch } from '../batch';
 
 const Navbar = () => {
@@ -408,6 +408,15 @@ const Navbar = () => {
                                 )}
                             </AnimatePresence>
                         </div>
+                        <NavLink
+                            to="/"
+                            aria-label="Back to Zest landing page"
+                            title="Back to Zest landing page"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-white/80 transition-all hover:bg-white/15 hover:text-white"
+                        >
+                            <ArrowLeft size={16} />
+                            <span className="hidden sm:inline">Back</span>
+                        </NavLink>
                         <img
                             src="/logo.png"
                             alt="Zest Logo"

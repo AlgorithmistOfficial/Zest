@@ -47,8 +47,12 @@ const ScheduleExam = () => {
         try {
             await api.post('/exams', payload);
             setSuccess(true);
-            setTimeout(() => navigate('/'), 2000);
-        } catch { alert('Failed to schedule exam'); }
+            setTimeout(() => navigate('/manage-exams'), 2000);
+        } catch (error) {
+            alert(error.response?.status === 409
+                ? 'This test ID is already scheduled in the selected batch.'
+                : 'Failed to schedule exam');
+        }
         finally { setLoading(false); }
     };
 
