@@ -91,6 +91,26 @@ const Navbar = () => {
         }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
+                    {/* Left: brand */}
+                    <div className="flex items-center gap-3">
+                        <NavLink
+                            to="/"
+                            aria-label="Back to Zest landing page"
+                            title="Back to Zest landing page"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-white/80 transition-all hover:bg-white/15 hover:text-white"
+                        >
+                            <ArrowLeft size={16} />
+                            <span className="hidden sm:inline">Back</span>
+                        </NavLink>
+                        <img
+                            src="/logo.png"
+                            alt="Zest Logo"
+                            className="w-8 h-8 object-contain"
+                            onError={(e) => e.target.style.display = 'none'}
+                        />
+                        <span className="text-white font-bold text-xl tracking-tight">Zest</span>
+                    </div>
+
                     {/* Left: nav links */}
                     <div className="flex items-center gap-1">
                         {/* Exams Dropdown */}
@@ -319,8 +339,8 @@ const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* Right: brand */}
-                    <div className="ml-auto flex items-center justify-end gap-3">
+                    {/* Right: batch selector */}
+                    <div className="flex items-center gap-3">
                         <div ref={batchMenuRef} className="hidden xl:block relative">
                             <button
                                 type="button"
@@ -408,22 +428,6 @@ const Navbar = () => {
                                 )}
                             </AnimatePresence>
                         </div>
-                        <NavLink
-                            to="/"
-                            aria-label="Back to Zest landing page"
-                            title="Back to Zest landing page"
-                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-white/80 transition-all hover:bg-white/15 hover:text-white"
-                        >
-                            <ArrowLeft size={16} />
-                            <span className="hidden sm:inline">Back</span>
-                        </NavLink>
-                        <img
-                            src="/logo.png"
-                            alt="Zest Logo"
-                            className="w-8 h-8 object-contain"
-                            onError={(e) => e.target.style.display = 'none'}
-                        />
-                        <span className="text-white font-bold text-xl tracking-tight">Zest</span>
                     </div>
                 </div>
             </div>
