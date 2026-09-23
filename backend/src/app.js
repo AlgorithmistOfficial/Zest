@@ -1308,7 +1308,7 @@ app.post('/api/test/run-java-testcases', async (req, res) => {
 // POST /api/test/submit — Submit entire test, evaluate all answers, save score to student
 app.post('/api/test/submit', async (req, res) => {
     try {
-        const { testId, answers, alarmCount, yellowWarningCount } = req.body;
+        const { testId, answers, alarmCount, yellowWarningCount, interruptionId } = req.body;
 
         // Authenticate student via JWT
         const authHeader = req.headers.authorization;
@@ -1324,10 +1324,46 @@ app.post('/api/test/submit', async (req, res) => {
         }
 
         let decoded;
+        let interruptedSubmission;
         try {
             decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
         } catch (e) {
-            console.warn('[Test] Submit blocked: invalid JWT', { name: e.name, message: e.message });
+            try {
+                const expiredDecoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', { ignoreExpiration: true });
+                if (interruptionId) {
+                    interruptedSubmission = await Notification.findOne({
+                        _id: interruptionId,
+                        type: 'interrupted_submission',
+                        studentId: expiredDecoded.id,
+                        status: 'allowed'
+                    });
+                    if (!interruptedSubmission) return res.status(403).json({ message: 'Submission recovery has not been approved.' });
+                    decoded = { id: expiredDecoded.id };
+                } else {
+                    interruptedSubmission = await Notification.create({
+                        type: 'interrupted_submission',
+                        studentId: expiredDecoded.id,
+                        studentName: 'Student',
+                        studentEmail: 'unknown',
+                        testId,
+                        status: 'pending',
+                        submissionPayload: { testId, answers, alarmCount, yellowWarningCount }
+                    });
+                    const interruptedStudent = await Student.findById(expiredDecoded.id);
+                    if (interruptedStudent) {
+                        interruptedSubmission.studentName = interruptedStudent.name;
+                        interruptedSubmission.studentEmail = interruptedStudent.emailID;
+                        interruptedSubmission.batchId = interruptedStudent.batchId || null;
+                        await interruptedSubmission.save();
+                    }
+                    return res.status(202).json({
+                        message: 'Submission interrupted. Waiting for administrator approval.',
+                        interruptionId: interruptedSubmission._id
+                    });
+                }
+            } catch (recoveryError) {
+                console.warn('[Test] Submit blocked: invalid JWT', { name: e.name, message: e.message });
+            }
             return res.status(401).json({ message: 'Invalid or expired token' });
         }
 

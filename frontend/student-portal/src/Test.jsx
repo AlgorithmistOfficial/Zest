@@ -47,6 +47,7 @@ const Test = () => {
     const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
     const [breakActive, setBreakActive] = useState(false);
     const [submissionReview, setSubmissionReview] = useState(null);
+    const [submitError, setSubmitError] = useState(null);
 
     // Exit fullscreen on test end
     useEffect(() => {
@@ -88,6 +89,10 @@ const Test = () => {
     const yellowWarningsRef = useRef(0);
     const faceOverlayNoiseRef = useRef(0);
     const visionTasksModuleRef = useRef(null);
+    const submittingRef = useRef(false);
+    const submissionReviewRef = useRef(null);
+    const isBrowserDialogActiveRef = useRef(false);
+    const errorSuppressionUntilRef = useRef(0);
 
     const drawFaceOverlay = useCallback((faceBox, video) => {
         const canvas = overlayCanvasRef.current;
@@ -302,12 +307,12 @@ const Test = () => {
                     setPhase('results');
                 }
             } else {
-                alert(data.message || 'Failed to submit test');
+                setSubmitError(data.message || 'Failed to submit test. Please try again.');
                 hasSubmitted.current = false;
             }
         } catch (err) {
             console.error('Submit error:', err);
-            alert('Network error. Please try again.');
+            setSubmitError('Network error while submitting. Please check your connection and try again.');
             hasSubmitted.current = false;
         } finally {
             setSubmitting(false);
@@ -341,6 +346,8 @@ const Test = () => {
     // Keep ref updated for timer callback
     submitFnRef.current = handleSubmit;
     warningPromptOpenRef.current = Boolean(warningPrompt);
+    submittingRef.current = submitting;
+    submissionReviewRef.current = submissionReview;
 
     // Timer effect
     useEffect(() => {
@@ -602,6 +609,79 @@ const Test = () => {
         return () => window.removeEventListener('beforeunload', handler);
     }, [phase]);
 
+    // Intercept native browser dialogs & isolate browser error logs from triggering security alarms
+    useEffect(() => {
+        if (phase !== 'testing') return;
+
+        const suppressDurationMs = 2500;
+
+        const markSuppression = () => {
+            errorSuppressionUntilRef.current = Date.now() + suppressDurationMs;
+        };
+
+        const originalAlert = window.alert;
+        const originalConfirm = window.confirm;
+        const originalPrompt = window.prompt;
+
+        window.alert = (...args) => {
+            isBrowserDialogActiveRef.current = true;
+            markSuppression();
+            try {
+                return originalAlert.apply(window, args);
+            } finally {
+                markSuppression();
+                window.setTimeout(() => {
+                    isBrowserDialogActiveRef.current = false;
+                }, 1000);
+            }
+        };
+
+        window.confirm = (...args) => {
+            isBrowserDialogActiveRef.current = true;
+            markSuppression();
+            try {
+                return originalConfirm.apply(window, args);
+            } finally {
+                markSuppression();
+                window.setTimeout(() => {
+                    isBrowserDialogActiveRef.current = false;
+                }, 1000);
+            }
+        };
+
+        window.prompt = (...args) => {
+            isBrowserDialogActiveRef.current = true;
+            markSuppression();
+            try {
+                return originalPrompt.apply(window, args);
+            } finally {
+                markSuppression();
+                window.setTimeout(() => {
+                    isBrowserDialogActiveRef.current = false;
+                }, 1000);
+            }
+        };
+
+        const handleErrorEvent = () => {
+            markSuppression();
+        };
+
+        const handleUnhandledRejection = () => {
+            markSuppression();
+        };
+
+        window.addEventListener('error', handleErrorEvent);
+        window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+        return () => {
+            window.alert = originalAlert;
+            window.confirm = originalConfirm;
+            window.prompt = originalPrompt;
+            window.removeEventListener('error', handleErrorEvent);
+            window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+        };
+    }, [phase]);
+
     // Security monitoring (Tab switching, Fullscreen exit)
     useEffect(() => {
         if (phase !== 'testing') return;
@@ -642,6 +722,10 @@ const Test = () => {
         const triggerWarningPrompt = () => {
             if (breakActiveRef.current) return;
             if (warningPromptOpenRef.current) return;
+            if (submittingRef.current || hasSubmitted.current || submissionReviewRef.current) return;
+            if (isBrowserDialogActiveRef.current) return;
+            if (Date.now() < errorSuppressionUntilRef.current) return;
+            if (submitError) return;
             playAlarmTone();
             setWarningPrompt('Attempt of unfair means observed, giving you a warning!');
         };
@@ -671,7 +755,7 @@ const Test = () => {
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
             window.removeEventListener('blur', handleWindowBlur);
         };
-    }, [phase]);
+    }, [phase, submitError]);
 
     const handleContinueAfterWarning = () => {
         const nextWarnings = warningsCount + 1;
@@ -1271,6 +1355,50 @@ const Test = () => {
                                     className="rounded-2xl bg-navy px-4 py-4 font-extrabold text-white shadow-lg shadow-navy/10 transition-colors hover:bg-navy/90"
                                 >
                                     Confirm
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Custom Submit/Auth Error Modal (Prevents browser native alert & window blur alarms) */}
+            <AnimatePresence>
+                {submitError && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[108] flex items-center justify-center bg-navy/80 backdrop-blur-md p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.94, y: 12 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.94, y: 12 }}
+                            className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-2xl border border-slate-100"
+                        >
+                            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-amber-500">
+                                <AlertTriangle size={36} />
+                            </div>
+                            <h2 className="mb-2 text-2xl font-black text-navy">Submission Notice</h2>
+                            <p className="mb-6 text-slate-600 font-medium text-sm leading-relaxed">
+                                {submitError}
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setSubmitError(null)}
+                                    className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors"
+                                >
+                                    Dismiss
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setSubmitError(null);
+                                        handleSubmit(false);
+                                    }}
+                                    className="flex-1 py-3.5 bg-lime hover:opacity-90 text-white font-extrabold rounded-2xl transition-all shadow-md"
+                                >
+                                    Retry Submit
                                 </button>
                             </div>
                         </motion.div>
