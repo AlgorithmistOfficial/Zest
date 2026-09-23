@@ -38,37 +38,30 @@ body {
   background-size: 76px 76px;
   mask-image: linear-gradient(to right, black, transparent 75%);
 }
-.landing-glow {
+.landing-photo-frame {
   position: absolute;
-  width: 38rem;
-  height: 38rem;
+  width: min(38rem, 48vw);
+  height: min(38rem, 72vh);
   right: 8%;
-  top: 8%;
-  border: 1px solid rgba(146, 194, 17, .18);
-  border-radius: 50%;
-  box-shadow: 0 0 0 40px rgba(146, 194, 17, .025), 0 0 0 100px rgba(146, 194, 17, .018);
+  top: 50%;
+  padding: .7rem;
+  transform: translateY(-50%);
+  border: 1px solid rgba(146, 194, 17, .72);
+  background: rgba(255, 254, 242, .48);
+  box-shadow: 0 0 0 1px rgba(5, 35, 64, .06), 0 0 2rem rgba(146, 194, 17, .18);
+  animation: landing-photo-glow 4s ease-in-out infinite;
 }
-.landing-orbit {
-  position: absolute;
-  width: 29rem;
-  height: 29rem;
-  right: 14%;
-  top: 15%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 2.5rem;
-  border: 1px solid transparent;
-  border-top-color: rgba(146, 194, 17, .9);
-  border-radius: 50%;
-  opacity: .65;
-}
-.landing-orbit-image {
+.landing-photo {
+  display: block;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
+  object-position: center;
+  opacity: .9;
+}
+@keyframes landing-photo-glow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(5, 35, 64, .06), 0 0 2rem rgba(146, 194, 17, .18); }
+  50% { box-shadow: 0 0 0 1px rgba(5, 35, 64, .08), 0 0 3.5rem rgba(146, 194, 17, .4); }
 }
 .landing-eyebrow {
   color: var(--lime);
@@ -123,8 +116,8 @@ body {
 
 @media (max-width: 640px) {
   .landing-title { font-size: clamp(3rem, 15vw, 5rem); }
-  .landing-glow { width: 24rem; height: 24rem; right: -11rem; top: 7%; }
-  .landing-orbit { width: 18rem; height: 18rem; right: -7rem; top: 15%; }
+  .landing-photo-frame { width: 18rem; height: 24rem; right: -4rem; top: 14%; transform: none; }
+  .landing-photo { opacity: .2; }
 }
 
 /* ────────────────── Cards ────────────────── */
