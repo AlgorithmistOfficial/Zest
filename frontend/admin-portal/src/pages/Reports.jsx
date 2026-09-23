@@ -150,7 +150,9 @@ const Reports = () => {
                                     <div className="mt-5 grid grid-cols-2 gap-3">
                                         <div className="rounded-2xl bg-white p-4 border border-slate-100">
                                             <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Score</p>
-                                            <p className="mt-1 text-2xl font-black text-navy">{row.score}</p>
+                                            <p className="mt-1 text-2xl font-black text-navy">
+                                                {Number(row.score) === -1 || row.score === '-1' ? 'Absent' : row.score}
+                                            </p>
                                         </div>
                                         <div className="rounded-2xl bg-white p-4 border border-slate-100">
                                             <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Alarms Buzzed</p>

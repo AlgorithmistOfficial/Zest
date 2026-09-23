@@ -83,7 +83,9 @@ const Attendance = () => {
                                                     {row.status}
                                                 </span>
                                             </td>
-                                            <td className="py-3 px-2 text-slate-600 font-bold">{row.score}</td>
+                                            <td className="py-3 px-2 text-slate-600 font-bold">
+                                                {Number(row.score) === -1 || row.score === '-1' ? 'Absent' : row.score}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
