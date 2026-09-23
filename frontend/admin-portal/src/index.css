@@ -54,10 +54,21 @@ body {
   height: 29rem;
   right: 14%;
   top: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2.5rem;
   border: 1px solid transparent;
   border-top-color: rgba(146, 194, 17, .9);
   border-radius: 50%;
   opacity: .65;
+}
+.landing-orbit-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .landing-eyebrow {
   color: var(--lime);

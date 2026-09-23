@@ -44,7 +44,9 @@ const AdminLanding = () => {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
                     aria-hidden="true"
-                />
+                >
+                    <img src="/admin.jpeg" alt="" className="landing-orbit-image" />
+                </motion.div>
 
                 <div className="max-w-7xl w-full mx-auto px-6 lg:px-10 py-20 lg:py-28 relative z-10">
                     <div className="max-w-4xl">
