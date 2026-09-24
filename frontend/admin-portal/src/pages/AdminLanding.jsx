@@ -54,8 +54,8 @@ const Navbar = () => {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link to="/manage-exams" className="text-white md:hover:text-[#052340] md:hover:bg-white/20 px-3 py-2 rounded-md text-sm font-semibold border border-white/20 transition-all">
-                Go to Dashboard
+              <Link to="/about" className="text-white md:hover:text-[#052340] md:hover:bg-white/20 px-3 py-2 rounded-md text-sm font-semibold border border-white/20 transition-all">
+                Algorithmist Classes
               </Link>
             </div>
           </div>
@@ -78,8 +78,8 @@ const Navbar = () => {
             className="md:hidden bg-[#92c211] border-b border-white/20"
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link to="/manage-exams" className="text-white block px-3 py-2 rounded-md text-base font-semibold">
-                Go to Dashboard
+              <Link to="/about" className="text-white block px-3 py-2 rounded-md text-base font-semibold">
+                Algorithmist Classes
               </Link>
             </div>
           </motion.div>

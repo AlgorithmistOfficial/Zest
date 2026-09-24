@@ -14,6 +14,7 @@ import AnswerReports from './pages/AnswerReports';
 import Attendance from './pages/Attendance';
 import Batches from './pages/Batches';
 import AdminLanding from './pages/AdminLanding';
+import About from './pages/About';
 
 const PortalLayout = () => (
   <div className="min-h-screen bg-off-white flex flex-col selection:bg-lime/30">
@@ -42,6 +43,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<AdminLanding />} />
+        <Route path="/about" element={<About />} />
         <Route path="*" element={<PortalLayout />} />
       </Routes>
     </Router>
