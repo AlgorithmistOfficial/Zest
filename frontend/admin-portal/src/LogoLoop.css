@@ -1,0 +1,84 @@
+.logoloop {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: var(--logoloop-gap, 32px);
+}
+
+.logoloop--vertical {
+  flex-direction: column;
+  height: 100%;
+}
+
+.logoloop__track {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--logoloop-gap, 32px);
+  min-width: 100%;
+}
+
+.logoloop--vertical .logoloop__track {
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.logoloop__list {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--logoloop-gap, 32px);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.logoloop--vertical .logoloop__list {
+  flex-direction: column;
+}
+
+.logoloop__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--logoloop-logoHeight, 28px);
+}
+
+.logoloop__node {
+  font-size: var(--logoloop-logoHeight, 28px);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  color: #1e293b;
+}
+
+/* Fade effects */
+.logoloop--fade {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 15%,
+    black 85%,
+    transparent
+  );
+}
+
+.logoloop--vertical.logoloop--fade {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 15%,
+    black 85%,
+    transparent
+  );
+}
+
+.logoloop--scale-hover .logoloop__item {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logoloop--scale-hover .logoloop__item:hover {
+  transform: scale(1.2);
+  color: #92c211;
+}
