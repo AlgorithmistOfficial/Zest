@@ -194,14 +194,6 @@ export default function LandingPage() {
       <main className="relative pt-32 pb-16 lg:pt-48 lg:pb-32 overflow-hidden">
         {/* Background Video Holder */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-          <video
-            src="/landingpage.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover opacity-80"
-          />
           {/* Simple semi-transparent overlay to ensure text contrast */}
           <div className="absolute inset-0 bg-[#fffef2]/40"></div>
 

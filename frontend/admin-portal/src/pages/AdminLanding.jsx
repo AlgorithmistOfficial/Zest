@@ -198,13 +198,15 @@ export default function AdminLanding() {
         {/* Background Video Holder */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
           <video
-            src="/landingpage.mp4"
             autoPlay
-            loop
             muted
+            loop
             playsInline
-            className="w-full h-full object-cover opacity-80"
-          />
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          >
+            <source src="/admin_landing.mp4" type="video/mp4" />
+          </video>
           {/* Semi-transparent overlay for contrast */}
           <div className="absolute inset-0 bg-[#fffef2]/40"></div>
 
