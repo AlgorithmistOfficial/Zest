@@ -235,7 +235,7 @@ export default function AdminLanding() {
                 Elevate Outcomes.
               </h1>
 
-              <p className="text-lg text-white max-w-lg leading-relaxed drop-shadow-md">
+              <p className="text-lg text-black max-w-lg leading-relaxed drop-shadow-md">
                 Zest Administration Suite provides real-time exam management, batch analytics, automated evaluation, and attendance tracking for Algorithmist Academy.
               </p>
 
